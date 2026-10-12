@@ -1,0 +1,10 @@
+{
+    "Choose a customer from the list or create a new one.": "Aukeratu atzilea zerrendan edo sortu berria.",
+    "Create customer": "Sortu atzilea",
+    "Customer": "Atzilea",
+    "No customers found.": "Atzileak ez direkitut.",
+    "Select a customer": "Aukeratu atzilea",
+    "Unable to create customer.": "Ezin da atzilea sortu.",
+    "Unable to load customers.": "Ezin da atzileak kargatu.",
+    "View :count projects": "Ikusi :count proiektu"
+}

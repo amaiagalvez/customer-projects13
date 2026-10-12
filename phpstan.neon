@@ -1,0 +1,49 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    paths:
+        - src/
+        - tests/
+
+    level: 7
+
+    ignoreErrors:
+        # `Project::customer()`, `Customer::projects()` and `Customer::epics()` are resolved at
+        # runtime by this package's service provider with `resolveRelationUsing()`, and so are the
+        # counts and the existence flag that the customer list query adds. None of them exists in
+        # the source of the base models, which is the point of the split: `projects13` must not name
+        # `Customer` and `customers13` must not name `Project`. Larastan works from that source and
+        # therefore cannot see them.
+        #
+        # A stub file was the other option and it is the wrong one here: PHPStan replaces a class's
+        # PHPDoc with the stub's instead of merging the two, so the stub would hide every property the
+        # base models declare now and every one they gain later. These ignores are narrower than a
+        # stub would be: they name the access shapes only, so anything else read off those models is
+        # still reported, and they are scoped to this package, which is the only place where the
+        # relations exist at all.
+        -
+            identifier: property.notFound
+            message: '#\$customer#'
+            path: src/*
+        -
+            identifier: property.notFound
+            message: '#(projects|epics|comments)_(count|exists)#'
+            path: src/*
+        -
+            identifier: method.notFound
+            message: '#::(customer|projects|epics)\(\)#'
+            path: src/*
+        -
+            identifier: larastan.relationExistence
+            message: '#customer#'
+            path: src/*
+        -
+            identifier: property.notFound
+            message: '#customer_id#'
+            path: tests/*
+        -
+            identifier: property.notFound
+            message: '#(projects|epics|comments)_(count|exists)#'
+            path: tests/*

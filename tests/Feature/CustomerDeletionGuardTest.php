@@ -1,0 +1,143 @@
+<?php
+
+namespace CustomerProjects13\Tests\Feature;
+
+use CustomerProjects13\Tests\TestCase;
+use Customers13\Models\Customer;
+use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
+use Projects13\Models\Epic;
+use Projects13\Models\Project;
+
+/**
+ * A customer with live projects cannot be moved to the trash, and a customer in the trash cannot be
+ * deleted outright either. Both are enforced twice on purpose: the guard refuses the soft delete,
+ * and the foreign key refuses the hard one, so neither depends on the other being called.
+ */
+class CustomerDeletionGuardTest extends TestCase
+{
+    use RefreshDatabase;
+
+    public function test_a_customer_with_a_project_cannot_be_deleted(): void
+    {
+        $this->signIn();
+        $customer = Customer::factory()->create();
+        $project = Project::factory()->for($customer)->create([]);
+
+        $this->delete(route('customers.destroy', $customer))
+            ->assertRedirect(route('customers.index'))
+            ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
+
+        $this->assertNotSoftDeleted($customer);
+        $this->assertModelExists($project);
+    }
+
+    public function test_a_customer_with_a_trashed_project_cannot_be_deleted(): void
+    {
+        $this->signIn();
+        $customer = Customer::factory()->create();
+        $project = Project::factory()->for($customer)->create([]);
+        $project->delete();
+
+        $this->delete(route('customers.destroy', $customer))
+            ->assertRedirect(route('customers.index'))
+            ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
+
+        $this->assertNotSoftDeleted($customer);
+        $this->assertSoftDeleted($project);
+    }
+
+    public function test_a_customer_with_a_project_cannot_be_deleted_by_a_plain_model_delete(): void
+    {
+        $customer = Customer::factory()->create();
+        Project::factory()->for($customer)->create([]);
+
+        $this->assertFalse($customer->delete());
+        $this->assertNotSoftDeleted($customer);
+    }
+
+    /**
+     * The guard locks the customer inside a transaction of its own, which is only safe because
+     * `Customer::delete()` opens an enclosing one. What proves the lock outlives the check is that
+     * the locking read happens one level deeper than the soft-delete write: before that enclosing
+     * transaction existed, both ran at the same level and a project could slip in between them.
+     */
+    public function test_the_guard_holds_its_lock_until_the_soft_delete_is_written(): void
+    {
+        $customer = Customer::factory()->create();
+        $levels = [];
+
+        DB::listen(
+            static function (QueryExecuted $query) use (&$levels): void {
+                if (str_starts_with($query->sql, 'select') && str_contains($query->sql, 'CUM_customers')) {
+                    $levels['guard'] = DB::transactionLevel();
+                }
+
+                if (str_starts_with($query->sql, 'update') && str_contains($query->sql, 'CUM_customers')) {
+                    $levels['delete'] = DB::transactionLevel();
+                }
+            },
+        );
+
+        $ambient = DB::transactionLevel();
+
+        $customer->delete();
+
+        $this->assertArrayHasKey('guard', $levels, 'the guard has to lock the customer before deciding');
+        $this->assertArrayHasKey('delete', $levels);
+        $this->assertGreaterThan(
+            $levels['delete'],
+            $levels['guard'],
+            'the locking read has to sit in a transaction that encloses the soft delete',
+        );
+        $this->assertGreaterThan($ambient, $levels['delete'], 'the soft delete itself has to be transactional');
+        $this->assertSoftDeleted($customer);
+    }
+
+    /**
+     * The guard is a soft-delete hook, so a force delete is refused by it too. What the foreign key
+     * adds is the second line of defence: a delete that never goes through the model — a query
+     * builder call, a maintenance script, another package — is still refused by the database.
+     */
+    public function test_a_force_delete_is_refused_and_the_database_refuses_it_too(): void
+    {
+        $customer = Customer::factory()->create();
+        Project::factory()->for($customer)->create();
+
+        $this->assertFalse($customer->forceDelete(), 'the guard refuses it before the row is written');
+        $this->assertModelExists($customer);
+
+        $this->expectException(QueryException::class);
+
+        DB::table('CUM_customers')->where('id', $customer->id)->delete();
+    }
+
+    public function test_a_customer_without_projects_can_be_deleted(): void
+    {
+        $this->signIn();
+        $customer = Customer::factory()->create();
+
+        $this->delete(route('customers.destroy', $customer))
+            ->assertRedirect(route('customers.index'));
+
+        $this->assertSoftDeleted($customer);
+    }
+
+    public function test_the_row_offers_archive_instead_of_delete_when_a_project_hangs_from_it(): void
+    {
+        $this->signIn();
+        $customer = Customer::factory()->create();
+        Project::factory()->for($customer)->create([]);
+        Epic::factory()->create();
+
+        $response = $this->get(route('customers.index'));
+
+        $response->assertOk();
+        $this->assertStringContainsString(
+            'customer-archive-'.$customer->id,
+            $response->getContent() ?: '',
+        );
+    }
+}

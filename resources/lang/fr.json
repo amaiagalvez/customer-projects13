@@ -1,0 +1,10 @@
+{
+    "Choose a customer from the list or create a new one.": "Choisissez un client dans la liste ou créez-en un nouveau.",
+    "Create customer": "Créer un client",
+    "Customer": "Client",
+    "No customers found.": "Aucun client trouvé.",
+    "Select a customer": "Sélectionnez un client",
+    "Unable to create customer.": "Impossible de créer le client.",
+    "Unable to load customers.": "Impossible de charger les clients.",
+    "View :count projects": "Voir :count projets"
+}
