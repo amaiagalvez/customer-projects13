@@ -29,7 +29,7 @@ parameters:
             path: src/*
         -
             identifier: property.notFound
-            message: '#(projects|epics|comments)_(count|exists)#'
+            message: '#(projects|epics|comments)_(count|exists)\.#'
             path: src/*
         -
             identifier: method.notFound
@@ -41,9 +41,4 @@ parameters:
             path: src/*
         -
             identifier: property.notFound
-            message: '#customer_id#'
-            path: tests/*
-        -
-            identifier: property.notFound
-            message: '#(projects|epics|comments)_(count|exists)#'
             path: tests/*

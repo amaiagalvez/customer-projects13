@@ -100,6 +100,17 @@ final class CustomerProjectsIntegration implements ProjectIntegration
     }
 
     /**
+     * @return list<string>
+     */
+    public function orderings(string $scope, string $alias): array
+    {
+        return match ($scope) {
+            'project', 'epic' => [$alias.'.name'],
+            default => [],
+        };
+    }
+
+    /**
      * @param  list<string>  $columns
      * @return list<string>
      */
@@ -185,5 +196,19 @@ final class CustomerProjectsIntegration implements ProjectIntegration
         }
 
         return $project->getRelation('customer');
+    }
+
+    public function hasActiveRelatedEntities(): bool
+    {
+        return Customer::query()->where('active', true)->exists();
+    }
+
+    public function noRelatedEntitiesBanner(): array
+    {
+        return [
+            'message' => __('No active customers are available. Open the customer form to create one.'),
+            'action_label' => __('Open customer form'),
+            'action_url' => route('customers.index', ['create' => 1]),
+        ];
     }
 }

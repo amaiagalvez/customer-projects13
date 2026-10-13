@@ -7,10 +7,14 @@ use Basics13\ServiceProvider as Basics13ServiceProvider;
 use Basics13\Support\Testing\ValidatesFormRequests;
 use Carbon\CarbonImmutable;
 use CustomerProjects13\ServiceProvider as CustomerProjects13ServiceProvider;
+use Customers13\Models\Customer;
 use Customers13\ServiceProvider as Customers13ServiceProvider;
+use Flux\FluxServiceProvider;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\Route;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as TestbenchTestCase;
 use Projects13\ServiceProvider as Projects13ServiceProvider;
 
@@ -25,7 +29,15 @@ use Projects13\ServiceProvider as Projects13ServiceProvider;
  */
 abstract class TestCase extends TestbenchTestCase
 {
-    use ValidatesFormRequests;
+    use RefreshDatabase, ValidatesFormRequests;
+
+    /**
+     * Create a test customer for integration tests.
+     */
+    protected function customer(): Customer
+    {
+        return Customer::factory()->create();
+    }
 
     protected function signIn(): User
     {
@@ -33,6 +45,7 @@ abstract class TestCase extends TestbenchTestCase
             'name' => 'Test author',
             'email' => 'author@example.test',
             'password' => 'password',
+            'email_verified_at' => now(),
         ]);
 
         $this->actingAs($user);
@@ -46,6 +59,8 @@ abstract class TestCase extends TestbenchTestCase
     protected function getPackageProviders($app): array
     {
         return [
+            LivewireServiceProvider::class,
+            FluxServiceProvider::class,
             Basics13ServiceProvider::class,
             Customers13ServiceProvider::class,
             Projects13ServiceProvider::class,

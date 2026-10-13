@@ -1,0 +1,137 @@
+<?php
+
+namespace CustomerProjects13\Tests\Feature;
+
+use App\Models\User;
+use Basics13\Queries\ListQueryBase;
+use Basics13\Support\Validation\MaxLength;
+use CustomerProjects13\Tests\TestCase;
+use Customers13\Http\Requests\CustomerSelectOptionsRequest;
+use Customers13\Models\Customer;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Validator;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Projects13\Http\Requests\ProjectSelectOptionsRequest;
+use Projects13\Models\Project;
+
+/**
+ * Both select-options endpoints share one request base, so their validation behaves the same. The
+ * per-resource option tests only covered the happy path and the length limit.
+ */
+class SelectOptionsRequestTest extends TestCase
+{
+    use RefreshDatabase;
+
+    /**
+     * @return array<string, array{0: non-empty-string, 1: class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>}>
+     */
+    public static function optionsRequests(): array
+    {
+        return [
+            'customers' => ['customers.options', CustomerSelectOptionsRequest::class],
+            'projects' => ['projects.options', ProjectSelectOptionsRequest::class],
+        ];
+    }
+
+    /**
+     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     */
+    #[DataProvider('optionsRequests')]
+    public function test_the_term_is_trimmed_before_matching(string $routeName, string $requestClass): void
+    {
+        $this->actingAs(User::factory()->create());
+        $name = $routeName === 'customers.options' ? 'Trimmed customer' : 'Trimmed project';
+
+        $this->recordFor($routeName, $name);
+
+        $this->getJson(route($routeName, ['q' => '  Trimmed  ']))
+            ->assertOk()
+            ->assertJsonPath('results.0.text', $this->expectedText($routeName, $name));
+    }
+
+    /**
+     * A term that matches nothing returns an empty set rather than an error.
+     *
+     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     */
+    #[DataProvider('optionsRequests')]
+    public function test_a_term_that_matches_nothing_returns_no_options(string $routeName, string $requestClass): void
+    {
+        $this->actingAs(User::factory()->create());
+        $this->recordFor($routeName, 'Something else');
+
+        $this->getJson(route($routeName, ['q' => 'no such thing']))
+            ->assertOk()
+            ->assertJsonCount(0, 'results');
+    }
+
+    /**
+     * Without a term the endpoint still answers the first page of active records.
+     *
+     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     */
+    #[DataProvider('optionsRequests')]
+    public function test_the_options_are_limited_to_the_shared_page_size(string $routeName, string $requestClass): void
+    {
+        $this->actingAs(User::factory()->create());
+
+        for ($index = 1; $index <= ListQueryBase::PER_PAGE + 1; $index++) {
+            $this->recordFor($routeName, sprintf('Option %02d', $index));
+        }
+
+        $this->getJson(route($routeName))
+            ->assertOk()
+            ->assertJsonCount(ListQueryBase::PER_PAGE, 'results');
+    }
+
+    /**
+     * The rules have to reject an array term and an over-long one.
+     *
+     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     */
+    #[DataProvider('optionsRequests')]
+    public function test_an_invalid_term_is_rejected(string $routeName, string $requestClass): void
+    {
+        $rules = $this->rulesOf($requestClass);
+        $limit = MaxLength::string();
+
+        $this->assertTrue(Validator::make([], $rules)->passes());
+        $this->assertTrue(Validator::make(['q' => 'Ane'], $rules)->passes());
+        $this->assertTrue(Validator::make(['q' => ['Ane']], $rules)->fails());
+        $this->assertTrue(Validator::make(['q' => str_repeat('a', $limit + 1)], $rules)->fails());
+        $this->assertTrue(Validator::make(['q' => str_repeat('a', $limit)], $rules)->passes());
+    }
+
+    /**
+     * The rules are read off the request instance, where the shared base declares them.
+     *
+     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @return array<string, array<int, string>>
+     */
+    private function rulesOf(string $requestClass): array
+    {
+        return match ($requestClass) {
+            CustomerSelectOptionsRequest::class => CustomerSelectOptionsRequest::create('/', 'GET')->rules(),
+            default => ProjectSelectOptionsRequest::create('/', 'GET')->rules(),
+        };
+    }
+
+    /**
+     * A project is labelled "name (customer)", so it is created under a customer whose name is known.
+     */
+    private function recordFor(string $routeName, string $name): Customer|Project
+    {
+        if ($routeName === 'customers.options') {
+            return Customer::factory()->create(['name' => $name]);
+        }
+
+        return Project::factory()->for($this->customer())
+            ->for(Customer::factory()->create(['name' => $name]))
+            ->create(['name' => $name]);
+    }
+
+    private function expectedText(string $routeName, string $name): string
+    {
+        return $routeName === 'customers.options' ? $name : $name.' ('.$name.')';
+    }
+}
