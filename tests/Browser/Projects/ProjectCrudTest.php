@@ -2,7 +2,6 @@
 
 namespace CustomerProjects13\Tests\Browser\Projects;
 
-use App\Models\User;
 use CustomerProjects13\Tests\DuskTestCase;
 use Customers13\Models\Customer;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -20,7 +19,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_row_name_opens_the_edit_form(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create(['name' => 'Editable from the row']);
 
         $this->browse(function (Browser $browser) use ($user, $project): void {
@@ -36,7 +35,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_table_keeps_the_actions_column_stuck_to_the_end(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $customer = Customer::factory()->create();
         $longName = 'Very long project name '.str_repeat('x', 120);
         $project = Project::factory()->for($customer)->create(['name' => $longName]);
@@ -65,7 +64,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_can_be_created_updated_and_deleted_from_the_drawer(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $suffix = Str::uuid()->toString();
         $customerName = 'Dusk customer '.$suffix;
         $projectName = 'Dusk project '.$suffix;

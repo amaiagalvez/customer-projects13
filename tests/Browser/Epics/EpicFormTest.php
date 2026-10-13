@@ -2,7 +2,6 @@
 
 namespace CustomerProjects13\Tests\Browser\Epics;
 
-use App\Models\User;
 use CustomerProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
@@ -16,7 +15,7 @@ class EpicFormTest extends DuskTestCase
 
     public function test_no_active_projects_action_opens_the_project_form(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         Project::factory()->for($this->customer())->archived()->create();
         Project::factory()->for($this->customer())->trashed()->create();
 
@@ -33,7 +32,7 @@ class EpicFormTest extends DuskTestCase
 
     public function test_end_date_picker_starts_the_day_after_the_start_date(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create();
         $epic = Epic::factory()->for($project)->create([
             'name' => 'Dusk dates '.Str::uuid()->toString(),
@@ -52,7 +51,7 @@ class EpicFormTest extends DuskTestCase
 
     public function test_opening_the_project_select_loads_remote_project_options(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create([
             'name' => 'Remote project '.Str::uuid()->toString(),
         ]);
@@ -83,7 +82,7 @@ class EpicFormTest extends DuskTestCase
 
     public function test_opening_the_project_select_loads_other_projects_for_an_existing_epic(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $archivedProject = Project::factory()->for($this->customer())->archived()->create([
             'name' => 'Inactive selected project '.Str::uuid()->toString(),
         ]);

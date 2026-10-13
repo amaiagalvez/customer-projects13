@@ -2,7 +2,6 @@
 
 namespace CustomerProjects13\Tests\Browser\Epics;
 
-use App\Models\User;
 use CustomerProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
@@ -22,7 +21,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_row_name_opens_the_edit_form(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create();
         $epic = Epic::factory()->for($project)->create(['name' => 'Editable from the row']);
 
@@ -38,7 +37,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_table_keeps_the_actions_column_stuck_to_the_end(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create();
         $longName = 'Very long epic name '.str_repeat('x', 120);
         $epic = Epic::factory()->for($project)->create(['name' => $longName]);
@@ -67,7 +66,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_can_be_created_updated_and_deleted_from_the_drawer(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $suffix = Str::uuid()->toString();
         $project = Project::factory()->for($this->customer())->create(['name' => 'Dusk project '.$suffix]);
         $epicName = 'Dusk epic '.$suffix;

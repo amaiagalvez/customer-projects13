@@ -2,7 +2,6 @@
 
 namespace CustomerProjects13\Tests\Browser\Epics;
 
-use App\Models\User;
 use CustomerProjects13\Tests\DuskTestCase;
 use Facebook\WebDriver\Chrome\ChromeDevToolsDriver;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -18,7 +17,7 @@ class EpicCommentTest extends DuskTestCase
 
     public function test_comment_added_from_the_edit_drawer_is_shown_after_reopening_it(): void
     {
-        $user = User::factory()->create(['name' => 'Dusk commenter']);
+        $user = $this->user(['name' => 'Dusk commenter']);
         $epicName = 'Dusk epic '.Str::uuid()->toString();
         $project = Project::factory()->for($this->customer())->create();
         $epic = Epic::factory()->for($project)->create(['name' => $epicName]);
@@ -60,7 +59,7 @@ class EpicCommentTest extends DuskTestCase
 
     public function test_comment_time_is_displayed_in_the_browser_timezone(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $project = Project::factory()->for($this->customer())->create();
         $epic = Epic::factory()->for($project)->create([
             'name' => 'Timezone epic '.Str::uuid()->toString(),

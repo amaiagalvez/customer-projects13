@@ -2,7 +2,6 @@
 
 namespace CustomerProjects13\Tests\Browser\Projects;
 
-use App\Models\User;
 use CustomerProjects13\Tests\DuskTestCase;
 use Customers13\Models\Customer;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
@@ -18,7 +17,7 @@ class ProjectCustomerSelectTest extends DuskTestCase
 
     public function test_no_active_customers_action_opens_the_customer_form(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         Customer::factory()->archived()->create();
         Customer::factory()->trashed()->create();
 
@@ -36,7 +35,7 @@ class ProjectCustomerSelectTest extends DuskTestCase
 
     public function test_project_customer_select_can_search_and_create_customers(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $executionId = Str::uuid()->toString();
         $existingCustomerName = 'Northwind '.$executionId;
         $newCustomerName = 'Dusk Select2 '.$executionId;
@@ -118,7 +117,7 @@ class ProjectCustomerSelectTest extends DuskTestCase
 
     public function test_edit_keeps_its_archived_customer_selected_and_only_offers_active_options(): void
     {
-        $user = User::factory()->create();
+        $user = $this->user();
         $archivedCustomer = Customer::factory()->archived()->create(['name' => 'Inactive selected customer']);
         $activeCustomer = Customer::factory()->create(['name' => 'Active option customer']);
         $otherInactiveCustomer = Customer::factory()->archived()->create(['name' => 'Other archived customer']);
