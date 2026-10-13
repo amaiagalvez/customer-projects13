@@ -34,7 +34,8 @@ final class CustomerCountsIntegration implements CustomerIntegration
             ->select('CUM_customers.*')
             // A left join, not an inner one: most customers have no projects at all, and an inner
             // join would drop them from the page and from its total before a count is even read.
-            ->leftJoin(self::ALIAS_TABLE, self::ALIAS.'.id', '=', 'CUM_customers.id')
+            ->leftJoin(self::ALIAS_TABLE, self::ALIAS.'.customer_id', '=', 'CUM_customers.id')
+            ->distinct('CUM_customers.id')
             ->withCount([
                 'projects' => fn (Builder $projects): Builder => $projects->where('PRO_projects.active', true),
                 'epics' => fn (Builder $epics): Builder => $epics

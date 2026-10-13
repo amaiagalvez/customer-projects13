@@ -147,6 +147,23 @@ class IntegrationSurfacesTest extends TestCase
             ->assertSee('North client');
     }
 
+    public function test_customer_search_uses_the_owner_key_and_keeps_each_customer_once(): void
+    {
+        $otherCustomer = Customer::factory()->create(['name' => 'Other client']);
+        $customer = Customer::factory()->create(['name' => 'North client']);
+        Project::factory()->for($customer)->create(['name' => 'Website renewal']);
+        Project::factory()->for($customer)->create(['name' => 'Website maintenance']);
+
+        $query = app(CustomerListQuery::class);
+        $matching = $query->active('Website');
+        $all = $query->active('');
+
+        $this->assertSame([$customer->id], $matching->pluck('id')->all());
+        $this->assertSame(1, $matching->total());
+        $this->assertSame([$customer->id, $otherCustomer->id], $all->pluck('id')->all());
+        $this->assertSame(2, $all->total());
+    }
+
     public function test_the_project_form_offers_the_customer_field(): void
     {
         $this->signIn();

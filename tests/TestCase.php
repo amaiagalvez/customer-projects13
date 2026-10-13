@@ -72,7 +72,7 @@ abstract class TestCase extends TestbenchTestCase
     {
         Date::use(CarbonImmutable::class);
 
-        $app['config']->set('database.default', 'sqlite');
+        $app['config']->set('database.default', getenv('DB_CONNECTION') ?: 'sqlite');
         $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
         $app['config']->set('database.connections.sqlite.database', ':memory:');
         // The foreign key that stops a customer from being deleted with live projects is part of
@@ -84,7 +84,7 @@ abstract class TestCase extends TestbenchTestCase
 
     protected function defineDatabaseMigrations(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/Fixtures/database/migrations');
+        $this->app->make('migrator')->path(__DIR__.'/Fixtures/database/migrations');
     }
 
     protected function defineRoutes($router): void

@@ -94,7 +94,9 @@ class ResourceNotesTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        $this->post(route($resource.'.store'), [...$this->storePayload($resource), 'notes' => $notes]);
+        $this->post(route($resource.'.store'), [...$this->storePayload($resource), 'notes' => $notes])
+            ->assertRedirect(route($resource.'.index'))
+            ->assertSessionHasNoErrors();
 
         $this->get(route($resource.'.index'))
             ->assertOk()
@@ -139,7 +141,10 @@ class ResourceNotesTest extends TestCase
             'epics' => [
                 ...$payload,
                 'start_date' => '2026-10-01',
-                'project_id' => Project::factory()->for($customer)->create()->id,
+                'project_id' => Project::factory()->for($customer)->create([
+                    'start_date' => '2026-10-01',
+                    'end_date' => null,
+                ])->id,
             ],
             default => $payload,
         };

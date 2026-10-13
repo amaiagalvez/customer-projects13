@@ -8,7 +8,6 @@ use CustomerProjects13\Tests\TestCase;
 use Customers13\Contracts\CustomerIntegration;
 use Customers13\Models\Customer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Projects13\Contracts\ProjectIntegration;
 
@@ -40,10 +39,13 @@ class InstallationTest extends TestCase
     {
         $this->assertTrue(Schema::hasColumn('PRO_projects', 'customer_id'));
 
-        $keys = DB::select('PRAGMA foreign_key_list(PRO_projects)');
+        $keys = array_values(array_filter(
+            Schema::getForeignKeys('PRO_projects'),
+            static fn (array $key): bool => $key['columns'] === ['customer_id'],
+        ));
 
         $this->assertNotEmpty($keys, 'the foreign key has to be enforced, not just declared');
-        $this->assertSame('CUM_customers', $keys[0]->table);
-        $this->assertSame('customer_id', $keys[0]->from);
+        $this->assertSame('CUM_customers', $keys[0]['foreign_table']);
+        $this->assertSame(['id'], $keys[0]['foreign_columns']);
     }
 }

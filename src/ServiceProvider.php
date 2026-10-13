@@ -30,6 +30,7 @@ class ServiceProvider extends BaseServiceProvider
 
         $this->publishes([
             __DIR__.'/../resources/js' => resource_path('js/vendor/customer-projects13'),
+            __DIR__.'/../resources/css' => resource_path('css/vendor/customer-projects13'),
         ], 'customer-projects13-assets');
 
         $this->publishes([
@@ -65,7 +66,7 @@ class ServiceProvider extends BaseServiceProvider
             'projects13.views.project_form' => [
                 'fields' => 'customer-projects13::projects.form-fields',
                 'state' => ['customer_id', 'customer_name', 'customerCreating', 'customerCreateError'],
-                'submit_guard' => 'form.customerCreating',
+                'submit_guard' => 'Boolean(form.customerCreating)',
             ],
             'projects13.views.project_list' => [
                 'columns' => 'customer-projects13::projects.list-columns',

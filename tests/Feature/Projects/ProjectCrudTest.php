@@ -169,11 +169,13 @@ class ProjectCrudTest extends TestCase
             'name' => 'Reusable project name',
         ]);
         $this->assertSoftDeleted($deletedProject);
-        $index = DB::selectOne(
-            "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'PRO_projects_active_name_unique'",
-        );
-        $this->assertNotNull($index);
-        $this->assertStringContainsString('WHERE "deleted_at" IS NULL', $index->sql);
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            $index = DB::selectOne(
+                "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'PRO_projects_active_name_unique'",
+            );
+            $this->assertNotNull($index);
+            $this->assertStringContainsString('WHERE "deleted_at" IS NULL', $index->sql);
+        }
 
         $activeProject = Project::factory()->for($customer)->create([
             'name' => 'Reusable project name',
@@ -440,6 +442,10 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_is_not_deleted_when_an_epic_appears_during_the_delete_transaction(): void
     {
+        if (DB::connection()->getDriverName() !== 'mysql') {
+            $this->markTestSkipped('The concurrent delete guard requires MySQL row locks.');
+        }
+
         $this->actingAs(User::factory()->create());
         $project = Project::factory()->for($this->customer())->create();
         $competitorCreated = false;
@@ -449,6 +455,7 @@ class ProjectCrudTest extends TestCase
                 $competitorCreated
                 || ! str_starts_with(strtolower(ltrim($query->sql)), 'select')
                 || ! str_contains(strtolower($query->sql), 'pro_projects')
+                || ! str_contains(strtolower($query->sql), 'for update')
                 || ! in_array($project->id, $query->bindings, true)
             ) {
                 return;

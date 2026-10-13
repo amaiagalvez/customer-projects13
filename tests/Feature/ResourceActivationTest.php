@@ -105,10 +105,11 @@ class ResourceActivationTest extends TestCase
         try {
             $response = $this->get(route($route, ['search' => $search]));
             $countQueries = collect(DB::getQueryLog())->filter(
-                static fn (array $query): bool => str_starts_with(
+                static fn (array $query): bool => preg_match(
+                    '/^select count\((?:\*|distinct '.preg_quote((new $model)->getTable(), '/').'\.id)\) as aggregate from '
+                        .preg_quote((new $model)->getTable(), '/').' /',
                     str_replace(['`', '"'], '', $query['query']),
-                    'select count(*) as aggregate from '.(new $model)->getTable().' ',
-                ),
+                ) === 1,
             );
         } finally {
             DB::disableQueryLog();
@@ -461,8 +462,16 @@ class ResourceActivationTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
         $this->travelTo('2026-03-01 10:00:00');
-        $updatedEpic = Epic::factory()->archived()->create(['name' => 'Alpha Dormant']);
-        Epic::factory()->archived()->create(['name' => 'Beta Dormant']);
+        $updatedEpic = Epic::factory()->archived()->create([
+            'name' => 'Alpha Dormant',
+            'start_date' => null,
+            'end_date' => null,
+        ]);
+        Epic::factory()->archived()->create([
+            'name' => 'Beta Dormant',
+            'start_date' => null,
+            'end_date' => null,
+        ]);
         $this->travelTo('2026-07-15 10:00:00');
         $updatedEpic->touch();
 
