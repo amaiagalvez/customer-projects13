@@ -12,6 +12,22 @@ foreach ([$storageDir, $cacheDir] as $dir) {
     }
 }
 
+foreach (glob($storageDir.'/*.php') ?: [] as $compiledView) {
+    $compiledViewContents = file_get_contents($compiledView);
+
+    if ($compiledViewContents === false) {
+        throw new RuntimeException(sprintf('Unable to read compiled view: %s', $compiledView));
+    }
+
+    if (! str_contains($compiledViewContents, 'PATH /packages/')) {
+        continue;
+    }
+
+    if (! unlink($compiledView)) {
+        throw new RuntimeException(sprintf('Unable to clear compiled view: %s', $compiledView));
+    }
+}
+
 foreach (['TMPDIR', 'TEMP', 'TMP'] as $key) {
     putenv(sprintf('%s=%s', $key, $tempDir));
 }
