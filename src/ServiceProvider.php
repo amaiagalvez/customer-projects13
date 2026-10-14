@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ServiceProvider as BaseServiceProvider;
-use Projects13\Contracts\ProjectIntegration;
+use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectValidationIntegration;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
@@ -51,7 +53,9 @@ class ServiceProvider extends BaseServiceProvider
         // nobody else to ask. Composer's auto-discovery registers providers in dependency order,
         // which puts this one last, but the base packages use `singletonIf` as well so the outcome
         // does not depend on that order being right.
-        $this->app->singleton(ProjectIntegration::class, CustomerProjectsIntegration::class);
+        $this->app->singleton(ProjectValidationIntegration::class, CustomerProjectsIntegration::class);
+        $this->app->singleton(ProjectQueryIntegration::class, CustomerProjectsIntegration::class);
+        $this->app->singleton(ProjectDisplayIntegration::class, CustomerProjectsIntegration::class);
         $this->app->singleton(CustomerIntegration::class, CustomerCountsIntegration::class);
     }
 

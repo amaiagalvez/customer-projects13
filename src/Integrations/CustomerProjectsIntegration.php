@@ -8,7 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
-use Projects13\Contracts\ProjectIntegration;
+use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectValidationIntegration;
 use Projects13\Http\Requests\ProjectRequest;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -19,7 +21,7 @@ use Projects13\Models\Project;
  * customer that is being deleted at the same time, and the name and column the customer's presence
  * gives to a row.
  */
-final class CustomerProjectsIntegration implements ProjectIntegration
+final class CustomerProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
 {
     /**
      * A project may only hang from an active customer, which is what the selector offers. While
@@ -166,6 +168,20 @@ final class CustomerProjectsIntegration implements ProjectIntegration
         ];
     }
 
+    public function hasActiveRelatedEntities(): bool
+    {
+        return Customer::query()->where('active', true)->exists();
+    }
+
+    public function noRelatedEntitiesBanner(): array
+    {
+        return [
+            'message' => __('No active customers are available. Open the customer form to create one.'),
+            'action_label' => __('Open customer form'),
+            'action_url' => route('customers.index', ['create' => 1]),
+        ];
+    }
+
     private function selectableCustomerRule(ProjectRequest $request): Exists
     {
         $current = $request->route('project');
@@ -196,19 +212,5 @@ final class CustomerProjectsIntegration implements ProjectIntegration
         }
 
         return $project->getRelation('customer');
-    }
-
-    public function hasActiveRelatedEntities(): bool
-    {
-        return Customer::query()->where('active', true)->exists();
-    }
-
-    public function noRelatedEntitiesBanner(): array
-    {
-        return [
-            'message' => __('No active customers are available. Open the customer form to create one.'),
-            'action_label' => __('Open customer form'),
-            'action_url' => route('customers.index', ['create' => 1]),
-        ];
     }
 }

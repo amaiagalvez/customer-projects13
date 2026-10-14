@@ -9,7 +9,9 @@ use Customers13\Contracts\CustomerIntegration;
 use Customers13\Models\Customer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
-use Projects13\Contracts\ProjectIntegration;
+use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectValidationIntegration;
 
 /**
  * Installing this package replaces what both base packages bound by default. If the order in which
@@ -22,7 +24,9 @@ class InstallationTest extends TestCase
 
     public function test_the_integration_replaces_the_project_null_implementation(): void
     {
-        $this->assertInstanceOf(CustomerProjectsIntegration::class, app(ProjectIntegration::class));
+        $this->assertInstanceOf(CustomerProjectsIntegration::class, app(ProjectValidationIntegration::class));
+        $this->assertInstanceOf(CustomerProjectsIntegration::class, app(ProjectQueryIntegration::class));
+        $this->assertInstanceOf(CustomerProjectsIntegration::class, app(ProjectDisplayIntegration::class));
     }
 
     public function test_the_integration_replaces_the_customer_null_implementation(): void
