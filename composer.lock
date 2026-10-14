@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "a348a45eaefaeae398924881f90d2ac61765d734"
+                "reference": "625deb7790b4f6e8bdc1536dc0007c17c8966e70"
             },
             "require": {
                 "laravel/boost": "^2.10",
@@ -67,7 +67,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/customers13",
-                "reference": "10f4cd778dd09171cfafde9ffab826b9c8b08032"
+                "reference": "f7b5a39c366fbb09754ce8895584161777334941"
             },
             "require": {
                 "php": "^8.3"
@@ -75,6 +75,7 @@
             "require-dev": {
                 "amaia/basics13": "^1.0",
                 "larastan/larastan": "^3.9",
+                "laravel/dusk": "^8.7",
                 "laravel/pint": "^1.27",
                 "mockery/mockery": "^1.6",
                 "orchestra/testbench": "^11.3",
@@ -114,7 +115,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "cf4574400a17db4619ddccdff1eb93581f0b873f"
+                "reference": "5bdad2aa5982c2377ba86b3ff876edb2e8d2d541"
             },
             "require": {
                 "php": "^8.3"

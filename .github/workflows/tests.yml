@@ -1,0 +1,93 @@
+name: tests
+
+# This package is checked out at `package/` and its dependencies at `packages/*`, because the
+# Composer `path` repositories in composer.json are written relative to the package root
+# (`../packages/<dep>`). That is the same shape testing13 mounts in Docker, so the lock file and
+# the vendor symlinks resolve unchanged.
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: package
+    env:
+      # The package suite runs on an in-memory SQLite database, so no database service is needed.
+      XDEBUG_MODE: off
+
+    steps:
+      - name: Checkout package
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          path: package
+
+      - name: Checkout basics13
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          repository: amaiagalvez/basics13
+          path: packages/basics13
+
+      - name: Checkout customers13
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          repository: amaiagalvez/customers13
+          path: packages/customers13
+
+      - name: Checkout projects13
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          repository: amaiagalvez/projects13
+          path: packages/projects13
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: none
+
+      - name: Get Composer cache directory
+        id: composer-cache
+        run: echo "dir=$(composer config cache-files-dir)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache Composer packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: composer-${{ runner.os }}-${{ hashFiles('package/composer.lock') }}
+          restore-keys: |
+            composer-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # Same three checks testing13 runs locally: reformat.sh, review.sh, phpunit.sh.
+      - name: Check formatting
+        run: vendor/bin/pint --test
+
+      - name: Static analysis
+        run: vendor/bin/phpstan analyse --memory-limit=1G
+
+      # Browser suites (tests/Browser) are deliberately absent: they need a running application
+      # and run in demo13, whose phpunit.dusk.xml collects them through vendor/amaia/*/tests/Browser.
+      - name: Run tests
+        run: vendor/bin/phpunit
