@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "625deb7790b4f6e8bdc1536dc0007c17c8966e70"
+                "reference": "405c684c238d099bb9e32091d3e8ab8a2b9778c8"
             },
             "require": {
                 "laravel/boost": "^2.10",
@@ -67,7 +67,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/customers13",
-                "reference": "f7b5a39c366fbb09754ce8895584161777334941"
+                "reference": "11f30df850867cae07127f839ec4daafdf57987b"
             },
             "require": {
                 "php": "^8.3"
@@ -115,7 +115,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "5bdad2aa5982c2377ba86b3ff876edb2e8d2d541"
+                "reference": "698167188bc0aa629e6a7ebac40c92995186318f"
             },
             "require": {
                 "php": "^8.3"
