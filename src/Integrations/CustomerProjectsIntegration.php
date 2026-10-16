@@ -9,8 +9,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
 use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectDisplayIntegrationDefaults;
 use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectQueryIntegrationDefaults;
 use Projects13\Contracts\ProjectValidationIntegration;
+use Projects13\Contracts\ProjectValidationIntegrationDefaults;
 use Projects13\Http\Requests\ProjectRequest;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -23,6 +26,10 @@ use Projects13\Models\Project;
  */
 final class CustomerProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
 {
+    use ProjectDisplayIntegrationDefaults;
+    use ProjectQueryIntegrationDefaults;
+    use ProjectValidationIntegrationDefaults;
+
     /**
      * A project may only hang from an active customer, which is what the selector offers. While
      * editing, the customer the project already belongs to stays valid even after it has been
@@ -173,6 +180,9 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
         return Customer::query()->where('active', true)->exists();
     }
 
+    /**
+     * @return array{message: string, action_label: string, action_url: string}
+     */
     public function noRelatedEntitiesBanner(): array
     {
         return [

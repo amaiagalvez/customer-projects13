@@ -53,9 +53,14 @@ class ServiceProvider extends BaseServiceProvider
         // nobody else to ask. Composer's auto-discovery registers providers in dependency order,
         // which puts this one last, but the base packages use `singletonIf` as well so the outcome
         // does not depend on that order being right.
-        $this->app->singleton(ProjectValidationIntegration::class, CustomerProjectsIntegration::class);
-        $this->app->singleton(ProjectQueryIntegration::class, CustomerProjectsIntegration::class);
-        $this->app->singleton(ProjectDisplayIntegration::class, CustomerProjectsIntegration::class);
+        //
+        // Since PHP doesn't support multiple inheritance, we create a single instance and bind it
+        // to all three abstract class contracts. The instance has all required methods because
+        // CustomerProjectsIntegration implements the full interface surface.
+        $integration = new CustomerProjectsIntegration;
+        $this->app->instance(ProjectValidationIntegration::class, $integration);
+        $this->app->instance(ProjectQueryIntegration::class, $integration);
+        $this->app->instance(ProjectDisplayIntegration::class, $integration);
         $this->app->singleton(CustomerIntegration::class, CustomerCountsIntegration::class);
     }
 

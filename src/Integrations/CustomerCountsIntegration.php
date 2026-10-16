@@ -14,7 +14,7 @@ use Projects13\Models\EpicComment;
  * and comments live under them, where to drill into them, and whether anything hangs from the row
  * at all — which is what turns its delete action into an archive one.
  */
-final class CustomerCountsIntegration implements CustomerIntegration
+final class CustomerCountsIntegration extends CustomerIntegration
 {
     /**
      * The alias the join and the search column share. A feature test searches the customer list by
