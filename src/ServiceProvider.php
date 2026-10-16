@@ -21,7 +21,7 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__.'/Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'customer-projects13');
         $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'customer-projects13');
         $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang');
@@ -146,7 +146,7 @@ class ServiceProvider extends BaseServiceProvider
                 ->lockForUpdate()
                 ->firstOrFail());
 
-            return ! $locked->projects()->withTrashed()->exists();
+            return ! Project::withTrashed()->where('customer_id', $locked->getKey())->exists();
         });
     }
 }

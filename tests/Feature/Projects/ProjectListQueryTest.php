@@ -27,6 +27,6 @@ class ProjectListQueryTest extends TestCase
             self::fail('The active list must include the project with its trashed customer.');
         }
 
-        $this->assertTrue($listedProject->customer->is($customer));
+        $this->assertTrue($listedProject->getRelationValue('customer')->is($customer));
     }
 }

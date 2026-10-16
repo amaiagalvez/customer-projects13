@@ -74,7 +74,7 @@ class ProjectCrudTest extends TestCase
         $project = Project::query()->firstOrFail();
         $this->assertSame('Website renewal', $project->name);
 
-        $this->assertTrue($project->customer->is($customer));
+        $this->assertTrue($project->getRelationValue('customer')->is($customer));
 
         $this->get(route('projects.index'))
             ->assertOk()
@@ -148,7 +148,7 @@ class ProjectCrudTest extends TestCase
 
         $this->assertCount(2, $customer->projects);
         $this->assertTrue($projects->every(function (Project $project) use ($customer): bool {
-            return $project->customer->is($customer);
+            return $project->getRelationValue('customer')->is($customer);
         }));
     }
 

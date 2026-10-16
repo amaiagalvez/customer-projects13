@@ -68,7 +68,7 @@ final class CustomerCountsIntegration extends CustomerIntegration
             return [];
         }
 
-        $projectsCount = (int) $record->projects_count;
+        $projectsCount = (int) $record->getAttribute('projects_count');
 
         return [
             'projectsCount' => $projectsCount,
@@ -76,9 +76,9 @@ final class CustomerCountsIntegration extends CustomerIntegration
             'projectsUrl' => $projectsCount > 0
                 ? route('projects.index', ['search' => $record->name])
                 : null,
-            'epicsCount' => (int) $record->epics_count,
-            'commentsCount' => (int) $record->comments_count,
-            'projects_exists' => (bool) $record->projects_exists,
+            'epicsCount' => (int) $record->getAttribute('epics_count'),
+            'commentsCount' => (int) $record->getAttribute('comments_count'),
+            'projects_exists' => (bool) $record->getAttribute('projects_exists'),
         ];
     }
 

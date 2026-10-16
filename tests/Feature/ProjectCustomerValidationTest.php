@@ -119,7 +119,7 @@ class ProjectCustomerValidationTest extends TestCase
         ])->assertRedirect(route('projects.index'));
 
         $project = Project::query()->where('name', 'Website renewal')->firstOrFail();
-        $this->assertSame($customer->id, $project->customer_id);
+        $this->assertSame($customer->id, $project->getAttribute('customer_id'));
 
         $this->put(route('projects.update', $project), [
             'name' => $project->name,
@@ -127,7 +127,7 @@ class ProjectCustomerValidationTest extends TestCase
             'customer_id' => $other->id,
         ])->assertRedirect(route('projects.index'));
 
-        $this->assertSame($other->id, $project->refresh()->customer_id);
+        $this->assertSame($other->id, $project->refresh()->getAttribute('customer_id'));
     }
 
     public function test_the_error_names_the_field_the_user_sees(): void

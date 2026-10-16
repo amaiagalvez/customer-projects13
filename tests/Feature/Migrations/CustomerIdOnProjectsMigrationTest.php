@@ -47,7 +47,7 @@ class CustomerIdOnProjectsMigrationTest extends TestCase
                 $table->timestamps();
             });
 
-            $migration = require dirname(__DIR__, 3).'/src/Database/Migrations/2026_10_11_000000_add_customer_id_to_projects_table.php';
+            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_11_000000_add_customer_id_to_projects_table.php';
             $migration->up();
 
             $this->assertTrue(Schema::hasColumn('PRO_projects', 'customer_id'));

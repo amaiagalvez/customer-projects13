@@ -103,9 +103,9 @@ class IntegrationSurfacesTest extends TestCase
         // Through the list query, because that is where the counts are added.
         $record = app(CustomerListQuery::class)->active('')->items()[0];
 
-        $this->assertSame(1, (int) $record->projects_count);
-        $this->assertSame(1, (int) $record->epics_count);
-        $this->assertSame(0, (int) $record->comments_count);
+        $this->assertSame(1, (int) $record->getAttribute('projects_count'));
+        $this->assertSame(1, (int) $record->getAttribute('epics_count'));
+        $this->assertSame(0, (int) $record->getAttribute('comments_count'));
 
         $this->get(route('customers.index'))
             ->assertOk()
@@ -128,8 +128,8 @@ class IntegrationSurfacesTest extends TestCase
         // Through the list query, because that is where the counts are added.
         $record = app(CustomerListQuery::class)->active('')->items()[0];
 
-        $this->assertSame(1, (int) $record->projects_count);
-        $this->assertSame(1, (int) $record->epics_count);
+        $this->assertSame(1, (int) $record->getAttribute('projects_count'));
+        $this->assertSame(1, (int) $record->getAttribute('epics_count'));
     }
 
     public function test_the_customer_list_searches_a_project_through_the_joined_alias(): void

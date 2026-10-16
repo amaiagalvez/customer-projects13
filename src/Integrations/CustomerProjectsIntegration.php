@@ -196,7 +196,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     {
         $current = $request->route('project');
 
-        if ($current instanceof Project && $current->customer_id === $request->integer('customer_id')) {
+        if ($current instanceof Project && $current->getAttribute('customer_id') === $request->integer('customer_id')) {
             return Rule::exists(Customer::class, 'id')->whereNull('deleted_at');
         }
 
@@ -217,10 +217,6 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
 
     private function customerOf(Project $project): ?Customer
     {
-        if (! $project->relationLoaded('customer')) {
-            $project->load('customer');
-        }
-
-        return $project->getRelation('customer');
+        return $project->getRelationValue('customer');
     }
 }

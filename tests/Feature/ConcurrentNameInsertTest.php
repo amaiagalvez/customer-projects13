@@ -192,7 +192,7 @@ class ConcurrentNameInsertTest extends TestCase
     {
         return match (true) {
             $record instanceof Epic => $record->project_id,
-            $record instanceof Project => $record->customer_id,
+            $record instanceof Project => $record->getAttribute('customer_id'),
             default => null,
         };
     }

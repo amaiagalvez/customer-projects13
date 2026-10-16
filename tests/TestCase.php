@@ -82,11 +82,6 @@ abstract class TestCase extends TestbenchTestCase
         $app['config']->set('view.compiled', dirname(__DIR__).'/storage/framework/views');
     }
 
-    protected function defineDatabaseMigrations(): void
-    {
-        $this->app->make('migrator')->path(__DIR__.'/Fixtures/database/migrations');
-    }
-
     protected function defineRoutes($router): void
     {
         Route::get('login', static fn (): string => 'Login')->name('login');
