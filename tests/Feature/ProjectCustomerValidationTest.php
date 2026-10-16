@@ -15,6 +15,36 @@ class ProjectCustomerValidationTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_base_and_customer_required_fields_are_validated_together(): void
+    {
+        $this->signIn();
+
+        $this->from(route('projects.index'))
+            ->post(route('projects.store'), [])
+            ->assertRedirect(route('projects.index'))
+            ->assertSessionHasErrors(['name', 'start_date', 'customer_id']);
+
+        $this->assertDatabaseCount('PRO_projects', 0);
+    }
+
+    public function test_base_validation_still_rejects_invalid_input_with_a_valid_customer(): void
+    {
+        $this->signIn();
+        $customer = Customer::factory()->create();
+
+        $this->from(route('projects.index'))
+            ->post(route('projects.store'), [
+                'name' => 'Abc',
+                'start_date' => '2026-10-01',
+                'end_date' => '2026-09-30',
+                'customer_id' => $customer->id,
+            ])->assertRedirect(route('projects.index'))
+            ->assertSessionHasErrors(['name', 'end_date'])
+            ->assertSessionDoesntHaveErrors('customer_id');
+
+        $this->assertDatabaseCount('PRO_projects', 0);
+    }
+
     public function test_a_project_cannot_be_created_without_a_customer(): void
     {
         $this->signIn();

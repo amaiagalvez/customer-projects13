@@ -3,12 +3,31 @@
 namespace CustomerProjects13\Tests\Feature\Migrations;
 
 use CustomerProjects13\Tests\TestCase;
+use Customers13\Models\Customer;
+use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Projects13\Models\Project;
 
 class RestoreProjectActiveNameIndexMigrationTest extends TestCase
 {
+    public function test_integrated_schema_preserves_name_reuse_and_uniqueness_across_customers(): void
+    {
+        $customer = Customer::factory()->create();
+        $otherCustomer = Customer::factory()->create();
+        $deleted = Project::factory()->for($customer)->trashed()->create(['name' => 'Reusable project']);
+
+        $active = Project::factory()->for($otherCustomer)->create(['name' => 'Reusable project']);
+
+        $this->assertSoftDeleted($deleted);
+        $this->assertModelExists($active);
+
+        $this->expectException(QueryException::class);
+
+        Project::factory()->for($customer)->create(['name' => 'Reusable project']);
+    }
+
     public function test_restore_project_active_name_index_migration_can_be_rolled_back(): void
     {
         $connectionName = 'customer_projects13_restore_index_migration_test';

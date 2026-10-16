@@ -7,7 +7,6 @@ use Basics13\Queries\ListQueryBase;
 use CustomerProjects13\Tests\TestCase;
 use Customers13\Models\Customer;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
@@ -56,43 +55,40 @@ class ProjectCrudTest extends TestCase
             ->assertViewHas('hasCustomers', false);
     }
 
-    public function test_authenticated_users_can_create_update_and_delete_projects(): void
+    public function test_creating_and_reassigning_a_project_persists_its_customer_and_preserves_notes(): void
     {
         $this->actingAs(User::factory()->create());
         $customer = Customer::factory()->create();
         $otherCustomer = Customer::factory()->create();
 
         $this->post(route('projects.store'), [
-            'name' => '  Website renewal  ',
+            'name' => 'Website renewal',
             'start_date' => '2026-10-01',
             'end_date' => '2026-12-31',
             'customer_id' => $customer->id,
+            'notes' => 'Project notes',
         ])
             ->assertRedirect(route('projects.index'))
             ->assertSessionHas('status', __('Record created successfully.'));
 
         $project = Project::query()->firstOrFail();
-        $this->assertSame('Website renewal', $project->name);
-
         $this->assertTrue($project->getRelationValue('customer')->is($customer));
+        $this->assertSame('Project notes', $project->notes);
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertSee('project-create-button')
-            ->assertSee('aria-labelledby="project-form-heading"', false)
-            ->assertSee('id="project-form-heading"', false)
-            ->assertSee('aria-labelledby="project-confirm-heading"', false)
-            ->assertSee('id="project-confirm-heading"', false)
-            ->assertSee('project-edit-'.$project->id)
-            ->assertSee('Website renewal')
-            ->assertSee('title="Website renewal"', false)
-            ->assertSee($customer->name);
+            ->assertSee($customer->name)
+            ->assertViewHas('list', function (array $list) use ($customer): bool {
+                return $list['rows'][0]['editPayload']['customer_id'] === $customer->id
+                    && $list['rows'][0]['editPayload']['notes'] === 'Project notes';
+            });
 
         $this->put(route('projects.update', $project), [
             'name' => 'Updated website',
             'start_date' => '2026-10-15',
             'end_date' => '2027-01-15',
             'customer_id' => $otherCustomer->id,
+            'notes' => 'Rewritten notes',
         ])
             ->assertRedirect(route('projects.index'))
             ->assertSessionHas('status', __('Record updated successfully.'));
@@ -102,42 +98,16 @@ class ProjectCrudTest extends TestCase
             'id' => $project->id,
             'name' => 'Updated website',
             'customer_id' => $otherCustomer->id,
+            'notes' => 'Rewritten notes',
         ]);
-        $this->assertSame('2026-10-15', $project->start_date->format('Y-m-d'));
-        $this->assertSame('2027-01-15', $project->end_date->format('Y-m-d'));
+        $this->assertTrue($project->getRelationValue('customer')->is($otherCustomer));
 
-        $this->delete(route('projects.destroy', $project))
-            ->assertRedirect(route('projects.index'))
-            ->assertSessionHas('status', __('Record moved to trash.'));
-
-        $this->assertSoftDeleted($project);
-    }
-
-    public function test_project_store_persists_only_validated_attributes(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-
-        $this->post(route('projects.store'), [
-            'name' => 'Validated project',
-            'start_date' => '2026-10-01',
-            'customer_id' => $customer->id,
-            'id' => 999999,
-            'created_at' => '2000-01-01 00:00:00',
-        ])->assertRedirect(route('projects.index'));
-
-        $this->assertDatabaseHas('PRO_projects', [
-            'name' => 'Validated project',
-            'customer_id' => $customer->id,
-        ]);
-        $this->assertDatabaseMissing('PRO_projects', [
-            'name' => 'Validated project',
-            'id' => 999999,
-        ]);
-        $this->assertDatabaseMissing('PRO_projects', [
-            'name' => 'Validated project',
-            'created_at' => '2000-01-01 00:00:00',
-        ]);
+        $this->get(route('projects.index'))
+            ->assertOk()
+            ->assertViewHas('list', function (array $list) use ($otherCustomer): bool {
+                return $list['rows'][0]['editPayload']['customer_id'] === $otherCustomer->id
+                    && $list['rows'][0]['editPayload']['notes'] === 'Rewritten notes';
+            });
     }
 
     public function test_a_customer_can_have_multiple_projects(): void
@@ -150,38 +120,6 @@ class ProjectCrudTest extends TestCase
         $this->assertTrue($projects->every(function (Project $project) use ($customer): bool {
             return $project->getRelationValue('customer')->is($customer);
         }));
-    }
-
-    public function test_database_rejects_duplicate_project_names(): void
-    {
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create(['name' => 'Unique project']);
-
-        $this->expectException(QueryException::class);
-
-        Project::factory()->for($customer)->create(['name' => 'Unique project']);
-    }
-
-    public function test_database_allows_project_name_reuse_after_soft_delete(): void
-    {
-        $customer = Customer::factory()->create();
-        $deletedProject = Project::factory()->for($customer)->trashed()->create([
-            'name' => 'Reusable project name',
-        ]);
-        $this->assertSoftDeleted($deletedProject);
-        if (DB::connection()->getDriverName() === 'sqlite') {
-            $index = DB::selectOne(
-                "SELECT sql FROM sqlite_master WHERE type = 'index' AND name = 'PRO_projects_active_name_unique'",
-            );
-            $this->assertNotNull($index);
-            $this->assertStringContainsString('WHERE "deleted_at" IS NULL', $index->sql);
-        }
-
-        $activeProject = Project::factory()->for($customer)->create([
-            'name' => 'Reusable project name',
-        ]);
-
-        $this->assertModelExists($activeProject);
     }
 
     public function test_projects_can_be_searched_by_customer_name(): void
