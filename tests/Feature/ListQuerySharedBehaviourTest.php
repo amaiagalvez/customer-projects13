@@ -154,7 +154,8 @@ class ListQuerySharedBehaviourTest extends TestCase
 
     /**
      * The tab badges must not re-run the count the paginator already knows. The budget is per
-     * resource: customers and projects load no extra records, while epics load their project.
+     * resource: customers load their types, projects load no extra records, while epics load their
+     * project.
      *
      * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
@@ -216,7 +217,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     public static function queryBudgets(): array
     {
         return [
-            'customers' => [CustomerListQuery::class, 4],
+            'customers' => [CustomerListQuery::class, 5],
             'projects' => [ProjectListQuery::class, 4],
             'epics' => [EpicListQuery::class, 5],
         ];

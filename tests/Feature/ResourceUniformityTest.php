@@ -55,7 +55,12 @@ class ResourceUniformityTest extends TestCase
         $projectRules = $this->requestRules($projectRequest, static fn (): array => $projectRequest->rules());
         $epicRules = $this->requestRules($epicRequest, static fn (): array => $epicRequest->rules());
 
-        $this->assertSame(['name', 'notes', 'reuse_deleted_name'], array_keys($customerRules));
+        // `customer_type_ids` is the multi-select customers13 owns, so it sits among the fields of
+        // the resource rather than after the shared deleted-name flag.
+        $this->assertSame(
+            ['name', 'notes', 'customer_type_ids', 'customer_type_ids.*', 'reuse_deleted_name'],
+            array_keys($customerRules),
+        );
         // `customer_id` is contributed by amaia/customer-projects13 through the contract, so it
         // lands after the fields the base package declares rather than among them.
         $this->assertSame(
@@ -337,7 +342,8 @@ class ResourceUniformityTest extends TestCase
         /** @var list<array{actions: list<array<string, mixed>>}> $epicRows */
         $epicRows = $epicList['rows'];
 
-        $this->assertRowActionContract($customerRows[0], 'customer', ['id', 'name', 'notes']);
+        // The types travel as string ids, the values the multiselect binds to.
+        $this->assertRowActionContract($customerRows[0], 'customer', ['id', 'name', 'notes', 'customer_type_ids']);
         // The last two are the integration's, merged into the drawer payload after the base keys.
         $this->assertRowActionContract($projectRows[0], 'project', [
             'id',
