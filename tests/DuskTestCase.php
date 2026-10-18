@@ -1,13 +1,13 @@
 <?php
 
-namespace CustomerProjects13\Tests;
+namespace EntityProjects13\Tests;
 
-use Customers13\Models\Customer;
+use entities13\Models\Entity;
 
 abstract class DuskTestCase extends \Basics13\Support\Testing\DuskTestCase
 {
-    protected function customer(): Customer
+    protected function entity(): Entity
     {
-        return Customer::factory()->create();
+        return Entity::factory()->create();
     }
 }

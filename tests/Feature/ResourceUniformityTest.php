@@ -1,6 +1,6 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use Basics13\Http\Controllers\ArchivedController as BasicsArchivedController;
 use Basics13\Http\Requests\RestoreRequest;
@@ -9,13 +9,13 @@ use Basics13\Http\Requests\TrashDestroyRequest;
 use Basics13\Queries\ListQueryBase;
 use Basics13\Support\Validation\MaxLength;
 use Closure;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Http\Requests\CustomerListRequest;
-use Customers13\Http\Requests\CustomerRequest;
-use Customers13\Models\Customer;
-use Customers13\Policies\CustomerPolicy;
-use Customers13\Queries\Customers\CustomerListQuery;
-use Customers13\Transformers\CustomerListTransformer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Http\Requests\EntityListRequest;
+use entities13\Http\Requests\EntityRequest;
+use entities13\Models\Entity;
+use entities13\Policies\EntityPolicy;
+use entities13\Queries\Entities\EntityListQuery;
+use entities13\Transformers\EntityListTransformer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
@@ -45,26 +45,26 @@ class ResourceUniformityTest extends TestCase
 
     public function test_resource_requests_share_ordered_name_rules_and_deleted_name_flag(): void
     {
-        $customerRequest = CustomerRequest::create('/', 'POST', ['name' => 'Uniform customer']);
+        $entityRequest = EntityRequest::create('/', 'POST', ['name' => 'Uniform entity']);
         $projectRequest = ProjectRequest::create('/', 'POST', ['name' => 'Uniform project']);
         $epicRequest = EpicRequest::create('/', 'POST', [
             'name' => 'Uniform epic',
             'project_id' => 1,
         ]);
-        $customerRules = $this->requestRules($customerRequest, static fn (): array => $customerRequest->rules());
-        $projectRules = $this->requestRules($projectRequest, static fn (): array => $projectRequest->rules());
-        $epicRules = $this->requestRules($epicRequest, static fn (): array => $epicRequest->rules());
+        $entityRules = $this->requestRules($entityRequest, static fn(): array => $entityRequest->rules());
+        $projectRules = $this->requestRules($projectRequest, static fn(): array => $projectRequest->rules());
+        $epicRules = $this->requestRules($epicRequest, static fn(): array => $epicRequest->rules());
 
-        // `customer_type_ids` is the multi-select customers13 owns, so it sits among the fields of
+        // `entity_type_ids` is the multi-select entities13 owns, so it sits among the fields of
         // the resource rather than after the shared deleted-name flag.
         $this->assertSame(
-            ['name', 'notes', 'customer_type_ids', 'customer_type_ids.*', 'reuse_deleted_name'],
-            array_keys($customerRules),
+            ['name', 'notes', 'entity_type_ids', 'entity_type_ids.*', 'reuse_deleted_name'],
+            array_keys($entityRules),
         );
-        // `customer_id` is contributed by amaia/customer-projects13 through the contract, so it
+        // `entity_id` is contributed by amaia/entity-projects13 through the contract, so it
         // lands after the fields the base package declares rather than among them.
         $this->assertSame(
-            ['name', 'start_date', 'end_date', 'notes', 'reuse_deleted_name', 'customer_id'],
+            ['name', 'start_date', 'end_date', 'notes', 'reuse_deleted_name', 'entity_id'],
             array_keys($projectRules),
         );
         $this->assertSame(
@@ -72,9 +72,9 @@ class ResourceUniformityTest extends TestCase
             array_keys($epicRules),
         );
 
-        foreach ([$customerRules, $projectRules, $epicRules] as $rules) {
+        foreach ([$entityRules, $projectRules, $epicRules] as $rules) {
             $this->assertSame(
-                ['required', 'string', 'min:4', 'max:'.MaxLength::string()],
+                ['required', 'string', 'min:4', 'max:' . MaxLength::string()],
                 array_slice($rules['name'], 0, 4),
             );
             $this->assertArrayHasKey('reuse_deleted_name', $rules);
@@ -83,9 +83,9 @@ class ResourceUniformityTest extends TestCase
 
     public function test_list_requests_share_search_rules_and_normalization(): void
     {
-        $customerRules = $this->listRequestRules(CustomerListRequest::class);
-        $this->assertSame($customerRules, $this->listRequestRules(ProjectListRequest::class));
-        $this->assertSame($customerRules, $this->listRequestRules(EpicListRequest::class));
+        $entityRules = $this->listRequestRules(EntityListRequest::class);
+        $this->assertSame($entityRules, $this->listRequestRules(ProjectListRequest::class));
+        $this->assertSame($entityRules, $this->listRequestRules(EpicListRequest::class));
 
         $cases = [
             [null, ''],
@@ -94,7 +94,7 @@ class ResourceUniformityTest extends TestCase
             ['   ', ''],
         ];
 
-        foreach ([CustomerListRequest::class, ProjectListRequest::class, EpicListRequest::class] as $requestClass) {
+        foreach ([EntityListRequest::class, ProjectListRequest::class, EpicListRequest::class] as $requestClass) {
             foreach ($cases as [$input, $expected]) {
                 $this->assertSame($expected, $this->normalizedSearch($requestClass, $input));
             }
@@ -127,7 +127,7 @@ class ResourceUniformityTest extends TestCase
     public static function listRequestClasses(): array
     {
         return [
-            'customers' => [CustomerListRequest::class],
+            'entities' => [EntityListRequest::class],
             'projects' => [ProjectListRequest::class],
             'epics' => [EpicListRequest::class],
         ];
@@ -135,20 +135,20 @@ class ResourceUniformityTest extends TestCase
 
     public function test_policy_abilities_are_uniform_and_have_http_call_sites(): void
     {
-        $customerAbilities = $this->policyAbilities(CustomerPolicy::class);
+        $entityAbilities = $this->policyAbilities(EntityPolicy::class);
         $projectAbilities = $this->policyAbilities(ProjectPolicy::class);
         $epicAbilities = $this->policyAbilities(EpicPolicy::class);
-        $expectedEpicAbilities = [...$customerAbilities, 'comment'];
+        $expectedEpicAbilities = [...$entityAbilities, 'comment'];
         sort($expectedEpicAbilities);
 
-        $this->assertSame($customerAbilities, $projectAbilities);
+        $this->assertSame($entityAbilities, $projectAbilities);
         $this->assertSame($expectedEpicAbilities, $epicAbilities);
 
         // Read the authorization call sites per resource, so dropping the check on one controller
         // is caught even while the other two still call it. The shared base classes
         // (InactiveController, RestoreRequest, TrashDestroyRequest...) hold call sites that apply to
         // every resource, so they count towards all three.
-        $models = ['Customer', 'Project', 'Epic'];
+        $models = ['Entity', 'Project', 'Epic'];
         $byResource = array_fill_keys($models, '');
         $shared = '';
 
@@ -163,14 +163,14 @@ class ResourceUniformityTest extends TestCase
             $shared .= File::get($path);
         }
 
-        $customerRequestPath = (new ReflectionClass(CustomerRequest::class))->getFileName();
-        $this->assertIsString($customerRequestPath);
+        $entityRequestPath = (new ReflectionClass(EntityRequest::class))->getFileName();
+        $this->assertIsString($entityRequestPath);
         $projectRequestPath = (new ReflectionClass(ProjectRequest::class))->getFileName();
         $this->assertIsString($projectRequestPath);
         $archivedControllerPath = (new ReflectionClass(BasicsArchivedController::class))->getFileName();
         $this->assertIsString($archivedControllerPath);
         $httpPaths = [
-            dirname($customerRequestPath, 2),
+            dirname($entityRequestPath, 2),
             dirname($projectRequestPath, 2),
             dirname($archivedControllerPath),
         ];
@@ -194,11 +194,11 @@ class ResourceUniformityTest extends TestCase
         }
 
         foreach ($byResource as $model => $source) {
-            $byResource[$model] = $source.$shared;
+            $byResource[$model] = $source . $shared;
         }
 
-        foreach ([...$customerAbilities, 'comment'] as $ability) {
-            $pattern = '/->(?:authorize|can)\(\s*[\'\"]'.preg_quote($ability, '/').'[\'\"]/';
+        foreach ([...$entityAbilities, 'comment'] as $ability) {
+            $pattern = '/->(?:authorize|can)\(\s*[\'\"]' . preg_quote($ability, '/') . '[\'\"]/';
             $missing = [];
 
             foreach ($byResource as $model => $source) {
@@ -212,7 +212,7 @@ class ResourceUniformityTest extends TestCase
                 }
             }
 
-            $this->assertSame([], $missing, "No HTTP call site for [{$ability}] in: ".implode(', ', $missing));
+            $this->assertSame([], $missing, "No HTTP call site for [{$ability}] in: " . implode(', ', $missing));
         }
     }
 
@@ -222,7 +222,7 @@ class ResourceUniformityTest extends TestCase
      */
     public function test_soft_deletable_factories_share_trashed_and_optional_date_states(): void
     {
-        foreach ([Customer::class, Project::class, Epic::class] as $modelClass) {
+        foreach ([Entity::class, Project::class, Epic::class] as $modelClass) {
             $this->assertContains(SoftDeletes::class, class_uses_recursive($modelClass));
             $this->assertTrue(method_exists($modelClass::factory(), 'trashed'));
         }
@@ -239,7 +239,7 @@ class ResourceUniformityTest extends TestCase
      */
     public function test_every_model_with_an_active_flag_offers_the_archived_state(): void
     {
-        foreach ([Customer::class, Project::class, Epic::class] as $modelClass) {
+        foreach ([Entity::class, Project::class, Epic::class] as $modelClass) {
             $this->assertArrayHasKey(
                 'active',
                 (new $modelClass)->getCasts(),
@@ -254,20 +254,20 @@ class ResourceUniformityTest extends TestCase
 
     public function test_resource_factories_generate_unique_names(): void
     {
-        $customerNames = array_map(
-            fn (Customer $customer): string => $this->factoryName($customer),
-            Customer::factory()->count(20)->make()->all(),
+        $entityNames = array_map(
+            fn(Entity $entity): string => $this->factoryName($entity),
+            Entity::factory()->count(20)->make()->all(),
         );
         $projectNames = array_map(
-            fn (Project $project): string => $this->factoryName($project),
-            Project::factory()->for($this->customer())->count(20)->make()->all(),
+            fn(Project $project): string => $this->factoryName($project),
+            Project::factory()->for($this->entity())->count(20)->make()->all(),
         );
         $epicNames = array_map(
-            fn (Epic $epic): string => $this->factoryName($epic),
+            fn(Epic $epic): string => $this->factoryName($epic),
             Epic::factory()->count(20)->make()->all(),
         );
 
-        $this->assertCount(count($customerNames), array_unique($customerNames));
+        $this->assertCount(count($entityNames), array_unique($entityNames));
         $this->assertCount(count($projectNames), array_unique($projectNames));
         $this->assertCount(count($epicNames), array_unique($epicNames));
     }
@@ -275,23 +275,23 @@ class ResourceUniformityTest extends TestCase
     public function test_list_queries_share_page_size_and_trashed_id_tiebreaking(): void
     {
         $this->travelTo('2026-10-03 12:00:00');
-        $customer = Customer::factory()->create();
-        $firstCustomer = Customer::factory()->trashed()->create(['name' => 'Same deleted customer']);
-        $secondCustomer = Customer::factory()->trashed()->create(['name' => 'Same deleted customer']);
+        $entity = Entity::factory()->create();
+        $firstEntity = Entity::factory()->trashed()->create(['name' => 'Same deleted entity']);
+        $secondEntity = Entity::factory()->trashed()->create(['name' => 'Same deleted entity']);
 
-        $firstProject = Project::factory()->for($customer)->trashed()->create(['name' => 'Same deleted project']);
-        $secondProject = Project::factory()->for($customer)->trashed()->create(['name' => 'Same deleted project']);
+        $firstProject = Project::factory()->for($entity)->trashed()->create(['name' => 'Same deleted project']);
+        $secondProject = Project::factory()->for($entity)->trashed()->create(['name' => 'Same deleted project']);
 
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         $firstEpic = Epic::factory()->for($project)->trashed()->create(['name' => 'Same deleted epic']);
         $secondEpic = Epic::factory()->for($project)->trashed()->create(['name' => 'Same deleted epic']);
 
-        $customerQuery = app(CustomerListQuery::class);
+        $entityQuery = app(EntityListQuery::class);
         $projectQuery = app(ProjectListQuery::class);
         $epicQuery = app(EpicListQuery::class);
         $paginators = [
-            $customerQuery->active(''),
-            $customerQuery->trashed(''),
+            $entityQuery->active(''),
+            $entityQuery->trashed(''),
             $projectQuery->active(''),
             $projectQuery->trashed(''),
             $epicQuery->active(''),
@@ -303,8 +303,8 @@ class ResourceUniformityTest extends TestCase
         }
 
         $this->assertSame(
-            [$firstCustomer->id, $secondCustomer->id],
-            $customerQuery->trashed('')->pluck('id')->all(),
+            [$firstEntity->id, $secondEntity->id],
+            $entityQuery->trashed('')->pluck('id')->all(),
         );
         $this->assertSame(
             [$firstProject->id, $secondProject->id],
@@ -318,12 +318,12 @@ class ResourceUniformityTest extends TestCase
 
     public function test_resource_transformers_share_action_envelopes_and_allowlisted_edit_payloads(): void
     {
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
 
-        $customerList = app(CustomerListTransformer::class)->active(
-            app(CustomerListQuery::class)->active(''),
+        $entityList = app(EntityListTransformer::class)->active(
+            app(EntityListQuery::class)->active(''),
             '',
         );
         $projectList = app(ProjectListTransformer::class)->active(
@@ -335,15 +335,15 @@ class ResourceUniformityTest extends TestCase
             '',
         );
 
-        /** @var list<array{actions: list<array<string, mixed>>}> $customerRows */
-        $customerRows = $customerList['rows'];
+        /** @var list<array{actions: list<array<string, mixed>>}> $entityRows */
+        $entityRows = $entityList['rows'];
         /** @var list<array{actions: list<array<string, mixed>>}> $projectRows */
         $projectRows = $projectList['rows'];
         /** @var list<array{actions: list<array<string, mixed>>}> $epicRows */
         $epicRows = $epicList['rows'];
 
         // The types travel as string ids, the values the multiselect binds to.
-        $this->assertRowActionContract($customerRows[0], 'customer', ['id', 'name', 'notes', 'customer_type_ids']);
+        $this->assertRowActionContract($entityRows[0], 'entity', ['id', 'name', 'notes', 'entity_type_ids']);
         // The last two are the integration's, merged into the drawer payload after the base keys.
         $this->assertRowActionContract($projectRows[0], 'project', [
             'id',
@@ -351,10 +351,10 @@ class ResourceUniformityTest extends TestCase
             'notes',
             'start_date',
             'end_date',
-            'customer',
-            'customer_id',
-            'customer_name',
-            'customer_active',
+            'entity',
+            'entity_id',
+            'entity_name',
+            'entity_active',
         ]);
         $this->assertRowActionContract($epicRows[0], 'epic', [
             'id',
@@ -368,19 +368,19 @@ class ResourceUniformityTest extends TestCase
             'commentAction',
             'commentsUrl',
             'commentsCount',
-            'customer',
-            'customer_active',
+            'entity',
+            'entity_active',
         ]);
     }
 
     public function test_row_name_button_and_edit_action_share_the_same_payload(): void
     {
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
 
-        $customerList = app(CustomerListTransformer::class)->active(
-            app(CustomerListQuery::class)->active(''),
+        $entityList = app(EntityListTransformer::class)->active(
+            app(EntityListQuery::class)->active(''),
             '',
         );
         $projectList = app(ProjectListTransformer::class)->active(
@@ -394,7 +394,7 @@ class ResourceUniformityTest extends TestCase
 
         /** @var array<string, list<array{actions: list<array<string, mixed>>, editPayload: array<string, mixed>}>> $rows */
         $rows = [
-            'customer' => $customerList['rows'],
+            'entity' => $entityList['rows'],
             'project' => $projectList['rows'],
             'epic' => $epicList['rows'],
         ];
@@ -416,9 +416,9 @@ class ResourceUniformityTest extends TestCase
      */
     private function requestRules(FormRequest $request, Closure $rules): array
     {
-        $route = new Route($request->getMethod(), '/', static fn (): null => null);
+        $route = new Route($request->getMethod(), '/', static fn(): null => null);
         $route->bind($request);
-        $request->setRouteResolver(static fn (): Route => $route);
+        $request->setRouteResolver(static fn(): Route => $route);
 
         return $rules();
     }
@@ -430,7 +430,7 @@ class ResourceUniformityTest extends TestCase
     private function listRequestRules(string $requestClass): array
     {
         $request = $requestClass::create('/', 'GET');
-        $request->setRouteResolver(static fn (): null => null);
+        $request->setRouteResolver(static fn(): null => null);
 
         return $request->rules();
     }
@@ -441,7 +441,7 @@ class ResourceUniformityTest extends TestCase
     private function normalizedSearch(string $requestClass, mixed $input): string
     {
         $request = $requestClass::create('/', 'GET', ['search' => $input]);
-        $request->setRouteResolver(static fn (): null => null);
+        $request->setRouteResolver(static fn(): null => null);
 
         return $request->search();
     }

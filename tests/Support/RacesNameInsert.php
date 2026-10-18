@@ -1,6 +1,6 @@
 <?php
 
-namespace CustomerProjects13\Tests\Support;
+namespace EntityProjects13\Tests\Support;
 
 use Closure;
 use Illuminate\Database\Events\QueryExecuted;

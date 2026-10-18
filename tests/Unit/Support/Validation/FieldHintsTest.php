@@ -1,11 +1,11 @@
 <?php
 
-namespace CustomerProjects13\Tests\Unit\Support\Validation;
+namespace EntityProjects13\Tests\Unit\Support\Validation;
 
 use Basics13\Support\Validation\FieldHints;
 use Basics13\Support\Validation\MaxLength;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Http\Requests\CustomerRequest;
+use EntityProjects13\Tests\TestCase;
+use entities13\Http\Requests\EntityRequest;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Projects13\Http\Requests\EpicCommentRequest;
@@ -16,7 +16,7 @@ class FieldHintsTest extends TestCase
 {
     public function test_the_name_notice_spells_out_every_rule_the_request_applies(): void
     {
-        $hints = (new FieldHints(CustomerRequest::class))->for('name');
+        $hints = (new FieldHints(EntityRequest::class))->for('name');
 
         $this->assertSame([
             __('Use between :min and :max characters.', ['min' => 4, 'max' => MaxLength::string()]),
@@ -26,7 +26,7 @@ class FieldHintsTest extends TestCase
 
     public function test_an_optional_field_only_mentions_the_rules_a_person_can_act_on(): void
     {
-        $hints = (new FieldHints(CustomerRequest::class))->for('notes');
+        $hints = (new FieldHints(EntityRequest::class))->for('notes');
 
         $this->assertSame([
             __('Use at most :max characters.', ['max' => MaxLength::longText()]),
@@ -76,8 +76,8 @@ class FieldHintsTest extends TestCase
     {
         $hints = new FieldHints(ProjectRequest::class);
 
-        $this->assertSame([], $hints->for('customer_id'));
-        $this->assertTrue($hints->isRequired('customer_id'), 'the asterisk still marks it as asked for.');
+        $this->assertSame([], $hints->for('entity_id'));
+        $this->assertTrue($hints->isRequired('entity_id'), 'the asterisk still marks it as asked for.');
     }
 
     public function test_a_date_notice_names_the_other_date_the_way_the_form_labels_it(): void

@@ -1,8 +1,8 @@
 <?php
 
-namespace CustomerProjects13\Integrations;
+namespace EntityProjects13\Integrations;
 
-use Customers13\Models\Customer;
+use entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -19,20 +19,20 @@ use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
 /**
- * A project hangs from a customer, and everything that follows from it: the field in the form, the
+ * A project hangs from a entity, and everything that follows from it: the field in the form, the
  * rule that keeps the two consistent, the lock that keeps a project from being attached to a
- * customer that is being deleted at the same time, and the name and column the customer's presence
+ * entity that is being deleted at the same time, and the name and column the entity's presence
  * gives to a row.
  */
-final class CustomerProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
+final class EntityProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
 {
     use ProjectDisplayIntegrationDefaults;
     use ProjectQueryIntegrationDefaults;
     use ProjectValidationIntegrationDefaults;
 
     /**
-     * A project may only hang from an active customer, which is what the selector offers. While
-     * editing, the customer the project already belongs to stays valid even after it has been
+     * A project may only hang from an active entity, which is what the selector offers. While
+     * editing, the entity the project already belongs to stays valid even after it has been
      * deactivated, so a form that does not change it can still be saved.
      *
      * @return array<string, array<int, mixed>>
@@ -40,10 +40,10 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     public function rules(ProjectRequest $request): array
     {
         return [
-            'customer_id' => [
+            'entity_id' => [
                 'required',
                 'integer',
-                $this->selectableCustomerRule($request),
+                $this->selectableEntityRule($request),
             ],
         ];
     }
@@ -53,29 +53,29 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
      */
     public function attributes(): array
     {
-        return ['customer_id' => __('Customer')];
+        return ['entity_id' => __('Entity')];
     }
 
     /**
-     * The customer row is locked here, inside the controller transaction that is about to write the
-     * project, so a concurrent delete of that customer makes this transaction wait and then fail
-     * instead of leaving a project pointing at a customer in the trash.
+     * The entity row is locked here, inside the controller transaction that is about to write the
+     * project, so a concurrent delete of that entity makes this transaction wait and then fail
+     * instead of leaving a project pointing at a entity in the trash.
      *
      * @return array<string, mixed>
      */
     public function saving(ProjectRequest $request, ?Project $project): array
     {
-        $id = $request->integer('customer_id');
+        $id = $request->integer('entity_id');
 
-        DB::transaction(static fn (): Customer => Customer::query()->lockForUpdate()->findOrFail($id));
+        DB::transaction(static fn(): Entity => Entity::query()->lockForUpdate()->findOrFail($id));
 
-        return ['customer_id' => $id];
+        return ['entity_id' => $id];
     }
 
     /**
-     * Every project query reaches the customer through the alias it was given, so one join serves
+     * Every project query reaches the entity through the alias it was given, so one join serves
      * the list, the selector, the planning board and the timeline without any of them knowing that
-     * a customer exists.
+     * a entity exists.
      *
      * @param  string  $scope  One of `project`, `epic`, `planning`, `timeline`.
      * @param  string  $alias  The alias this scope is joined under.
@@ -86,29 +86,29 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
         $owner = $scope === 'epic' ? 'epic_projects' : 'PRO_projects';
 
         // A left join, not an inner one. An inner join would make every project without a
-        // customer invisible — it would vanish from the list and from the board the moment this
+        // entity invisible — it would vanish from the list and from the board the moment this
         // package is installed, which is a silent data problem rather than a visible one. With a
-        // left join the row stays where it is and simply carries no customer, and the validation
+        // left join the row stays where it is and simply carries no entity, and the validation
         // below is what stops that state from being reachable through the application.
         $query->leftJoin(
-            (new Customer)->getTable().' as '.$alias,
-            $alias.'.id',
+            (new Entity)->getTable() . ' as ' . $alias,
+            $alias . '.id',
             '=',
-            $owner.'.customer_id',
+            $owner . '.entity_id',
         );
 
-        // Select customer columns to avoid N+1 when the transformer accesses the customer relation.
-        // Use distinct aliases to avoid conflict with PRO_projects.customer_id (the FK).
+        // Select entity columns to avoid N+1 when the transformer accesses the entity relation.
+        // Use distinct aliases to avoid conflict with PRO_projects.entity_id (the FK).
         $query->addSelect([
-            $alias.'.name as customer_name',
-            $alias.'.id as customer_id_joined',
-            $alias.'.active as customer_active',
+            $alias . '.name as entity_name',
+            $alias . '.id as entity_id_joined',
+            $alias . '.active as entity_active',
         ]);
 
         if ($scope === 'epic') {
-            // The relation feeds the integration's customer fields and the base edit payload's
+            // The relation feeds the integration's entity fields and the base edit payload's
             // active state, so keep both columns along with the keys needed to match it.
-            $query->with('project:id,name,customer_id,active');
+            $query->with('project:id,name,entity_id,active');
         }
     }
 
@@ -118,7 +118,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     public function orderings(string $scope, string $alias): array
     {
         return match ($scope) {
-            'project', 'epic' => [$alias.'.name'],
+            'project', 'epic' => [$alias . '.name'],
             default => [],
         };
     }
@@ -129,7 +129,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
      */
     public function searchColumns(string $scope, array $columns): array
     {
-        return [...$columns, $this->aliasFor($scope).'.name'];
+        return [...$columns, $this->aliasFor($scope) . '.name'];
     }
 
     /**
@@ -139,7 +139,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
      */
     public function label(Project $project): string
     {
-        return $project->name.' ('.$this->customerOf($project)?->name.')';
+        return $project->name . ' (' . $this->entityOf($project)?->name . ')';
     }
 
     /**
@@ -147,9 +147,9 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
      */
     public function trail(Project $project): array
     {
-        $customer = $this->customerOf($project);
+        $entity = $this->entityOf($project);
 
-        return $customer === null ? [] : [$customer->name];
+        return $entity === null ? [] : [$entity->name];
     }
 
     /**
@@ -158,32 +158,32 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     public function row(Model $record): array
     {
         if ($record instanceof Epic) {
-            $customer = $this->customerOf($record->project);
+            $entity = $this->entityOf($record->project);
 
             return array_filter([
-                'customer' => $customer?->name,
-                'customer_active' => $customer?->active,
+                'entity' => $entity?->name,
+                'entity_active' => $entity?->active,
                 'project_label' => $this->label($record->project),
-            ], static fn (mixed $value): bool => $value !== null);
+            ], static fn(mixed $value): bool => $value !== null);
         }
 
         if (! $record instanceof Project) {
             return [];
         }
 
-        $customer = $this->customerOf($record);
+        $entity = $this->entityOf($record);
 
         return [
-            'customer' => $customer?->name,
-            'customer_id' => $customer?->id,
-            'customer_name' => $customer?->name,
-            'customer_active' => $customer?->active,
+            'entity' => $entity?->name,
+            'entity_id' => $entity?->id,
+            'entity_name' => $entity?->name,
+            'entity_active' => $entity?->active,
         ];
     }
 
     public function hasActiveRelatedEntities(): bool
     {
-        return Customer::query()->where('active', true)->exists();
+        return Entity::query()->where('active', true)->exists();
     }
 
     /**
@@ -196,21 +196,21 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
         }
 
         return [
-            'message' => __('No active customers are available. Open the customer form to create one.'),
-            'action_label' => __('Open customer form'),
-            'action_url' => route('customers.index', ['create' => 1]),
+            'message' => __('No active entities are available. Open the entity form to create one.'),
+            'action_label' => __('Open entity form'),
+            'action_url' => route('entities.index', ['create' => 1]),
         ];
     }
 
-    private function selectableCustomerRule(ProjectRequest $request): Exists
+    private function selectableEntityRule(ProjectRequest $request): Exists
     {
         $current = $request->route('project');
 
-        if ($current instanceof Project && $current->getAttribute('customer_id') === $request->integer('customer_id')) {
-            return Rule::exists(Customer::class, 'id')->whereNull('deleted_at');
+        if ($current instanceof Project && $current->getAttribute('entity_id') === $request->integer('entity_id')) {
+            return Rule::exists(Entity::class, 'id')->whereNull('deleted_at');
         }
 
-        return Rule::exists(Customer::class, 'id')
+        return Rule::exists(Entity::class, 'id')
             ->whereNull('deleted_at')
             ->where('active', true);
     }
@@ -218,40 +218,40 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     private function aliasFor(string $scope): string
     {
         return match ($scope) {
-            'epic' => 'epic_customers',
-            'planning' => 'planning_customers',
-            'timeline' => 'timeline_customers',
-            default => 'project_customers',
+            'epic' => 'epic_entities',
+            'planning' => 'planning_entities',
+            'timeline' => 'timeline_entities',
+            default => 'project_entities',
         };
     }
 
     /**
      * @return object{name: string, id: int, active: bool}|null
      */
-    private function customerOf(Project $project): ?object
+    private function entityOf(Project $project): ?object
     {
         // Prefer joined columns (set by scope()) to avoid N+1. Fall back to the relation
         // for unit tests that set the relation directly without the joined columns.
-        $name = $project->getAttribute('customer_name');
+        $name = $project->getAttribute('entity_name');
 
         if ($name !== null) {
             return (object) [
                 'name' => $name,
-                'id' => $project->getAttribute('customer_id_joined'),
-                'active' => (bool) $project->getAttribute('customer_active'),
+                'id' => $project->getAttribute('entity_id_joined'),
+                'active' => (bool) $project->getAttribute('entity_active'),
             ];
         }
 
-        $customer = $project->getRelationValue('customer');
+        $entity = $project->getRelationValue('entity');
 
-        if ($customer === null) {
+        if ($entity === null) {
             return null;
         }
 
         return (object) [
-            'name' => $customer->name,
-            'id' => $customer->id,
-            'active' => $customer->active,
+            'name' => $entity->name,
+            'id' => $entity->id,
+            'active' => $entity->active,
         ];
     }
 }

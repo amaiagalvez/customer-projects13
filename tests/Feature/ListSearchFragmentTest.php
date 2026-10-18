@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class ListSearchFragmentTest extends TestCase
@@ -16,8 +16,8 @@ class ListSearchFragmentTest extends TestCase
      * @var array<string, string>
      */
     private const ROUTES = [
-        'customers.index' => 'customer',
-        'customers.trash.index' => 'customer',
+        'entities.index' => 'entity',
+        'entities.trash.index' => 'entity',
         'projects.index' => 'project',
         'projects.trash.index' => 'project',
         'epics.index' => 'epic',
@@ -34,7 +34,7 @@ class ListSearchFragmentTest extends TestCase
             $response
                 ->assertOk()
                 ->assertSee('data-list-results')
-                ->assertSee('data-test="'.$prefix.'-search"', false)
+                ->assertSee('data-test="' . $prefix . '-search"', false)
                 ->assertDontSee('<!DOCTYPE html>');
         }
     }
@@ -47,14 +47,14 @@ class ListSearchFragmentTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        foreach (['customer', 'project', 'epic'] as $prefix) {
-            $routePrefix = $prefix === 'customer' ? 'customers' : $prefix.'s';
-            $this->get(route($routePrefix.'.index'), ['X-List-Fragment' => 'true'])
+        foreach (['entity', 'project', 'epic'] as $prefix) {
+            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix . 's';
+            $this->get(route($routePrefix . '.index'), ['X-List-Fragment' => 'true'])
                 ->assertOk()
-                ->assertSee('data-test="'.$prefix.'-search"', false)
-                ->assertDontSee('data-test="'.$prefix.'-breadcrumbs"', false)
-                ->assertDontSee('data-test="'.$prefix.'-tabs"', false)
-                ->assertDontSee('data-test="'.$prefix.'-create-button"', false);
+                ->assertSee('data-test="' . $prefix . '-search"', false)
+                ->assertDontSee('data-test="' . $prefix . '-breadcrumbs"', false)
+                ->assertDontSee('data-test="' . $prefix . '-tabs"', false)
+                ->assertDontSee('data-test="' . $prefix . '-create-button"', false);
         }
     }
 
@@ -62,18 +62,18 @@ class ListSearchFragmentTest extends TestCase
     {
         $this->actingAs(User::factory()->create());
 
-        foreach (['customer', 'project', 'epic'] as $prefix) {
-            $routePrefix = $prefix === 'customer' ? 'customers' : $prefix.'s';
-            $this->get(route($routePrefix.'.index'))
+        foreach (['entity', 'project', 'epic'] as $prefix) {
+            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix . 's';
+            $this->get(route($routePrefix . '.index'))
                 ->assertOk()
-                ->assertSee('data-test="'.$prefix.'-breadcrumbs"', false)
-                ->assertSee('data-test="'.$prefix.'-tabs"', false)
-                ->assertSee('data-test="'.$prefix.'-create-button"', false);
+                ->assertSee('data-test="' . $prefix . '-breadcrumbs"', false)
+                ->assertSee('data-test="' . $prefix . '-tabs"', false)
+                ->assertSee('data-test="' . $prefix . '-create-button"', false);
 
-            $this->get(route($routePrefix.'.trash.index'))
+            $this->get(route($routePrefix . '.trash.index'))
                 ->assertOk()
-                ->assertSee('data-test="'.$prefix.'-tabs"', false)
-                ->assertDontSee('data-test="'.$prefix.'-create-button"', false);
+                ->assertSee('data-test="' . $prefix . '-tabs"', false)
+                ->assertDontSee('data-test="' . $prefix . '-create-button"', false);
         }
     }
 
@@ -85,7 +85,7 @@ class ListSearchFragmentTest extends TestCase
             $url = route($route, ['search' => 'reload-check']);
 
             $this->get($url)
-                ->assertSee('href="'.$url.'"', false);
+                ->assertSee('href="' . $url . '"', false);
         }
     }
 }

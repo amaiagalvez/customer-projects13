@@ -1,163 +1,163 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Project;
 
 /**
- * The acceptance cases the integration owes on its own: what the field may be, and when a customer
+ * The acceptance cases the integration owes on its own: what the field may be, and when a entity
  * may no longer be chosen.
  */
-class ProjectCustomerValidationTest extends TestCase
+class ProjectEntityValidationTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_base_and_customer_required_fields_are_validated_together(): void
+    public function test_base_and_entity_required_fields_are_validated_together(): void
     {
         $this->signIn();
 
         $this->from(route('projects.index'))
             ->post(route('projects.store'), [])
             ->assertRedirect(route('projects.index'))
-            ->assertSessionHasErrors(['name', 'start_date', 'customer_id']);
+            ->assertSessionHasErrors(['name', 'start_date', 'entity_id']);
 
         $this->assertDatabaseCount('PRO_projects', 0);
     }
 
-    public function test_base_validation_still_rejects_invalid_input_with_a_valid_customer(): void
+    public function test_base_validation_still_rejects_invalid_input_with_a_valid_entity(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
 
         $this->from(route('projects.index'))
             ->post(route('projects.store'), [
                 'name' => 'Abc',
                 'start_date' => '2026-10-01',
                 'end_date' => '2026-09-30',
-                'customer_id' => $customer->id,
+                'entity_id' => $entity->id,
             ])->assertRedirect(route('projects.index'))
             ->assertSessionHasErrors(['name', 'end_date'])
-            ->assertSessionDoesntHaveErrors('customer_id');
+            ->assertSessionDoesntHaveErrors('entity_id');
 
         $this->assertDatabaseCount('PRO_projects', 0);
     }
 
-    public function test_a_project_cannot_be_created_without_a_customer(): void
+    public function test_a_project_cannot_be_created_without_a_entity(): void
     {
         $this->signIn();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-        ])->assertSessionHasErrors('customer_id');
+        ])->assertSessionHasErrors('entity_id');
 
         $this->assertDatabaseCount('PRO_projects', 0);
     }
 
-    public function test_a_customer_id_that_is_not_an_integer_is_rejected(): void
+    public function test_a_entity_id_that_is_not_an_integer_is_rejected(): void
     {
         $this->signIn();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-            'customer_id' => 'not-an-integer',
-        ])->assertSessionHasErrors('customer_id');
+            'entity_id' => 'not-an-integer',
+        ])->assertSessionHasErrors('entity_id');
     }
 
-    public function test_a_customer_that_does_not_exist_is_rejected(): void
+    public function test_a_entity_that_does_not_exist_is_rejected(): void
     {
         $this->signIn();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-            'customer_id' => 999999,
-        ])->assertSessionHasErrors('customer_id');
+            'entity_id' => 999999,
+        ])->assertSessionHasErrors('entity_id');
     }
 
-    public function test_a_soft_deleted_customer_is_rejected(): void
+    public function test_a_soft_deleted_entity_is_rejected(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
-        $customer->delete();
+        $entity = Entity::factory()->create();
+        $entity->delete();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-            'customer_id' => $customer->id,
-        ])->assertSessionHasErrors('customer_id');
+            'entity_id' => $entity->id,
+        ])->assertSessionHasErrors('entity_id');
     }
 
-    public function test_an_archived_customer_is_rejected_when_creating(): void
+    public function test_an_archived_entity_is_rejected_when_creating(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create(['active' => false]);
+        $entity = Entity::factory()->create(['active' => false]);
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-            'customer_id' => $customer->id,
-        ])->assertSessionHasErrors('customer_id');
+            'entity_id' => $entity->id,
+        ])->assertSessionHasErrors('entity_id');
     }
 
-    public function test_an_archived_customer_is_accepted_when_the_project_already_belongs_to_it(): void
+    public function test_an_archived_entity_is_accepted_when_the_project_already_belongs_to_it(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create(['active' => false]);
-        $project = Project::factory()->for($customer)->create(['name' => 'Website renewal']);
+        $entity = Entity::factory()->create(['active' => false]);
+        $project = Project::factory()->for($entity)->create(['name' => 'Website renewal']);
 
         $this->put(route('projects.update', $project), [
             'name' => $project->name,
             'start_date' => '2026-02-01',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ])->assertRedirect(route('projects.index'))
             ->assertSessionHas('status', __('basics13::messages.updated'));
 
-        $this->assertDatabaseHas('PRO_projects', ['id' => $project->id, 'customer_id' => $customer->id]);
+        $this->assertDatabaseHas('PRO_projects', ['id' => $project->id, 'entity_id' => $entity->id]);
     }
 
-    public function test_changing_to_another_archived_customer_is_rejected(): void
+    public function test_changing_to_another_archived_entity_is_rejected(): void
     {
         $this->signIn();
-        $current = Customer::factory()->create();
-        $archived = Customer::factory()->create(['active' => false]);
+        $current = Entity::factory()->create();
+        $archived = Entity::factory()->create(['active' => false]);
         $project = Project::factory()->for($current)->create(['name' => 'Website renewal']);
 
         $this->put(route('projects.update', $project), [
             'name' => $project->name,
             'start_date' => '2026-02-01',
-            'customer_id' => $archived->id,
-        ])->assertSessionHasErrors('customer_id');
+            'entity_id' => $archived->id,
+        ])->assertSessionHasErrors('entity_id');
 
-        $this->assertDatabaseHas('PRO_projects', ['id' => $project->id, 'customer_id' => $current->id]);
+        $this->assertDatabaseHas('PRO_projects', ['id' => $project->id, 'entity_id' => $current->id]);
     }
 
-    public function test_the_customer_is_written_on_create_and_on_change(): void
+    public function test_the_entity_is_written_on_create_and_on_change(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
-        $other = Customer::factory()->create();
+        $entity = Entity::factory()->create();
+        $other = Entity::factory()->create();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-01-01',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ])->assertRedirect(route('projects.index'));
 
         $project = Project::query()->where('name', 'Website renewal')->firstOrFail();
-        $this->assertSame($customer->id, $project->getAttribute('customer_id'));
+        $this->assertSame($entity->id, $project->getAttribute('entity_id'));
 
         $this->put(route('projects.update', $project), [
             'name' => $project->name,
             'start_date' => '2026-02-01',
-            'customer_id' => $other->id,
+            'entity_id' => $other->id,
         ])->assertRedirect(route('projects.index'));
 
-        $this->assertSame($other->id, $project->refresh()->getAttribute('customer_id'));
+        $this->assertSame($other->id, $project->refresh()->getAttribute('entity_id'));
     }
 
     public function test_the_error_names_the_field_the_user_sees(): void
@@ -169,9 +169,9 @@ class ProjectCustomerValidationTest extends TestCase
             'start_date' => '2026-01-01',
         ]);
 
-        $response->assertSessionHasErrors('customer_id');
+        $response->assertSessionHasErrors('entity_id');
         $response->assertSessionHasErrors([
-            'customer_id' => __('validation.required', ['attribute' => __('Customer')]),
+            'entity_id' => __('validation.required', ['attribute' => __('Entity')]),
         ]);
     }
 }

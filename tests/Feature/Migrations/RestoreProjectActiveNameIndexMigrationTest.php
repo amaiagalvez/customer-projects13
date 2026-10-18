@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Migrations;
+namespace EntityProjects13\Tests\Feature\Migrations;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -12,25 +12,25 @@ use Projects13\Models\Project;
 
 class RestoreProjectActiveNameIndexMigrationTest extends TestCase
 {
-    public function test_integrated_schema_preserves_name_reuse_and_uniqueness_across_customers(): void
+    public function test_integrated_schema_preserves_name_reuse_and_uniqueness_across_entities(): void
     {
-        $customer = Customer::factory()->create();
-        $otherCustomer = Customer::factory()->create();
-        $deleted = Project::factory()->for($customer)->trashed()->create(['name' => 'Reusable project']);
+        $entity = Entity::factory()->create();
+        $otherEntity = Entity::factory()->create();
+        $deleted = Project::factory()->for($entity)->trashed()->create(['name' => 'Reusable project']);
 
-        $active = Project::factory()->for($otherCustomer)->create(['name' => 'Reusable project']);
+        $active = Project::factory()->for($otherEntity)->create(['name' => 'Reusable project']);
 
         $this->assertSoftDeleted($deleted);
         $this->assertModelExists($active);
 
         $this->expectException(QueryException::class);
 
-        Project::factory()->for($customer)->create(['name' => 'Reusable project']);
+        Project::factory()->for($entity)->create(['name' => 'Reusable project']);
     }
 
     public function test_restore_project_active_name_index_migration_can_be_rolled_back(): void
     {
-        $connectionName = 'customer_projects13_restore_index_migration_test';
+        $connectionName = 'entity_projects13_restore_index_migration_test';
         $originalDefault = config('database.default');
         $sqliteConnection = config('database.connections.sqlite');
 
@@ -61,7 +61,7 @@ class RestoreProjectActiveNameIndexMigrationTest extends TestCase
             // Manually create the unique index that the migration would restore
             DB::statement('CREATE UNIQUE INDEX "PRO_projects_active_name_unique" ON "PRO_projects" ("name") WHERE "deleted_at" IS NULL');
 
-            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
+            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
             $migration->up();
 
             // The migration runs the restore function, which on SQLite drops and recreates the index
@@ -98,7 +98,7 @@ class RestoreProjectActiveNameIndexMigrationTest extends TestCase
             throw new \RuntimeException('The SQLite test connection is not configured.');
         }
 
-        $connectionName = 'customer_projects13_restore_index_non_sqlite_test';
+        $connectionName = 'entity_projects13_restore_index_non_sqlite_test';
 
         config([
             "database.connections.{$connectionName}" => array_merge($sqliteConnection, [
@@ -120,7 +120,7 @@ class RestoreProjectActiveNameIndexMigrationTest extends TestCase
                 $table->timestamps();
             });
 
-            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
+            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
 
             // On SQLite, the migration runs the restore function
             // We can't easily mock the driver in this test setup, so we just verify

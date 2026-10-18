@@ -1,14 +1,14 @@
 <?php
 
-namespace CustomerProjects13\Tests;
+namespace EntityProjects13\Tests;
 
 use App\Models\User;
 use Basics13\Support\Testing\ValidatesFormRequests;
 use Basics13\Tests\TestCase as Basics13TestCase;
 use Carbon\CarbonImmutable;
-use CustomerProjects13\ServiceProvider as CustomerProjects13ServiceProvider;
-use Customers13\Models\Customer;
-use Customers13\ServiceProvider as Customers13ServiceProvider;
+use EntityProjects13\ServiceProvider as EntityProjects13ServiceProvider;
+use entities13\Models\Entity;
+use entities13\ServiceProvider as entities13ServiceProvider;
 use Flux\FluxServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
@@ -29,11 +29,11 @@ abstract class TestCase extends Basics13TestCase
     use RefreshDatabase, ValidatesFormRequests;
 
     /**
-     * Create a test customer for integration tests.
+     * Create a test entity for integration tests.
      */
-    protected function customer(): Customer
+    protected function entity(): Entity
     {
-        return Customer::factory()->create();
+        return Entity::factory()->create();
     }
 
     protected function signIn(): User
@@ -58,9 +58,9 @@ abstract class TestCase extends Basics13TestCase
         return [
             ...parent::getPackageProviders($app),
             FluxServiceProvider::class,
-            Customers13ServiceProvider::class,
+            entities13ServiceProvider::class,
             Projects13ServiceProvider::class,
-            CustomerProjects13ServiceProvider::class,
+            EntityProjects13ServiceProvider::class,
         ];
     }
 
@@ -71,12 +71,12 @@ abstract class TestCase extends Basics13TestCase
         Date::use(CarbonImmutable::class);
 
         // Allow overriding the database connection for CI (e.g., MySQL).
-        // The foreign key that stops a customer from being deleted with live projects is part of
+        // The foreign key that stops a entity from being deleted with live projects is part of
         // what is under test, so SQLite has to enforce it rather than accept the column silently.
         $app['config']->set('database.default', getenv('DB_CONNECTION') ?: 'sqlite');
         $app['config']->set('database.connections.sqlite.foreign_key_constraints', true);
         $app['config']->set('auth.providers.users.model', User::class);
-        $app['config']->set('view.compiled', dirname(__DIR__).'/storage/framework/views');
+        $app['config']->set('view.compiled', dirname(__DIR__) . '/storage/framework/views');
     }
 
     protected function setUp(): void
@@ -84,6 +84,6 @@ abstract class TestCase extends Basics13TestCase
         parent::setUp();
 
         // The host application's layout, which these tests do not have.
-        Blade::anonymousComponentPath(__DIR__.'/Fixtures/views/layouts', 'layouts');
+        Blade::anonymousComponentPath(__DIR__ . '/Fixtures/views/layouts', 'layouts');
     }
 }

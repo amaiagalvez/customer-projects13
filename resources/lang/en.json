@@ -1,10 +1,10 @@
 {
-    "Choose a customer from the list or create a new one.": "Choose a customer from the list or create a new one.",
-    "Create customer": "Create customer",
-    "Customer": "Customer",
-    "No customers found.": "No customers found.",
-    "Select a customer": "Select a customer",
-    "Unable to create customer.": "Unable to create customer.",
-    "Unable to load customers.": "Unable to load customers.",
+    "Choose a entity from the list or create a new one.": "Choose a entity from the list or create a new one.",
+    "Create entity": "Create entity",
+    "Entity": "Entity",
+    "No entities found.": "No entities found.",
+    "Select a entity": "Select a entity",
+    "Unable to create entity.": "Unable to create entity.",
+    "Unable to load entities.": "Unable to load entities.",
     "View :count projects": "View :count projects"
 }

@@ -1,10 +1,10 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Projects13\Models\Epic;
@@ -25,7 +25,7 @@ class ListCreateDeepLinkTest extends TestCase
     public static function resources(): array
     {
         return [
-            'customers' => ['customers.index', 'customer-form', 'New customer'],
+            'entities' => ['entities.index', 'entity-form', 'New entity'],
             'projects' => ['projects.index', 'project-form', 'New project'],
             'epics' => ['epics.index', 'epic-form', 'New epic'],
         ];
@@ -51,7 +51,7 @@ class ListCreateDeepLinkTest extends TestCase
 
     /**
      * The flag drives an Alpine x-init, so it only works where the list can actually create: a
-     * customer always can, a project needs an active customer and an epic an active project.
+     * entity always can, a project needs an active entity and an epic an active project.
      *
      * @param  non-empty-string  $indexRoute
      * @param  non-empty-string  $formName
@@ -60,8 +60,8 @@ class ListCreateDeepLinkTest extends TestCase
     #[DataProvider('resources')]
     public function test_the_drawer_opens_once_the_parent_exists(string $indexRoute, string $formName, string $heading): void
     {
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
 
         $this->actingAs(User::factory()->create())

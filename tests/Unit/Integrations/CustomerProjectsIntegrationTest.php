@@ -1,19 +1,19 @@
 <?php
 
-namespace CustomerProjects13\Tests\Unit\Integrations;
+namespace EntityProjects13\Tests\Unit\Integrations;
 
-use CustomerProjects13\Integrations\CustomerProjectsIntegration;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Integrations\EntityProjectsIntegration;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Model;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
-class CustomerProjectsIntegrationTest extends TestCase
+class EntityProjectsIntegrationTest extends TestCase
 {
     public function test_row_returns_empty_array_for_non_project_nor_epic_model(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
         // Test with a plain model instance (not a Project or Epic)
         $model = new class extends Model
@@ -26,43 +26,43 @@ class CustomerProjectsIntegrationTest extends TestCase
         $this->assertSame([], $result);
     }
 
-    public function test_row_returns_customer_data_for_project(): void
+    public function test_row_returns_entity_data_for_project(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
-        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
+        $project = Project::factory()->for($entity)->make(['id' => 1, 'name' => 'Test Project']);
         // Set the relation to avoid loading
-        $project->setRelation('customer', $customer);
+        $project->setRelation('entity', $entity);
 
         $result = $integration->row($project);
 
         $this->assertSame([
-            'customer' => 'Test Customer',
-            'customer_id' => 1,
-            'customer_name' => 'Test Customer',
-            'customer_active' => true,
+            'entity' => 'Test Entity',
+            'entity_id' => 1,
+            'entity_name' => 'Test Entity',
+            'entity_active' => true,
         ], $result);
     }
 
-    public function test_row_marks_an_archived_customer_for_the_project_form(): void
+    public function test_row_marks_an_archived_entity_for_the_project_form(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $customer = Customer::factory()->archived()->make(['id' => 1, 'name' => 'Archived Customer']);
-        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
-        $project->setRelation('customer', $customer);
+        $entity = Entity::factory()->archived()->make(['id' => 1, 'name' => 'Archived Entity']);
+        $project = Project::factory()->for($entity)->make(['id' => 1, 'name' => 'Test Project']);
+        $project->setRelation('entity', $entity);
 
-        $this->assertFalse($integration->row($project)['customer_active']);
+        $this->assertFalse($integration->row($project)['entity_active']);
     }
 
-    public function test_row_returns_customer_data_for_epic(): void
+    public function test_row_returns_entity_data_for_epic(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer', 'active' => true]);
-        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
-        $project->setRelation('customer', $customer);
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity', 'active' => true]);
+        $project = Project::factory()->for($entity)->make(['id' => 1, 'name' => 'Test Project']);
+        $project->setRelation('entity', $entity);
 
         $epic = Epic::factory()->for($project)->make(['id' => 1, 'name' => 'Test Epic']);
         $epic->setRelation('project', $project);
@@ -70,115 +70,115 @@ class CustomerProjectsIntegrationTest extends TestCase
         $result = $integration->row($epic);
 
         $this->assertSame([
-            'customer' => 'Test Customer',
-            'customer_active' => true,
-            'project_label' => 'Test Project (Test Customer)',
+            'entity' => 'Test Entity',
+            'entity_active' => true,
+            'project_label' => 'Test Project (Test Entity)',
         ], $result);
     }
 
-    public function test_row_returns_empty_customer_fields_when_project_has_no_customer(): void
+    public function test_row_returns_empty_entity_fields_when_project_has_no_entity(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'customer_id' => null]);
-        $project->setRelation('customer', null);
+        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'entity_id' => null]);
+        $project->setRelation('entity', null);
 
         $result = $integration->row($project);
 
         $this->assertSame([
-            'customer' => null,
-            'customer_id' => null,
-            'customer_name' => null,
-            'customer_active' => null,
+            'entity' => null,
+            'entity_id' => null,
+            'entity_name' => null,
+            'entity_active' => null,
         ], $result);
     }
 
-    public function test_row_returns_project_label_when_epic_project_has_no_customer(): void
+    public function test_row_returns_project_label_when_epic_project_has_no_entity(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'customer_id' => null]);
-        $project->setRelation('customer', null);
+        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'entity_id' => null]);
+        $project->setRelation('entity', null);
 
         $epic = Epic::factory()->for($project)->make(['id' => 1, 'name' => 'Test Epic']);
         $epic->setRelation('project', $project);
 
         $result = $integration->row($epic);
 
-        // When epic's project has no customer, the label still includes the project name
+        // When epic's project has no entity, the label still includes the project name
         $this->assertSame([
             'project_label' => 'Test Project ()',
         ], $result);
     }
 
-    public function test_label_returns_project_name_with_customer(): void
+    public function test_label_returns_project_name_with_entity(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
-        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
-        $project->setRelation('customer', $customer);
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
+        $project = Project::factory()->for($entity)->make(['id' => 1, 'name' => 'Test Project']);
+        $project->setRelation('entity', $entity);
 
         $result = $integration->label($project);
 
-        $this->assertSame('Test Project (Test Customer)', $result);
+        $this->assertSame('Test Project (Test Entity)', $result);
     }
 
-    public function test_label_returns_project_name_without_customer_when_missing(): void
+    public function test_label_returns_project_name_without_entity_when_missing(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'customer_id' => null]);
-        $project->setRelation('customer', null);
+        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'entity_id' => null]);
+        $project->setRelation('entity', null);
 
         $result = $integration->label($project);
 
         $this->assertSame('Test Project ()', $result);
     }
 
-    public function test_trail_returns_customer_name_for_project(): void
+    public function test_trail_returns_entity_name_for_project(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
-        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
-        $project->setRelation('customer', $customer);
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
+        $project = Project::factory()->for($entity)->make(['id' => 1, 'name' => 'Test Project']);
+        $project->setRelation('entity', $entity);
 
         $result = $integration->trail($project);
 
-        $this->assertSame(['Test Customer'], $result);
+        $this->assertSame(['Test Entity'], $result);
     }
 
-    public function test_trail_returns_empty_array_when_no_customer(): void
+    public function test_trail_returns_empty_array_when_no_entity(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'customer_id' => null]);
-        $project->setRelation('customer', null);
+        $project = Project::factory()->make(['id' => 1, 'name' => 'Test Project', 'entity_id' => null]);
+        $project->setRelation('entity', null);
 
         $result = $integration->trail($project);
 
         $this->assertSame([], $result);
     }
 
-    public function test_has_active_related_entities_checks_for_active_customers(): void
+    public function test_has_active_related_entities_checks_for_active_entities(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
-        // Test when no active customers exist
-        Customer::factory()->create(['active' => false]);
+        // Test when no active entities exist
+        Entity::factory()->create(['active' => false]);
         $result = $integration->hasActiveRelatedEntities();
         $this->assertFalse($result);
 
-        // Test when active customers exist
-        Customer::factory()->create(['active' => true]);
+        // Test when active entities exist
+        Entity::factory()->create(['active' => true]);
         $result = $integration->hasActiveRelatedEntities();
         $this->assertTrue($result);
     }
 
     public function test_no_related_entities_banner_returns_expected_structure(): void
     {
-        $integration = new CustomerProjectsIntegration;
+        $integration = new EntityProjectsIntegration;
 
         $result = $integration->noRelatedEntitiesBanner();
 
@@ -187,20 +187,20 @@ class CustomerProjectsIntegrationTest extends TestCase
         $this->assertArrayHasKey('action_url', $result);
     }
 
-    public function test_no_related_entities_banner_returns_null_when_active_customers_exist(): void
+    public function test_no_related_entities_banner_returns_null_when_active_entities_exist(): void
     {
-        $integration = new CustomerProjectsIntegration;
-        Customer::factory()->create(['active' => true]);
+        $integration = new EntityProjectsIntegration;
+        Entity::factory()->create(['active' => true]);
 
         $result = $integration->noRelatedEntitiesBanner();
 
         $this->assertNull($result);
     }
 
-    public function test_no_related_entities_banner_returns_banner_when_no_active_customers(): void
+    public function test_no_related_entities_banner_returns_banner_when_no_active_entities(): void
     {
-        $integration = new CustomerProjectsIntegration;
-        Customer::factory()->create(['active' => false]);
+        $integration = new EntityProjectsIntegration;
+        Entity::factory()->create(['active' => false]);
 
         $result = $integration->noRelatedEntitiesBanner();
 

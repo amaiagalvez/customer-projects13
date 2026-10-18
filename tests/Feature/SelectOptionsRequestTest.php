@@ -1,13 +1,13 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
 use Basics13\Support\Validation\MaxLength;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Http\Requests\CustomerSelectOptionsRequest;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Http\Requests\EntitySelectOptionsRequest;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -23,24 +23,24 @@ class SelectOptionsRequestTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return array<string, array{0: non-empty-string, 1: class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>}>
+     * @return array<string, array{0: non-empty-string, 1: class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>}>
      */
     public static function optionsRequests(): array
     {
         return [
-            'customers' => ['customers.options', CustomerSelectOptionsRequest::class],
+            'entities' => ['entities.options', EntitySelectOptionsRequest::class],
             'projects' => ['projects.options', ProjectSelectOptionsRequest::class],
         ];
     }
 
     /**
-     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @param  class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
      */
     #[DataProvider('optionsRequests')]
     public function test_the_term_is_trimmed_before_matching(string $routeName, string $requestClass): void
     {
         $this->actingAs(User::factory()->create());
-        $name = $routeName === 'customers.options' ? 'Trimmed customer' : 'Trimmed project';
+        $name = $routeName === 'entities.options' ? 'Trimmed entity' : 'Trimmed project';
 
         $this->recordFor($routeName, $name);
 
@@ -52,7 +52,7 @@ class SelectOptionsRequestTest extends TestCase
     /**
      * A term that matches nothing returns an empty set rather than an error.
      *
-     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @param  class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
      */
     #[DataProvider('optionsRequests')]
     public function test_a_term_that_matches_nothing_returns_no_options(string $routeName, string $requestClass): void
@@ -68,7 +68,7 @@ class SelectOptionsRequestTest extends TestCase
     /**
      * Without a term the endpoint still answers the first page of active records.
      *
-     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @param  class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
      */
     #[DataProvider('optionsRequests')]
     public function test_the_options_are_limited_to_the_shared_page_size(string $routeName, string $requestClass): void
@@ -87,7 +87,7 @@ class SelectOptionsRequestTest extends TestCase
     /**
      * The rules have to reject an array term and an over-long one.
      *
-     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @param  class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
      */
     #[DataProvider('optionsRequests')]
     public function test_an_invalid_term_is_rejected(string $routeName, string $requestClass): void
@@ -105,33 +105,33 @@ class SelectOptionsRequestTest extends TestCase
     /**
      * The rules are read off the request instance, where the shared base declares them.
      *
-     * @param  class-string<CustomerSelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
+     * @param  class-string<EntitySelectOptionsRequest|ProjectSelectOptionsRequest>  $requestClass
      * @return array<string, array<int, string>>
      */
     private function rulesOf(string $requestClass): array
     {
         return match ($requestClass) {
-            CustomerSelectOptionsRequest::class => CustomerSelectOptionsRequest::create('/', 'GET')->rules(),
+            EntitySelectOptionsRequest::class => EntitySelectOptionsRequest::create('/', 'GET')->rules(),
             default => ProjectSelectOptionsRequest::create('/', 'GET')->rules(),
         };
     }
 
     /**
-     * A project is labelled "name (customer)", so it is created under a customer whose name is known.
+     * A project is labelled "name (entity)", so it is created under a entity whose name is known.
      */
-    private function recordFor(string $routeName, string $name): Customer|Project
+    private function recordFor(string $routeName, string $name): Entity|Project
     {
-        if ($routeName === 'customers.options') {
-            return Customer::factory()->create(['name' => $name]);
+        if ($routeName === 'entities.options') {
+            return Entity::factory()->create(['name' => $name]);
         }
 
-        return Project::factory()->for($this->customer())
-            ->for(Customer::factory()->create(['name' => $name]))
+        return Project::factory()->for($this->entity())
+            ->for(Entity::factory()->create(['name' => $name]))
             ->create(['name' => $name]);
     }
 
     private function expectedText(string $routeName, string $name): string
     {
-        return $routeName === 'customers.options' ? $name : $name.' ('.$name.')';
+        return $routeName === 'entities.options' ? $name : $name . ' (' . $name . ')';
     }
 }

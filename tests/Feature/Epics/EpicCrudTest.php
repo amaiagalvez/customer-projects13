@@ -1,11 +1,11 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Epics;
+namespace EntityProjects13\Tests\Feature\Epics;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -19,23 +19,23 @@ class EpicCrudTest extends TestCase
         app()->setLocale('en');
     }
 
-    public function test_epic_list_renders_the_customer_of_its_project(): void
+    public function test_epic_list_renders_the_entity_of_its_project(): void
     {
         $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create(['name' => 'Checkout flow']);
 
         $this->get(route('epics.index'))
             ->assertOk()
             ->assertSee($epic->name)
             ->assertSee($project->name)
-            ->assertSee($project->customer->name);
+            ->assertSee($project->entity->name);
     }
 
     public function test_epic_list_transformer_renders_the_parents_it_is_bound_to(): void
     {
-        $customer = Customer::factory()->create(['name' => 'Bound customer']);
-        $project = Project::factory()->for($customer)->create(['name' => 'Bound project']);
+        $entity = Entity::factory()->create(['name' => 'Bound entity']);
+        $project = Project::factory()->for($entity)->create(['name' => 'Bound project']);
         $epic = Epic::factory()->for($project)->create();
 
         $list = app(EpicListTransformer::class)->active(
@@ -44,27 +44,27 @@ class EpicCrudTest extends TestCase
         );
 
         $this->assertSame('Bound project', data_get($list, 'rows.0.project'));
-        $this->assertSame('Bound customer', data_get($list, 'rows.0.customer'));
+        $this->assertSame('Bound entity', data_get($list, 'rows.0.entity'));
         $this->assertSame(
-            'Bound project (Bound customer)',
+            'Bound project (Bound entity)',
             data_get($list, 'rows.0.actions.0.payload.project_label'),
         );
     }
 
-    public function test_epics_are_ordered_by_start_date_end_date_project_and_customer(): void
+    public function test_epics_are_ordered_by_start_date_end_date_project_and_entity(): void
     {
         $this->actingAs(User::factory()->create());
-        $alphaCustomer = Customer::factory()->create(['name' => 'Alpha customer']);
-        $zuluCustomer = Customer::factory()->create(['name' => 'Zulu customer']);
-        $alphaProject = Project::factory()->for($zuluCustomer)->create(['name' => 'Alpha project']);
-        $zuluProjectAlphaCustomer = Project::factory()->for($alphaCustomer)->create(['name' => 'Zulu project A']);
-        $zuluProjectZuluCustomer = Project::factory()->for($zuluCustomer)->create(['name' => 'Zulu project Z']);
+        $alphaEntity = Entity::factory()->create(['name' => 'Alpha entity']);
+        $zuluEntity = Entity::factory()->create(['name' => 'Zulu entity']);
+        $alphaProject = Project::factory()->for($zuluEntity)->create(['name' => 'Alpha project']);
+        $zuluProjectAlphaEntity = Project::factory()->for($alphaEntity)->create(['name' => 'Zulu project A']);
+        $zuluProjectZuluEntity = Project::factory()->for($zuluEntity)->create(['name' => 'Zulu project Z']);
 
         $dates = ['start_date' => '2026-10-01', 'end_date' => '2026-10-03'];
         Epic::factory()->for($alphaProject)->create(['name' => 'Epic later start', 'start_date' => '2026-10-02', 'end_date' => '2026-10-03']);
         Epic::factory()->for($alphaProject)->create(['name' => 'Epic later end', 'start_date' => '2026-10-01', 'end_date' => '2026-10-04']);
-        Epic::factory()->for($zuluProjectZuluCustomer)->create(['name' => 'Epic zulu customer', ...$dates]);
-        Epic::factory()->for($zuluProjectAlphaCustomer)->create(['name' => 'Epic alpha customer', ...$dates]);
+        Epic::factory()->for($zuluProjectZuluEntity)->create(['name' => 'Epic zulu entity', ...$dates]);
+        Epic::factory()->for($zuluProjectAlphaEntity)->create(['name' => 'Epic alpha entity', ...$dates]);
         Epic::factory()->for($alphaProject)->create(['name' => 'Epic alpha project', ...$dates]);
 
         for ($index = 6; $index <= ListQueryBase::PER_PAGE; $index++) {
@@ -79,8 +79,8 @@ class EpicCrudTest extends TestCase
         $this->get(route('epics.index'))
             ->assertSeeInOrder([
                 'Epic alpha project',
-                'Epic alpha customer',
-                'Epic zulu customer',
+                'Epic alpha entity',
+                'Epic zulu entity',
                 'Epic later end',
                 'Epic later start',
             ]);
@@ -89,13 +89,13 @@ class EpicCrudTest extends TestCase
             ->assertSee('Epic without dates');
     }
 
-    public function test_epics_can_be_searched_by_project_and_customer_name(): void
+    public function test_epics_can_be_searched_by_project_and_entity_name(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create(['name' => 'Northwind Studio']);
-        $otherCustomer = Customer::factory()->create(['name' => 'Southwind Studio']);
-        Epic::factory()->for(Project::factory()->for($customer)->state(['name' => 'Website']))->create(['name' => 'Matching epic']);
-        Epic::factory()->for(Project::factory()->for($otherCustomer)->state(['name' => 'Other project']))->create(['name' => 'Other epic']);
+        $entity = Entity::factory()->create(['name' => 'Northwind Studio']);
+        $otherEntity = Entity::factory()->create(['name' => 'Southwind Studio']);
+        Epic::factory()->for(Project::factory()->for($entity)->state(['name' => 'Website']))->create(['name' => 'Matching epic']);
+        Epic::factory()->for(Project::factory()->for($otherEntity)->state(['name' => 'Other project']))->create(['name' => 'Other epic']);
 
         $this->get(route('epics.index', ['search' => 'Northwind']))
             ->assertOk()

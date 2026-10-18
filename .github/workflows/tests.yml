@@ -44,12 +44,12 @@ jobs:
           repository: amaiagalvez/basics13
           path: packages/basics13
 
-      - name: Checkout customers13
+      - name: Checkout entities13
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-          repository: amaiagalvez/customers13
-          path: packages/customers13
+          repository: amaiagalvez/entities13
+          path: packages/entities13
 
       - name: Checkout projects13
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

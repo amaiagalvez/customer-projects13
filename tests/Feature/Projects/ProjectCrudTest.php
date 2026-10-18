@@ -1,11 +1,11 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Projects;
+namespace EntityProjects13\Tests\Feature\Projects;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -25,61 +25,61 @@ class ProjectCrudTest extends TestCase
         app()->setLocale('en');
     }
 
-    public function test_has_customers_is_true_when_an_active_customer_exists(): void
+    public function test_has_entities_is_true_when_an_active_entity_exists(): void
     {
         $this->actingAs(User::factory()->create());
-        Customer::factory()->create();
+        Entity::factory()->create();
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasCustomers', true);
+            ->assertViewHas('hasEntities', true);
     }
 
-    public function test_has_customers_is_false_when_only_archived_customers_exist(): void
+    public function test_has_entities_is_false_when_only_archived_entities_exist(): void
     {
         $this->actingAs(User::factory()->create());
-        Customer::factory()->archived()->create();
+        Entity::factory()->archived()->create();
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasCustomers', false);
+            ->assertViewHas('hasEntities', false);
     }
 
-    public function test_has_customers_is_false_when_only_deleted_customers_exist(): void
+    public function test_has_entities_is_false_when_only_deleted_entities_exist(): void
     {
         $this->actingAs(User::factory()->create());
-        Customer::factory()->trashed()->create();
+        Entity::factory()->trashed()->create();
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasCustomers', false);
+            ->assertViewHas('hasEntities', false);
     }
 
-    public function test_creating_and_reassigning_a_project_persists_its_customer_and_preserves_notes(): void
+    public function test_creating_and_reassigning_a_project_persists_its_entity_and_preserves_notes(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        $otherCustomer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
+        $otherEntity = Entity::factory()->create();
 
         $this->post(route('projects.store'), [
             'name' => 'Website renewal',
             'start_date' => '2026-10-01',
             'end_date' => '2026-12-31',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
             'notes' => 'Project notes',
         ])
             ->assertRedirect(route('projects.index'))
             ->assertSessionHas('status', __('Record created successfully.'));
 
         $project = Project::query()->firstOrFail();
-        $this->assertTrue($project->getRelationValue('customer')->is($customer));
+        $this->assertTrue($project->getRelationValue('entity')->is($entity));
         $this->assertSame('Project notes', $project->notes);
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertSee($customer->name)
-            ->assertViewHas('list', function (array $list) use ($customer): bool {
-                return $list['rows'][0]['editPayload']['customer_id'] === $customer->id
+            ->assertSee($entity->name)
+            ->assertViewHas('list', function (array $list) use ($entity): bool {
+                return $list['rows'][0]['editPayload']['entity_id'] === $entity->id
                     && $list['rows'][0]['editPayload']['notes'] === 'Project notes';
             });
 
@@ -87,7 +87,7 @@ class ProjectCrudTest extends TestCase
             'name' => 'Updated website',
             'start_date' => '2026-10-15',
             'end_date' => '2027-01-15',
-            'customer_id' => $otherCustomer->id,
+            'entity_id' => $otherEntity->id,
             'notes' => 'Rewritten notes',
         ])
             ->assertRedirect(route('projects.index'))
@@ -97,38 +97,38 @@ class ProjectCrudTest extends TestCase
         $this->assertDatabaseHas('PRO_projects', [
             'id' => $project->id,
             'name' => 'Updated website',
-            'customer_id' => $otherCustomer->id,
+            'entity_id' => $otherEntity->id,
             'notes' => 'Rewritten notes',
         ]);
-        $this->assertTrue($project->getRelationValue('customer')->is($otherCustomer));
+        $this->assertTrue($project->getRelationValue('entity')->is($otherEntity));
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('list', function (array $list) use ($otherCustomer): bool {
-                return $list['rows'][0]['editPayload']['customer_id'] === $otherCustomer->id
+            ->assertViewHas('list', function (array $list) use ($otherEntity): bool {
+                return $list['rows'][0]['editPayload']['entity_id'] === $otherEntity->id
                     && $list['rows'][0]['editPayload']['notes'] === 'Rewritten notes';
             });
     }
 
-    public function test_a_customer_can_have_multiple_projects(): void
+    public function test_a_entity_can_have_multiple_projects(): void
     {
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
 
-        $projects = Project::factory()->for($this->customer())->count(2)->for($customer)->create();
+        $projects = Project::factory()->for($this->entity())->count(2)->for($entity)->create();
 
-        $this->assertCount(2, $customer->projects);
-        $this->assertTrue($projects->every(function (Project $project) use ($customer): bool {
-            return $project->getRelationValue('customer')->is($customer);
+        $this->assertCount(2, $entity->projects);
+        $this->assertTrue($projects->every(function (Project $project) use ($entity): bool {
+            return $project->getRelationValue('entity')->is($entity);
         }));
     }
 
-    public function test_projects_can_be_searched_by_customer_name(): void
+    public function test_projects_can_be_searched_by_entity_name(): void
     {
         $this->actingAs(User::factory()->create());
-        $matchingCustomer = Customer::factory()->create(['name' => 'Northwind Studio']);
-        $otherCustomer = Customer::factory()->create(['name' => 'Contoso']);
-        Project::factory()->for($matchingCustomer)->create(['name' => 'Website redesign']);
-        Project::factory()->for($otherCustomer)->create(['name' => 'Mobile application']);
+        $matchingEntity = Entity::factory()->create(['name' => 'Northwind Studio']);
+        $otherEntity = Entity::factory()->create(['name' => 'Contoso']);
+        Project::factory()->for($matchingEntity)->create(['name' => 'Website redesign']);
+        Project::factory()->for($otherEntity)->create(['name' => 'Mobile application']);
 
         $this->get(route('projects.index', ['search' => 'Northwind']))
             ->assertOk()
@@ -140,9 +140,9 @@ class ProjectCrudTest extends TestCase
     public function test_projects_can_be_searched_by_their_name(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create(['name' => 'Searchable project']);
-        Project::factory()->for($customer)->create(['name' => 'Unrelated project']);
+        $entity = Entity::factory()->create();
+        Project::factory()->for($entity)->create(['name' => 'Searchable project']);
+        Project::factory()->for($entity)->create(['name' => 'Unrelated project']);
 
         $this->get(route('projects.index', ['search' => 'Searchable project']))
             ->assertOk()
@@ -153,16 +153,16 @@ class ProjectCrudTest extends TestCase
     public function test_project_name_with_non_latin_characters_can_be_stored_and_searched(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
         $name = 'Ñandú プロジェクト';
 
         $this->post(route('projects.store'), [
             'name' => $name,
             'start_date' => '2026-10-01',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ])->assertRedirect(route('projects.index'));
 
-        $this->assertDatabaseHas('PRO_projects', ['name' => $name, 'customer_id' => $customer->id]);
+        $this->assertDatabaseHas('PRO_projects', ['name' => $name, 'entity_id' => $entity->id]);
 
         $this->get(route('projects.index', ['search' => $name]))
             ->assertOk()
@@ -172,10 +172,10 @@ class ProjectCrudTest extends TestCase
     public function test_project_search_is_kept_in_pagination_links(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
 
         foreach (range(1, 6) as $index) {
-            Project::factory()->for($customer)->create(['name' => "Repeat project {$index}"]);
+            Project::factory()->for($entity)->create(['name' => "Repeat project {$index}"]);
         }
 
         $this->get(route('projects.index', ['search' => 'Repeat']))
@@ -186,8 +186,8 @@ class ProjectCrudTest extends TestCase
     public function test_projects_cannot_be_searched_by_their_unshown_creation_date(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create([
+        $entity = Entity::factory()->create();
+        Project::factory()->for($entity)->create([
             'name' => 'Website redesign',
             'start_date' => '2026-10-01',
             'end_date' => '2026-11-01',
@@ -203,8 +203,8 @@ class ProjectCrudTest extends TestCase
     public function test_project_list_shows_the_number_of_active_epics_and_their_comments(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
         $commentedEpic = Epic::factory()->for($project)->create();
         EpicComment::factory()->count(3)->for($commentedEpic)->create();
@@ -213,32 +213,32 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertSeeInOrder(['project-epics-count-'.$project->id, '2'])
-            ->assertSeeInOrder(['project-comments-count-'.$project->id, '3']);
+            ->assertSeeInOrder(['project-epics-count-' . $project->id, '2'])
+            ->assertSeeInOrder(['project-comments-count-' . $project->id, '3']);
     }
 
-    public function test_projects_are_ordered_by_start_date_end_date_and_customer_name(): void
+    public function test_projects_are_ordered_by_start_date_end_date_and_entity_name(): void
     {
         $this->actingAs(User::factory()->create());
-        $alphaCustomer = Customer::factory()->create(['name' => 'Alpha customer']);
-        $zuluCustomer = Customer::factory()->create(['name' => 'Zulu customer']);
+        $alphaEntity = Entity::factory()->create(['name' => 'Alpha entity']);
+        $zuluEntity = Entity::factory()->create(['name' => 'Zulu entity']);
 
-        Project::factory()->for($alphaCustomer)->create([
-            'name' => 'Z project, alpha customer',
+        Project::factory()->for($alphaEntity)->create([
+            'name' => 'Z project, alpha entity',
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-03',
         ]);
-        Project::factory()->for($zuluCustomer)->create([
-            'name' => 'A project, zulu customer',
+        Project::factory()->for($zuluEntity)->create([
+            'name' => 'A project, zulu entity',
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-03',
         ]);
-        Project::factory()->for($alphaCustomer)->create([
+        Project::factory()->for($alphaEntity)->create([
             'name' => 'B project, later end',
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-04',
         ]);
-        Project::factory()->for($alphaCustomer)->create([
+        Project::factory()->for($alphaEntity)->create([
             'name' => 'C project, later start',
             'start_date' => '2026-10-02',
             'end_date' => '2026-10-02',
@@ -246,24 +246,24 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertSeeInOrder([
-                'Z project, alpha customer',
-                'A project, zulu customer',
+                'Z project, alpha entity',
+                'A project, zulu entity',
                 'B project, later end',
                 'C project, later start',
             ]);
     }
 
-    public function test_projects_with_matching_dates_and_customer_are_ordered_by_name(): void
+    public function test_projects_with_matching_dates_and_entity_are_ordered_by_name(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create(['name' => 'Same customer']);
+        $entity = Entity::factory()->create(['name' => 'Same entity']);
 
-        Project::factory()->for($customer)->create([
+        Project::factory()->for($entity)->create([
             'name' => 'Zulu project',
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-05',
         ]);
-        Project::factory()->for($customer)->create([
+        Project::factory()->for($entity)->create([
             'name' => 'Alpha project',
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-05',
@@ -279,9 +279,9 @@ class ProjectCrudTest extends TestCase
     public function test_project_list_shows_pagination_when_more_than_one_page_exists(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
         for ($index = 1; $index <= ListQueryBase::PER_PAGE + 1; $index++) {
-            Project::factory()->for($customer)->create();
+            Project::factory()->for($entity)->create();
         }
 
         $this->get(route('projects.index'))
@@ -292,16 +292,16 @@ class ProjectCrudTest extends TestCase
     public function test_project_list_header_offers_the_state_tabs_with_the_record_count_of_each_one(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        Project::factory()->for($this->customer())->count(2)->for($customer)->create();
-        Project::factory()->for($customer)->archived()->create();
-        Project::factory()->for($this->customer())->count(3)->for($customer)->trashed()->create();
+        $entity = Entity::factory()->create();
+        Project::factory()->for($this->entity())->count(2)->for($entity)->create();
+        Project::factory()->for($entity)->archived()->create();
+        Project::factory()->for($this->entity())->count(3)->for($entity)->trashed()->create();
 
         $this->get(route('projects.index'))
             ->assertOk()
             ->assertSee('data-test="project-breadcrumbs"', false)
             ->assertSeeInOrder([
-                'href="'.route('dashboard').'"',
+                'href="' . route('dashboard') . '"',
                 __('Dashboard'),
                 __('Projects'),
             ], false)
@@ -328,33 +328,33 @@ class ProjectCrudTest extends TestCase
     public function test_project_row_edits_from_the_name_and_links_the_epic_count_to_its_epics(): void
     {
         $this->actingAs(User::factory()->create());
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create(['name' => 'Website redesign']);
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create(['name' => 'Website redesign']);
         Epic::factory()->for($project)->create();
-        $lonelyProject = Project::factory()->for($customer)->create(['name' => 'Lonely project']);
+        $lonelyProject = Project::factory()->for($entity)->create(['name' => 'Lonely project']);
 
         $response = $this->get(route('projects.index'));
 
         $response
             ->assertOk()
             ->assertSeeInOrder([
-                'data-test="project-name-'.$project->id.'"',
+                'data-test="project-name-' . $project->id . '"',
                 'editProject(JSON.parse(',
             ], false)
-            ->assertSee('href="'.route('epics.index', ['search' => 'Website redesign']).'"', false)
+            ->assertSee('href="' . route('epics.index', ['search' => 'Website redesign']) . '"', false)
             ->assertSee(__('View :count epics', ['count' => 1]))
-            ->assertDontSee('href="'.route('epics.index', ['search' => 'Lonely project']).'"', false)
-            ->assertSee('data-test="project-epics-count-'.$lonelyProject->id.'"></span>', false)
-            ->assertSee('data-test="project-comments-count-'.$lonelyProject->id.'"></span>', false)
-            ->assertDontSee('data-test="project-delete-'.$project->id.'"', false)
-            ->assertSee('data-test="project-archive-'.$project->id.'"', false)
-            ->assertSee('data-test="project-delete-'.$lonelyProject->id.'"', false);
+            ->assertDontSee('href="' . route('epics.index', ['search' => 'Lonely project']) . '"', false)
+            ->assertSee('data-test="project-epics-count-' . $lonelyProject->id . '"></span>', false)
+            ->assertSee('data-test="project-comments-count-' . $lonelyProject->id . '"></span>', false)
+            ->assertDontSee('data-test="project-delete-' . $project->id . '"', false)
+            ->assertSee('data-test="project-archive-' . $project->id . '"', false)
+            ->assertSee('data-test="project-delete-' . $lonelyProject->id . '"', false);
     }
 
     public function test_project_with_an_active_epic_cannot_be_deleted(): void
     {
         $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create();
 
         $this->delete(route('projects.destroy', $project))
@@ -368,7 +368,7 @@ class ProjectCrudTest extends TestCase
     public function test_project_with_epics_cannot_be_deleted(): void
     {
         $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         Epic::factory()->for($project)->trashed()->create();
 
         $this->delete(route('projects.destroy', $project))
@@ -385,7 +385,7 @@ class ProjectCrudTest extends TestCase
         }
 
         $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         $competitorCreated = false;
 
         DB::listen(static function (QueryExecuted $query) use ($project, &$competitorCreated): void {
@@ -417,7 +417,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_model_cannot_be_deleted_while_it_has_epics(): void
     {
-        $project = Project::factory()->for($this->customer())->create();
+        $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create();
 
         $this->assertFalse($project->delete());
@@ -426,35 +426,35 @@ class ProjectCrudTest extends TestCase
         $this->assertModelExists($epic);
     }
 
-    public function test_project_list_transformer_renders_the_customer_it_is_bound_to(): void
+    public function test_project_list_transformer_renders_the_entity_it_is_bound_to(): void
     {
-        $customer = Customer::factory()->create(['name' => 'Bound customer']);
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create(['name' => 'Bound entity']);
+        $project = Project::factory()->for($entity)->create();
 
         $list = app(ProjectListTransformer::class)->active(
             new LengthAwarePaginator([$project], 1, 15),
             '',
         );
 
-        $this->assertSame('Bound customer', data_get($list, 'rows.0.customer'));
-        $this->assertSame('Bound customer', data_get($list, 'rows.0.actions.0.payload.customer_name'));
+        $this->assertSame('Bound entity', data_get($list, 'rows.0.entity'));
+        $this->assertSame('Bound entity', data_get($list, 'rows.0.actions.0.payload.entity_name'));
     }
 
     /**
-     * A project cannot exist without a customer: the column is NOT NULL, the foreign key restricts
-     * deletion and the relation resolves soft-deleted customers, so the row always renders a name.
+     * A project cannot exist without a entity: the column is NOT NULL, the foreign key restricts
+     * deletion and the relation resolves soft-deleted entities, so the row always renders a name.
      */
-    public function test_a_customer_with_projects_cannot_be_permanently_deleted(): void
+    public function test_a_entity_with_projects_cannot_be_permanently_deleted(): void
     {
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create();
 
-        $customer->forceDelete();
+        $entity->forceDelete();
 
         $this->assertModelExists($project);
         $this->assertDatabaseHas('PRO_projects', [
             'id' => $project->id,
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ]);
     }
 
@@ -474,19 +474,19 @@ class ProjectCrudTest extends TestCase
 
     public function test_guests_cannot_create_update_or_delete_projects(): void
     {
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create(['name' => 'Existing project']);
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create(['name' => 'Existing project']);
 
         $this->post(route('projects.store'), [
             'name' => 'Guest project',
             'start_date' => '2045-07-09',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ])->assertRedirect(route('login'));
 
         $this->put(route('projects.update', $project), [
             'name' => 'Updated project',
             'start_date' => '2045-07-09',
-            'customer_id' => $customer->id,
+            'entity_id' => $entity->id,
         ])->assertRedirect(route('login'));
 
         $this->delete(route('projects.destroy', $project))

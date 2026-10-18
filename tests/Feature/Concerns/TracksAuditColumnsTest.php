@@ -1,10 +1,10 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Concerns;
+namespace EntityProjects13\Tests\Feature\Concerns;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -25,7 +25,7 @@ class TracksAuditColumnsTest extends TestCase
     public static function auditedModels(): array
     {
         return [
-            'customers' => [Customer::class],
+            'entities' => [Entity::class],
             'projects' => [Project::class],
             'epics' => [Epic::class],
             'epic comments' => [EpicComment::class],
@@ -40,14 +40,14 @@ class TracksAuditColumnsTest extends TestCase
     public static function softDeletingModels(): array
     {
         return [
-            'customers' => [Customer::class],
+            'entities' => [Entity::class],
             'projects' => [Project::class],
             'epics' => [Epic::class],
         ];
     }
 
     /**
-     * @param  class-string<Customer|Project|Epic|EpicComment|User>  $model
+     * @param  class-string<Entity|Project|Epic|EpicComment|User>  $model
      */
     #[DataProvider('auditedModels')]
     public function test_creating_a_record_stamps_the_actor_on_created_by_and_updated_by(string $model): void
@@ -63,7 +63,7 @@ class TracksAuditColumnsTest extends TestCase
     }
 
     /**
-     * @param  class-string<Customer|Project|Epic|EpicComment|User>  $model
+     * @param  class-string<Entity|Project|Epic|EpicComment|User>  $model
      */
     #[DataProvider('auditedModels')]
     public function test_changing_a_record_stamps_the_new_actor_and_keeps_the_author(string $model): void
@@ -85,7 +85,7 @@ class TracksAuditColumnsTest extends TestCase
      * A write with nobody authenticated has no actor to record, so the trail of whoever really
      * created or changed the row has to survive it, as a console command or a queued job leaves it.
      *
-     * @param  class-string<Customer|Project|Epic|EpicComment|User>  $model
+     * @param  class-string<Entity|Project|Epic|EpicComment|User>  $model
      */
     #[DataProvider('auditedModels')]
     public function test_a_write_without_an_authenticated_user_keeps_the_existing_trail(string $model): void
@@ -103,7 +103,7 @@ class TracksAuditColumnsTest extends TestCase
     }
 
     /**
-     * @param  class-string<Customer|Project|Epic|User>  $model
+     * @param  class-string<Entity|Project|Epic|User>  $model
      */
     #[DataProvider('softDeletingModels')]
     public function test_trashing_a_record_stamps_the_actor_on_deleted_by(string $model): void
@@ -122,7 +122,7 @@ class TracksAuditColumnsTest extends TestCase
      * SoftDeletes::runSoftDelete() updates deleted_at and updated_at and nothing else, so a hook
      * that only set the attribute in memory would leave deleted_by empty on a trashed row.
      *
-     * @param  class-string<Customer|Project|Epic|User>  $model
+     * @param  class-string<Entity|Project|Epic|User>  $model
      */
     #[DataProvider('softDeletingModels')]
     public function test_trashing_without_an_authenticated_user_keeps_the_author_of_the_row(string $model): void
@@ -140,7 +140,7 @@ class TracksAuditColumnsTest extends TestCase
     }
 
     /**
-     * @param  class-string<Customer|Project|Epic|User>  $model
+     * @param  class-string<Entity|Project|Epic|User>  $model
      */
     #[DataProvider('softDeletingModels')]
     public function test_restoring_a_record_clears_deleted_by(string $model): void
@@ -167,12 +167,12 @@ class TracksAuditColumnsTest extends TestCase
         $actor = User::factory()->create();
 
         $this->actingAs($actor);
-        $record = Customer::factory()->create();
+        $record = Entity::factory()->create();
         $id = $record->id;
 
         $record->forceDelete();
 
-        $this->assertDatabaseMissing('CUM_customers', ['id' => $id]);
+        $this->assertDatabaseMissing('CUM_entities', ['id' => $id]);
     }
 
     /**
@@ -183,7 +183,7 @@ class TracksAuditColumnsTest extends TestCase
         $actor = User::factory()->create();
 
         $this->actingAs($actor);
-        $record = Customer::factory()->create();
+        $record = Entity::factory()->create();
 
         try {
             $actor->forceDelete();
@@ -200,7 +200,7 @@ class TracksAuditColumnsTest extends TestCase
     /**
      * The columns are written by the trait alone, so a payload cannot claim authorship.
      *
-     * @param  class-string<Customer|Project|Epic|EpicComment|User>  $model
+     * @param  class-string<Entity|Project|Epic|EpicComment|User>  $model
      */
     #[DataProvider('auditedModels')]
     public function test_the_audit_columns_are_not_mass_assignable(string $model): void

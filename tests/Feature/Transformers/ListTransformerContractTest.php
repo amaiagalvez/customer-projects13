@@ -1,10 +1,10 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Transformers;
+namespace EntityProjects13\Tests\Feature\Transformers;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
-use Customers13\Transformers\CustomerListTransformer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
+use entities13\Transformers\EntityListTransformer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -55,11 +55,11 @@ class ListTransformerContractTest extends TestCase
      */
     public static function transformers(): array
     {
-        return array_map(static fn (string $class): array => [$class], self::transformerClasses());
+        return array_map(static fn(string $class): array => [$class], self::transformerClasses());
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      * @param  'active'|'archived'|'trash'  $state
      */
     #[DataProvider('listStates')]
@@ -68,7 +68,7 @@ class ListTransformerContractTest extends TestCase
         app()->setLocale('en');
         $list = $this->payload($transformerClass, $state);
         $prefix = match ($transformerClass) {
-            CustomerListTransformer::class => 'customers',
+            EntityListTransformer::class => 'entities',
             ProjectListTransformer::class => 'projects',
             EpicListTransformer::class => 'epics',
             default => throw new \LogicException("Unsupported transformer class [{$transformerClass}]."),
@@ -77,7 +77,7 @@ class ListTransformerContractTest extends TestCase
         $this->assertSame(self::ENVELOPE_KEYS, array_keys($list));
         $this->assertSame($state === 'active', $list['create']);
         $this->assertSame(
-            route($prefix.'.'.match ($state) {
+            route($prefix . '.' . match ($state) {
                 'active' => 'index',
                 'archived' => 'archived.index',
                 'trash' => 'trash.index',
@@ -86,9 +86,9 @@ class ListTransformerContractTest extends TestCase
         );
         $this->assertSame(
             [
-                route($prefix.'.index'),
-                route($prefix.'.archived.index'),
-                route($prefix.'.trash.index'),
+                route($prefix . '.index'),
+                route($prefix . '.archived.index'),
+                route($prefix . '.trash.index'),
             ],
             array_column($list['tabs'], 'url'),
         );
@@ -103,7 +103,7 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      */
     #[DataProvider('transformers')]
     public function test_state_tabs_count_records_only_when_counts_are_given(string $transformerClass): void
@@ -125,7 +125,7 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      */
     #[DataProvider('transformers')]
     public function test_every_resource_uses_the_same_active_empty_state_message(string $transformerClass): void
@@ -137,7 +137,7 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      */
     #[DataProvider('transformers')]
     public function test_every_resource_uses_the_same_no_match_message(string $transformerClass): void
@@ -149,7 +149,7 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      */
     #[DataProvider('transformers')]
     public function test_each_state_marks_only_its_own_tab_as_current(string $transformerClass): void
@@ -172,7 +172,7 @@ class ListTransformerContractTest extends TestCase
     /**
      * A row exposes the same action envelope in every state.
      *
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      * @param  'active'|'archived'|'trash'  $state
      */
     #[DataProvider('listStates')]
@@ -199,19 +199,19 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @return list<class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>>
+     * @return list<class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>>
      */
     private static function transformerClasses(): array
     {
         return [
-            CustomerListTransformer::class,
+            EntityListTransformer::class,
             ProjectListTransformer::class,
             EpicListTransformer::class,
         ];
     }
 
-    /** @return LengthAwarePaginator<int, Customer> */
-    private function customers(): LengthAwarePaginator
+    /** @return LengthAwarePaginator<int, Entity> */
+    private function entities(): LengthAwarePaginator
     {
         return new LengthAwarePaginator([], 0, 15);
     }
@@ -229,7 +229,7 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      * @param  'active'|'archived'|'trash'  $state
      * @param  array{active: int, archived: int, trashed: int}|null  $counts
      * @return array<string, mixed>
@@ -237,9 +237,9 @@ class ListTransformerContractTest extends TestCase
     private function payload(string $transformerClass, string $state, ?array $counts = null, string $search = ''): array
     {
         return match (true) {
-            $transformerClass === CustomerListTransformer::class => $this->customerState(
-                app(CustomerListTransformer::class),
-                $this->customers(),
+            $transformerClass === EntityListTransformer::class => $this->entityState(
+                app(EntityListTransformer::class),
+                $this->entities(),
                 $state,
                 $search,
                 $counts,
@@ -262,22 +262,22 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
      * @param  'active'|'archived'|'trash'  $state
      * @return array<string, mixed>
      */
     private function payloadWithOneRecord(string $transformerClass, string $state): array
     {
         return match (true) {
-            $transformerClass === CustomerListTransformer::class => $this->customerState(
-                app(CustomerListTransformer::class),
-                new LengthAwarePaginator([Customer::factory()->create()], 1, 15),
+            $transformerClass === EntityListTransformer::class => $this->entityState(
+                app(EntityListTransformer::class),
+                new LengthAwarePaginator([Entity::factory()->create()], 1, 15),
                 $state,
                 '',
             ),
             $transformerClass === ProjectListTransformer::class => $this->projectState(
                 app(ProjectListTransformer::class),
-                new LengthAwarePaginator([Project::factory()->for($this->customer())->create()], 1, 15),
+                new LengthAwarePaginator([Project::factory()->for($this->entity())->create()], 1, 15),
                 $state,
                 '',
             ),
@@ -291,13 +291,13 @@ class ListTransformerContractTest extends TestCase
     }
 
     /**
-     * @param  LengthAwarePaginator<int, Customer>  $paginator
+     * @param  LengthAwarePaginator<int, Entity>  $paginator
      * @param  'active'|'archived'|'trash'  $state
      * @param  array{active: int, archived: int, trashed: int}|null  $counts
      * @return array<string, mixed>
      */
-    private function customerState(
-        CustomerListTransformer $transformer,
+    private function entityState(
+        EntityListTransformer $transformer,
         LengthAwarePaginator $paginator,
         string $state,
         string $search,

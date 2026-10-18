@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Projects;
+namespace EntityProjects13\Tests\Feature\Projects;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Project;
 use Projects13\Queries\Projects\ProjectListQuery;
@@ -12,10 +12,10 @@ class ProjectListQueryTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_active_list_includes_projects_with_trashed_customers(): void
+    public function test_active_list_includes_projects_with_trashed_entities(): void
     {
-        $customer = Customer::factory()->trashed()->create();
-        $project = Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->trashed()->create();
+        $project = Project::factory()->for($entity)->create();
 
         $projects = app(ProjectListQuery::class)->active('');
 
@@ -24,9 +24,9 @@ class ProjectListQueryTest extends TestCase
         $listedProject = $projects->first();
 
         if ($listedProject === null) {
-            self::fail('The active list must include the project with its trashed customer.');
+            self::fail('The active list must include the project with its trashed entity.');
         }
 
-        $this->assertTrue($listedProject->getRelationValue('customer')->is($customer));
+        $this->assertTrue($listedProject->getRelationValue('entity')->is($entity));
     }
 }

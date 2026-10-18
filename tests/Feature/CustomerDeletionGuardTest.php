@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -12,70 +12,70 @@ use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
 /**
- * A customer with live projects cannot be moved to the trash, and a customer in the trash cannot be
+ * A entity with live projects cannot be moved to the trash, and a entity in the trash cannot be
  * deleted outright either. Both are enforced twice on purpose: the guard refuses the soft delete,
  * and the foreign key refuses the hard one, so neither depends on the other being called.
  */
-class CustomerDeletionGuardTest extends TestCase
+class EntityDeletionGuardTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_a_customer_with_a_project_cannot_be_deleted(): void
+    public function test_a_entity_with_a_project_cannot_be_deleted(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create([]);
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create([]);
 
-        $this->delete(route('customers.destroy', $customer))
-            ->assertRedirect(route('customers.index'))
+        $this->delete(route('entities.destroy', $entity))
+            ->assertRedirect(route('entities.index'))
             ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
 
-        $this->assertNotSoftDeleted($customer);
+        $this->assertNotSoftDeleted($entity);
         $this->assertModelExists($project);
     }
 
-    public function test_a_customer_with_a_trashed_project_cannot_be_deleted(): void
+    public function test_a_entity_with_a_trashed_project_cannot_be_deleted(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
-        $project = Project::factory()->for($customer)->create([]);
+        $entity = Entity::factory()->create();
+        $project = Project::factory()->for($entity)->create([]);
         $project->delete();
 
-        $this->delete(route('customers.destroy', $customer))
-            ->assertRedirect(route('customers.index'))
+        $this->delete(route('entities.destroy', $entity))
+            ->assertRedirect(route('entities.index'))
             ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
 
-        $this->assertNotSoftDeleted($customer);
+        $this->assertNotSoftDeleted($entity);
         $this->assertSoftDeleted($project);
     }
 
-    public function test_a_customer_with_a_project_cannot_be_deleted_by_a_plain_model_delete(): void
+    public function test_a_entity_with_a_project_cannot_be_deleted_by_a_plain_model_delete(): void
     {
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create([]);
+        $entity = Entity::factory()->create();
+        Project::factory()->for($entity)->create([]);
 
-        $this->assertFalse($customer->delete());
-        $this->assertNotSoftDeleted($customer);
+        $this->assertFalse($entity->delete());
+        $this->assertNotSoftDeleted($entity);
     }
 
     /**
-     * The guard locks the customer inside a transaction of its own, which is only safe because
-     * `Customer::delete()` opens an enclosing one. What proves the lock outlives the check is that
+     * The guard locks the entity inside a transaction of its own, which is only safe because
+     * `Entity::delete()` opens an enclosing one. What proves the lock outlives the check is that
      * the locking read happens one level deeper than the soft-delete write: before that enclosing
      * transaction existed, both ran at the same level and a project could slip in between them.
      */
     public function test_the_guard_holds_its_lock_until_the_soft_delete_is_written(): void
     {
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
         $levels = [];
 
         DB::listen(
             static function (QueryExecuted $query) use (&$levels): void {
-                if (str_starts_with($query->sql, 'select') && str_contains($query->sql, 'CUM_customers')) {
+                if (str_starts_with($query->sql, 'select') && str_contains($query->sql, 'CUM_entities')) {
                     $levels['guard'] = DB::transactionLevel();
                 }
 
-                if (str_starts_with($query->sql, 'update') && str_contains($query->sql, 'CUM_customers')) {
+                if (str_starts_with($query->sql, 'update') && str_contains($query->sql, 'CUM_entities')) {
                     $levels['delete'] = DB::transactionLevel();
                 }
             },
@@ -83,9 +83,9 @@ class CustomerDeletionGuardTest extends TestCase
 
         $ambient = DB::transactionLevel();
 
-        $customer->delete();
+        $entity->delete();
 
-        $this->assertArrayHasKey('guard', $levels, 'the guard has to lock the customer before deciding');
+        $this->assertArrayHasKey('guard', $levels, 'the guard has to lock the entity before deciding');
         $this->assertArrayHasKey('delete', $levels);
         $this->assertGreaterThan(
             $levels['delete'],
@@ -93,7 +93,7 @@ class CustomerDeletionGuardTest extends TestCase
             'the locking read has to sit in a transaction that encloses the soft delete',
         );
         $this->assertGreaterThan($ambient, $levels['delete'], 'the soft delete itself has to be transactional');
-        $this->assertSoftDeleted($customer);
+        $this->assertSoftDeleted($entity);
     }
 
     /**
@@ -103,40 +103,40 @@ class CustomerDeletionGuardTest extends TestCase
      */
     public function test_a_force_delete_is_refused_and_the_database_refuses_it_too(): void
     {
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create();
+        $entity = Entity::factory()->create();
+        Project::factory()->for($entity)->create();
 
-        $this->assertFalse($customer->forceDelete(), 'the guard refuses it before the row is written');
-        $this->assertModelExists($customer);
+        $this->assertFalse($entity->forceDelete(), 'the guard refuses it before the row is written');
+        $this->assertModelExists($entity);
 
         $this->expectException(QueryException::class);
 
-        DB::table('CUM_customers')->where('id', $customer->id)->delete();
+        DB::table('CUM_entities')->where('id', $entity->id)->delete();
     }
 
-    public function test_a_customer_without_projects_can_be_deleted(): void
+    public function test_a_entity_without_projects_can_be_deleted(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
+        $entity = Entity::factory()->create();
 
-        $this->delete(route('customers.destroy', $customer))
-            ->assertRedirect(route('customers.index'));
+        $this->delete(route('entities.destroy', $entity))
+            ->assertRedirect(route('entities.index'));
 
-        $this->assertSoftDeleted($customer);
+        $this->assertSoftDeleted($entity);
     }
 
     public function test_the_row_offers_archive_instead_of_delete_when_a_project_hangs_from_it(): void
     {
         $this->signIn();
-        $customer = Customer::factory()->create();
-        Project::factory()->for($customer)->create([]);
+        $entity = Entity::factory()->create();
+        Project::factory()->for($entity)->create([]);
         Epic::factory()->create();
 
-        $response = $this->get(route('customers.index'));
+        $response = $this->get(route('entities.index'));
 
         $response->assertOk();
         $this->assertStringContainsString(
-            'customer-archive-'.$customer->id,
+            'entity-archive-' . $entity->id,
             $response->getContent() ?: '',
         );
     }

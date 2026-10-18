@@ -1,11 +1,11 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use Basics13\Queries\ListQueryBase;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
-use Customers13\Queries\Customers\CustomerListQuery;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
+use entities13\Queries\Entities\EntityListQuery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -17,7 +17,7 @@ use Projects13\Queries\Projects\ProjectListQuery;
 /**
  * Behaviour that comes from ListQueryBase, so it must hold for every resource that extends it.
  *
- * These cases lived only in CustomerListQueryTest, which left the shared LIKE escaping and page
+ * These cases lived only in EntityListQueryTest, which left the shared LIKE escaping and page
  * size verified for one resource out of three. Epic names are only unique inside their project, so
  * every epic here belongs to its own project.
  */
@@ -31,14 +31,14 @@ class ListQuerySharedBehaviourTest extends TestCase
     public static function resources(): array
     {
         return [
-            'customers' => [CustomerListQuery::class],
+            'entities' => [EntityListQuery::class],
             'projects' => [ProjectListQuery::class],
             'epics' => [EpicListQuery::class],
         ];
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_active_lists_are_paginated_by_the_shared_page_size(string $queryClass): void
@@ -53,7 +53,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_trashed_lists_are_paginated_by_the_shared_page_size(string $queryClass): void
@@ -68,7 +68,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_search_keeps_the_term_in_the_pagination_urls(string $queryClass): void
@@ -82,7 +82,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_search_treats_percent_as_a_literal_character(string $queryClass): void
@@ -96,7 +96,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_search_treats_underscore_as_a_literal_character(string $queryClass): void
@@ -110,7 +110,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_search_treats_backslash_as_a_literal_character(string $queryClass): void
@@ -126,7 +126,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     /**
      * An empty term must not narrow the list, and a term no record matches must return none.
      *
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_an_empty_search_returns_everything(string $queryClass): void
@@ -138,7 +138,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('resources')]
     public function test_active_lists_exclude_trashed_records(string $queryClass): void
@@ -154,10 +154,10 @@ class ListQuerySharedBehaviourTest extends TestCase
 
     /**
      * The tab badges must not re-run the count the paginator already knows. The budget is per
-     * resource: customers load their types, projects load no extra records, while epics load their
+     * resource: entities load their types, projects load no extra records, while epics load their
      * project.
      *
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('queryBudgets')]
     public function test_state_counts_reuse_the_total_the_paginator_already_knew(
@@ -188,7 +188,7 @@ class ListQuerySharedBehaviourTest extends TestCase
      * A total that is not passed costs exactly the query it replaces: two, since only one of the
      * three states is already known.
      *
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
     #[DataProvider('queryBudgets')]
     public function test_state_counts_run_one_query_per_unpassed_total(
@@ -217,7 +217,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     public static function queryBudgets(): array
     {
         return [
-            'customers' => [CustomerListQuery::class, 5],
+            'entities' => [EntityListQuery::class, 5],
             'projects' => [ProjectListQuery::class, 4],
             'epics' => [EpicListQuery::class, 5],
         ];
@@ -227,9 +227,9 @@ class ListQuerySharedBehaviourTest extends TestCase
      * Creates records of the resource under test. Epic names are unique per project, so a factory
      * builds a project of its own for each epic.
      *
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      * @param  list<string>|null  $names
-     * @return array<int, Customer|Project|Epic>
+     * @return array<int, Entity|Project|Epic>
      */
     private function makeRecordsFor(string $queryClass, int $count, ?array $names = null, bool $trashed = false): array
     {
@@ -243,33 +243,33 @@ class ListQuerySharedBehaviourTest extends TestCase
     }
 
     /**
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      * @param  array<string, mixed>  $attributes
      */
-    private function makeRecord(string $queryClass, array $attributes, bool $trashed): Customer|Project|Epic
+    private function makeRecord(string $queryClass, array $attributes, bool $trashed): Entity|Project|Epic
     {
         return match ($queryClass) {
-            CustomerListQuery::class => $trashed
-                ? Customer::factory()->trashed()->create($attributes)
-                : Customer::factory()->create($attributes),
+            EntityListQuery::class => $trashed
+                ? Entity::factory()->trashed()->create($attributes)
+                : Entity::factory()->create($attributes),
             ProjectListQuery::class => $trashed
-                ? Project::factory()->for($this->customer())->trashed()->create($attributes)
-                : Project::factory()->for($this->customer())->create($attributes),
+                ? Project::factory()->for($this->entity())->trashed()->create($attributes)
+                : Project::factory()->for($this->entity())->create($attributes),
             default => $trashed
-                ? Epic::factory()->for(Project::factory()->for($this->customer())->create())->trashed()->create($attributes)
-                : Epic::factory()->for(Project::factory()->for($this->customer())->create())->create($attributes),
+                ? Epic::factory()->for(Project::factory()->for($this->entity())->create())->trashed()->create($attributes)
+                : Epic::factory()->for(Project::factory()->for($this->entity())->create())->create($attributes),
         };
     }
 
     /**
      * The concrete query for the resource under test, so PHPStan sees active() and trashed().
      *
-     * @param  class-string<CustomerListQuery|ProjectListQuery|EpicListQuery>  $queryClass
+     * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
-    private function listQuery(string $queryClass): CustomerListQuery|ProjectListQuery|EpicListQuery
+    private function listQuery(string $queryClass): EntityListQuery|ProjectListQuery|EpicListQuery
     {
         return match ($queryClass) {
-            CustomerListQuery::class => app(CustomerListQuery::class),
+            EntityListQuery::class => app(EntityListQuery::class),
             ProjectListQuery::class => app(ProjectListQuery::class),
             default => app(EpicListQuery::class),
         };

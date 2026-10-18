@@ -1,10 +1,10 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -23,29 +23,29 @@ class ResourceWriteAccessTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return array<string, array{0: 'customer'|'project'|'epic', 1: non-empty-string}>
+     * @return array<string, array{0: 'entity'|'project'|'epic', 1: non-empty-string}>
      */
     public static function writeRoutes(): array
     {
         $routes = [];
 
-        foreach (['customer', 'project', 'epic'] as $singular) {
-            $plural = $singular === 'customer' ? 'customers' : $singular.'s';
+        foreach (['entity', 'project', 'epic'] as $singular) {
+            $plural = $singular === 'entity' ? 'entities' : $singular . 's';
 
-            $routes["{$singular} store"] = [$singular, $plural.'.store'];
-            $routes["{$singular} update"] = [$singular, $plural.'.update'];
-            $routes["{$singular} destroy"] = [$singular, $plural.'.destroy'];
-            $routes["{$singular} deactivate"] = [$singular, $plural.'.archive'];
-            $routes["{$singular} reactivate"] = [$singular, $plural.'.archived.activate'];
-            $routes["{$singular} restore"] = [$singular, $plural.'.trash.restore'];
-            $routes["{$singular} force delete"] = [$singular, $plural.'.trash.destroy'];
+            $routes["{$singular} store"] = [$singular, $plural . '.store'];
+            $routes["{$singular} update"] = [$singular, $plural . '.update'];
+            $routes["{$singular} destroy"] = [$singular, $plural . '.destroy'];
+            $routes["{$singular} deactivate"] = [$singular, $plural . '.archive'];
+            $routes["{$singular} reactivate"] = [$singular, $plural . '.archived.activate'];
+            $routes["{$singular} restore"] = [$singular, $plural . '.trash.restore'];
+            $routes["{$singular} force delete"] = [$singular, $plural . '.trash.destroy'];
         }
 
         return $routes;
     }
 
     /**
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  non-empty-string  $routeName
      */
     #[DataProvider('writeRoutes')]
@@ -56,7 +56,7 @@ class ResourceWriteAccessTest extends TestCase
     }
 
     /**
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  non-empty-string  $routeName
      */
     #[DataProvider('writeRoutes')]
@@ -82,18 +82,18 @@ class ResourceWriteAccessTest extends TestCase
     public static function selectOptionsRoutes(): array
     {
         return [
-            'customers' => ['customers.options'],
+            'entities' => ['entities.options'],
             'projects' => ['projects.options'],
         ];
     }
 
     /**
      * @param  non-empty-string  $routeName
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      */
     /**
      * @param  non-empty-string  $routeName
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @return TestResponse<Response>
      */
     private function attempt(string $routeName, string $singular)
@@ -109,13 +109,13 @@ class ResourceWriteAccessTest extends TestCase
         };
     }
 
-    private function record(string $singular, bool $trashed = false): Customer|Project|Epic
+    private function record(string $singular, bool $trashed = false): Entity|Project|Epic
     {
         return match ([$singular, $trashed]) {
-            ['customer', false] => Customer::factory()->create(),
-            ['customer', true] => Customer::factory()->trashed()->create(),
-            ['project', false] => Project::factory()->for($this->customer())->create(),
-            ['project', true] => Project::factory()->for($this->customer())->trashed()->create(),
+            ['entity', false] => Entity::factory()->create(),
+            ['entity', true] => Entity::factory()->trashed()->create(),
+            ['project', false] => Project::factory()->for($this->entity())->create(),
+            ['project', true] => Project::factory()->for($this->entity())->trashed()->create(),
             default => $trashed
                 ? Epic::factory()->trashed()->create()
                 : Epic::factory()->create(),
@@ -123,13 +123,13 @@ class ResourceWriteAccessTest extends TestCase
     }
 
     /**
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @return array<string, mixed>
      */
     private function payloadFor(string $singular): array
     {
         return match ($singular) {
-            'customer' => ['name' => 'Rejected customer'],
+            'entity' => ['name' => 'Rejected entity'],
             'project' => ['name' => 'Rejected project', 'start_date' => '2045-07-09'],
             default => ['name' => 'Rejected epic'],
         };

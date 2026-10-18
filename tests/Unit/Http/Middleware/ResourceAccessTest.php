@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Unit\Http\Middleware;
+namespace EntityProjects13\Tests\Unit\Http\Middleware;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
+use EntityProjects13\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class ResourceAccessTest extends TestCase
@@ -14,7 +14,7 @@ class ResourceAccessTest extends TestCase
     public static function resources(): array
     {
         return [
-            'customers' => ['customers.index', 'customers.trash.index'],
+            'entities' => ['entities.index', 'entities.trash.index'],
             'projects' => ['projects.index', 'projects.trash.index'],
             'epics' => ['epics.index', 'epics.trash.index'],
         ];
@@ -26,7 +26,7 @@ class ResourceAccessTest extends TestCase
     public static function indexRoutes(): array
     {
         return [
-            'customers' => ['customers.index'],
+            'entities' => ['entities.index'],
             'projects' => ['projects.index'],
             'epics' => ['epics.index'],
         ];

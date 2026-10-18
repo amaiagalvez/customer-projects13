@@ -1,10 +1,10 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
 use Basics13\Support\Validation\MaxLength;
-use CustomerProjects13\Tests\TestCase;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 
 /**
@@ -16,13 +16,13 @@ class ValidationNoticeTest extends TestCase
 {
     use LazilyRefreshDatabase;
 
-    public function test_the_customer_name_notice_lists_every_rule_of_the_field(): void
+    public function test_the_entity_name_notice_lists_every_rule_of_the_field(): void
     {
         $this->actingAs(User::factory()->create())
-            ->get(route('customers.index'))
+            ->get(route('entities.index'))
             ->assertOk()
             ->assertSeeInOrder([
-                'data-test="customer-name-info"',
+                'data-test="entity-name-info"',
                 __('Use between :min and :max characters.', ['min' => 4, 'max' => MaxLength::string()]),
                 __('Must be unique.'),
             ], false);
@@ -50,14 +50,14 @@ class ValidationNoticeTest extends TestCase
             ], false);
     }
 
-    public function test_the_project_customer_notice_explains_that_a_new_one_can_be_created(): void
+    public function test_the_project_entity_notice_explains_that_a_new_one_can_be_created(): void
     {
         $this->actingAs(User::factory()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSeeInOrder([
-                'data-test="project-customer-info"',
-                __('Choose a customer from the list or create a new one.'),
+                'data-test="project-entity-info"',
+                __('Choose a entity from the list or create a new one.'),
             ], false);
     }
 
@@ -66,14 +66,14 @@ class ValidationNoticeTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         $forms = [
-            'customers' => [route('customers.index'), [
-                'customer-name-info',
-                'customer-notes-info',
+            'entities' => [route('entities.index'), [
+                'entity-name-info',
+                'entity-notes-info',
             ]],
             'projects' => [route('projects.index'), [
                 'project-name-info',
                 'project-end-date-info',
-                'project-customer-info',
+                'project-entity-info',
                 'project-notes-info',
             ]],
             'epics' => [route('epics.index'), [
@@ -91,7 +91,7 @@ class ValidationNoticeTest extends TestCase
 
             foreach ($notices as $notice) {
                 $this->assertStringContainsString(
-                    'data-test="'.$notice.'"',
+                    'data-test="' . $notice . '"',
                     $content,
                     "The {$resource} form is missing the notice of a field.",
                 );

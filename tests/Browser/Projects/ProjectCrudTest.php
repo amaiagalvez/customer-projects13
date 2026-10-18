@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Browser\Projects;
+namespace EntityProjects13\Tests\Browser\Projects;
 
-use CustomerProjects13\Tests\DuskTestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\DuskTestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
@@ -20,13 +20,13 @@ class ProjectCrudTest extends DuskTestCase
     public function test_project_row_name_opens_the_edit_form(): void
     {
         $user = $this->user();
-        $project = Project::factory()->for($this->customer())->create(['name' => 'Editable from the row']);
+        $project = Project::factory()->for($this->entity())->create(['name' => 'Editable from the row']);
 
         $this->browse(function (Browser $browser) use ($user, $project): void {
             $browser->loginAs($user)
                 ->visit('/projects')
                 ->waitUntil('typeof window.jQuery?.fn?.select2 === "function"', 10)
-                ->click('[data-test="project-name-'.$project->id.'"]')
+                ->click('[data-test="project-name-' . $project->id . '"]')
                 ->waitFor(self::PROJECT_NAME_SELECTOR)
                 ->assertSeeIn('dialog[open]', __('Edit project'))
                 ->assertInputValue(self::PROJECT_NAME_SELECTOR, $project->name);
@@ -36,16 +36,16 @@ class ProjectCrudTest extends DuskTestCase
     public function test_project_table_keeps_the_actions_column_stuck_to_the_end(): void
     {
         $user = $this->user();
-        $customer = Customer::factory()->create();
-        $longName = 'Very long project name '.str_repeat('x', 120);
-        $project = Project::factory()->for($customer)->create(['name' => $longName]);
+        $entity = Entity::factory()->create();
+        $longName = 'Very long project name ' . str_repeat('x', 120);
+        $project = Project::factory()->for($entity)->create(['name' => $longName]);
 
         $this->browse(function (Browser $browser) use ($user, $project, $longName): void {
             $browser->loginAs($user)
                 ->resize(1920, 1080)
-                ->visit('/projects?search='.urlencode($longName));
+                ->visit('/projects?search=' . urlencode($longName));
 
-            $browser->assertAttribute('[data-test="project-name-'.$project->id.'"]', 'title', $longName)
+            $browser->assertAttribute('[data-test="project-name-' . $project->id . '"]', 'title', $longName)
                 ->assertScript(
                     'getComputedStyle(document.querySelector(\'.resource-list-table tbody tr td:last-child\')).position',
                     'sticky',
@@ -56,7 +56,7 @@ class ProjectCrudTest extends DuskTestCase
                 )
                 ->resize(320, 420)
                 ->assertScript(
-                    'getComputedStyle(document.querySelector(\'[data-test="project-name-'.$project->id.'"]\')).textOverflow',
+                    'getComputedStyle(document.querySelector(\'[data-test="project-name-' . $project->id . '"]\')).textOverflow',
                     'ellipsis',
                 );
         });
@@ -66,16 +66,16 @@ class ProjectCrudTest extends DuskTestCase
     {
         $user = $this->user();
         $suffix = Str::uuid()->toString();
-        $customerName = 'Dusk customer '.$suffix;
-        $projectName = 'Dusk project '.$suffix;
-        $updatedProjectName = 'Updated project '.$suffix;
-        $customer = Customer::factory()->create(['name' => $customerName]);
+        $entityName = 'Dusk entity ' . $suffix;
+        $projectName = 'Dusk project ' . $suffix;
+        $updatedProjectName = 'Updated project ' . $suffix;
+        $entity = Entity::factory()->create(['name' => $entityName]);
         $projectId = null;
 
         $this->browse(function (Browser $browser) use (
             $user,
-            $customer,
-            $customerName,
+            $entity,
+            $entityName,
             $projectName,
             $updatedProjectName,
             &$projectId,
@@ -87,10 +87,10 @@ class ProjectCrudTest extends DuskTestCase
                 ->click('[data-test="project-create-button"]')
                 ->waitFor(self::PROJECT_NAME_SELECTOR)
                 ->type(self::PROJECT_NAME_SELECTOR, $projectName)
-                ->click('#select2-project-customer-id-container')
-                ->type('dialog[open] .select2-container--open .select2-search__field', $customerName)
-                ->waitFor('#select2-project-customer-id-result-'.$customer->id, 10)
-                ->click('#select2-project-customer-id-result-'.$customer->id);
+                ->click('#select2-project-entity-id-container')
+                ->type('dialog[open] .select2-container--open .select2-search__field', $entityName)
+                ->waitFor('#select2-project-entity-id-result-' . $entity->id, 10)
+                ->click('#select2-project-entity-id-result-' . $entity->id);
 
             $browser->script(<<<'JS'
                 const input = document.querySelector('dialog[open] [data-test="project-start-date"]');

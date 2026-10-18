@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Translations;
+namespace EntityProjects13\Tests\Feature\Translations;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -22,7 +22,7 @@ class ValidationAttributeTranslationTest extends TestCase
         'notes',
         'start_date',
         'end_date',
-        'customer_id',
+        'entity_id',
         'project_id',
         'body',
         'email',
@@ -68,7 +68,7 @@ class ValidationAttributeTranslationTest extends TestCase
 
     public function test_unique_validation_errors_use_the_translated_name_in_every_locale(): void
     {
-        Customer::factory()->create(['name' => 'Existing customer']);
+        Entity::factory()->create(['name' => 'Existing entity']);
         $originalLocale = app()->getLocale();
 
         try {
@@ -79,8 +79,8 @@ class ValidationAttributeTranslationTest extends TestCase
                 $this->assertIsArray($attributes);
 
                 $validator = Validator::make(
-                    ['name' => 'Existing customer'],
-                    ['name' => [Rule::unique(Customer::class)->whereNull('deleted_at')]],
+                    ['name' => 'Existing entity'],
+                    ['name' => [Rule::unique(Entity::class)->whereNull('deleted_at')]],
                 );
                 $validator->fails();
 

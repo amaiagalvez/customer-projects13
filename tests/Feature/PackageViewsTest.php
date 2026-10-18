@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use CustomerProjects13\Tests\TestCase;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Blade;
@@ -38,41 +38,41 @@ class PackageViewsTest extends TestCase
     public function test_package_component_in_blade_template(): void
     {
         $blade = <<<'BLADE'
-            <x-basics13::list.create-action prefix="customer" :label="__('New customer')" click="createCustomer()" />
+            <x-basics13::list.create-action prefix="entity" :label="__('New entity')" click="createEntity()" />
         BLADE;
 
         $html = Blade::render($blade);
 
-        $this->assertStringContainsString(__('New customer'), $html);
-        $this->assertStringContainsString('createCustomer()', $html);
+        $this->assertStringContainsString(__('New entity'), $html);
+        $this->assertStringContainsString('createEntity()', $html);
     }
 
     public function test_package_field_label_component_uses_the_form_request_rules(): void
     {
         $html = Blade::render(<<<'BLADE'
-            <x-basics13::forms.field-label :request="\Customers13\Http\Requests\CustomerRequest::class" field="name"
-                test="customer-name-info">
+            <x-basics13::forms.field-label :request="\entities13\Http\Requests\EntityRequest::class" field="name"
+                test="entity-name-info">
                 {{ __('Name') }}
             </x-basics13::forms.field-label>
         BLADE);
 
         $this->assertStringContainsString(__('Name'), $html);
         $this->assertStringContainsString('aria-hidden="true"', $html);
-        $this->assertStringContainsString('data-test="customer-name-info"', $html);
+        $this->assertStringContainsString('data-test="entity-name-info"', $html);
     }
 
     public function test_package_components_can_render_nested_components(): void
     {
         $html = Blade::render(
-            '<x-basics13::list.page-header :list="$list" prefix="customer" />',
+            '<x-basics13::list.page-header :list="$list" prefix="entity" />',
             ['list' => [
-                'breadcrumbs' => [['label' => 'Customers', 'url' => null]],
+                'breadcrumbs' => [['label' => 'Entities', 'url' => null]],
                 'tabs' => [],
             ]],
         );
 
-        $this->assertStringContainsString('customer-heading', $html);
-        $this->assertStringContainsString('Customers', $html);
+        $this->assertStringContainsString('entity-heading', $html);
+        $this->assertStringContainsString('Entities', $html);
     }
 
     public function test_package_validation_translations_are_available_to_the_validator(): void
@@ -91,7 +91,7 @@ class PackageViewsTest extends TestCase
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSee(
-                'x-bind:disabled="isSubmitting || !isDirty || Boolean(form.customerCreating)"',
+                'x-bind:disabled="isSubmitting || !isDirty || Boolean(form.entityCreating)"',
                 false,
             );
     }
@@ -99,7 +99,7 @@ class PackageViewsTest extends TestCase
     public function test_package_table_keeps_the_pagination_summary_for_an_empty_list(): void
     {
         $html = Blade::render(
-            '<x-basics13::list.table prefix="customer" :paginator="$paginator" />',
+            '<x-basics13::list.table prefix="entity" :paginator="$paginator" />',
             ['paginator' => new LengthAwarePaginator([], 0, 15)],
         );
 
@@ -155,9 +155,9 @@ class PackageViewsTest extends TestCase
     public static function packagePageProvider(): array
     {
         return [
-            'customers' => ['customers.index'],
-            'customer trash' => ['customers.trash.index'],
-            'customer archive' => ['customers.archived.index'],
+            'entities' => ['entities.index'],
+            'entity trash' => ['entities.trash.index'],
+            'entity archive' => ['entities.archived.index'],
             'projects' => ['projects.index'],
             'project trash' => ['projects.trash.index'],
             'project archive' => ['projects.archived.index'],

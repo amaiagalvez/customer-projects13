@@ -1,19 +1,19 @@
 <?php
 
-namespace CustomerProjects13\Tests\Unit\Integrations;
+namespace EntityProjects13\Tests\Unit\Integrations;
 
-use CustomerProjects13\Integrations\CustomerCountsIntegration;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Integrations\EntityCountsIntegration;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Model;
 
-class CustomerCountsIntegrationTest extends TestCase
+class EntityCountsIntegrationTest extends TestCase
 {
-    public function test_row_returns_empty_array_for_non_customer_model(): void
+    public function test_row_returns_empty_array_for_non_entity_model(): void
     {
-        $integration = new CustomerCountsIntegration;
+        $integration = new EntityCountsIntegration;
 
-        // Test with a plain model instance (not a Customer)
+        // Test with a plain model instance (not a Entity)
         $model = new class extends Model
         {
             protected $table = 'test';
@@ -24,22 +24,22 @@ class CustomerCountsIntegrationTest extends TestCase
         $this->assertSame([], $result);
     }
 
-    public function test_row_returns_counts_for_customer(): void
+    public function test_row_returns_counts_for_entity(): void
     {
-        $integration = new CustomerCountsIntegration;
+        $integration = new EntityCountsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
         // Set the counts as if they came from the query
-        $customer->projects_count = 5;
-        $customer->epics_count = 3;
-        $customer->comments_count = 2;
-        $customer->projects_exists = true;
+        $entity->projects_count = 5;
+        $entity->epics_count = 3;
+        $entity->comments_count = 2;
+        $entity->projects_exists = true;
 
-        $result = $integration->row($customer);
+        $result = $integration->row($entity);
 
         $this->assertSame([
             'projectsCount' => 5,
-            'projectsUrl' => route('projects.index', ['search' => 'Test Customer']),
+            'projectsUrl' => route('projects.index', ['search' => 'Test Entity']),
             'epicsCount' => 3,
             'commentsCount' => 2,
             'projects_exists' => true,
@@ -48,15 +48,15 @@ class CustomerCountsIntegrationTest extends TestCase
 
     public function test_row_returns_null_projects_url_when_zero_projects(): void
     {
-        $integration = new CustomerCountsIntegration;
+        $integration = new EntityCountsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
-        $customer->projects_count = 0;
-        $customer->epics_count = 0;
-        $customer->comments_count = 0;
-        $customer->projects_exists = false;
+        $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
+        $entity->projects_count = 0;
+        $entity->epics_count = 0;
+        $entity->comments_count = 0;
+        $entity->projects_exists = false;
 
-        $result = $integration->row($customer);
+        $result = $integration->row($entity);
 
         $this->assertSame([
             'projectsCount' => 0,

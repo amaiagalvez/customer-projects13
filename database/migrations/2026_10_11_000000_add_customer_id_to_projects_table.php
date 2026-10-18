@@ -10,11 +10,11 @@ return new class extends Migration
     {
         Schema::table('PRO_projects', function (Blueprint $table): void {
             // Nullable because the table already has rows and SQLite refuses to add a NOT NULL
-            // column to one. The application still requires a customer on every project; see
-            // config/customer-projects13.php.
-            $table->foreignId('customer_id')
+            // column to one. The application still requires a entity on every project; see
+            // config/entity-projects13.php.
+            $table->foreignId('entity_id')
                 ->nullable()
-                ->constrained('CUM_customers')
+                ->constrained('CUM_entities')
                 ->restrictOnDelete();
         });
     }
@@ -24,8 +24,8 @@ return new class extends Migration
         Schema::table('PRO_projects', function (Blueprint $table): void {
             // The foreign key goes first: SQLite refuses to drop a column that a live foreign key
             // definition still points at.
-            $table->dropForeign(['customer_id']);
-            $table->dropColumn('customer_id');
+            $table->dropForeign(['entity_id']);
+            $table->dropColumn('entity_id');
         });
     }
 };

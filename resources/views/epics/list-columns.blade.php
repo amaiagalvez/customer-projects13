@@ -1,2 +1,2 @@
-{{-- The customer column of the epic list. --}}
-<flux:table.column scope="col">{{ __('Customer') }}</flux:table.column>
+{{-- The entity column of the epic list. --}}
+<flux:table.column scope="col">{{ __('Entity') }}</flux:table.column>

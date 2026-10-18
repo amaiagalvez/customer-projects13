@@ -1,46 +1,46 @@
 /**
- * The customer selector of the project form.
+ * The entity selector of the project form.
  *
  * This file belongs to the package, not to the host application: the field it drives is the
  * integration's own, and its behaviour does not change when the host changes. A host that installs
  * this package imports it from its own entry point:
  *
- *     import { initializeCustomerSelects } from './vendor/customer-projects13/js/customer-select.js';
+ *     import { initializeEntitySelects } from './vendor/entity-projects13/js/entity-select.js';
  *
- * or, with the asset published under `resources/js/vendor/customer-projects13`:
+ * or, with the asset published under `resources/js/vendor/entity-projects13`:
  *
- *     import { initializeCustomerSelects } from '../../vendor/customer-projects13/customer-select.js';
+ *     import { initializeEntitySelects } from '../../vendor/entity-projects13/entity-select.js';
  *
- * and then calls `initializeCustomerSelects()` once the page is ready. `jquery` and `select2` are
+ * and then calls `initializeEntitySelects()` once the page is ready. `jquery` and `select2` are
  * read off the window, so the host decides which copy it bundles; nothing is imported here.
  */
-export function initializeCustomerSelects(root = document) {
-    if (root instanceof Element && root.matches('[data-project-customer-select]')) {
-        initializeCustomerSelect(root);
+export function initializeEntitySelects(root = document) {
+    if (root instanceof Element && root.matches('[data-project-entity-select]')) {
+        initializeEntitySelect(root);
     }
 
-    root.querySelectorAll?.('[data-project-customer-select]').forEach((element) => {
-        initializeCustomerSelect(element);
+    root.querySelectorAll?.('[data-project-entity-select]').forEach((element) => {
+        initializeEntitySelect(element);
     });
 }
 
-function renderCustomerSelection(data, element) {
+function renderEntitySelection(data, element) {
     if (data.element?.dataset.active !== 'false') {
         return data.text;
     }
 
-    return renderArchivedCustomer(data.text, element);
+    return renderArchivedEntity(data.text, element);
 }
 
-function renderCustomerResult(data, element) {
+function renderEntityResult(data, element) {
     if (data.active !== false) {
         return data.text;
     }
 
-    return renderArchivedCustomer(data.text, element);
+    return renderArchivedEntity(data.text, element);
 }
 
-function renderArchivedCustomer(text, element) {
+function renderArchivedEntity(text, element) {
     const selection = document.createElement('span');
     selection.append(document.createTextNode(`${text} `));
 
@@ -56,12 +56,12 @@ function renderArchivedCustomer(text, element) {
  * Every drawer in the page is re-rendered when it opens, so the selects are watched instead of
  * being bound once on load: an element that was not in the DOM yet has never seen select2.
  */
-export function observeCustomerSelects(root = document.documentElement) {
+export function observeEntitySelects(root = document.documentElement) {
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
                 if (node instanceof Element) {
-                    initializeCustomerSelects(node);
+                    initializeEntitySelects(node);
                 }
             });
         });
@@ -72,7 +72,7 @@ export function observeCustomerSelects(root = document.documentElement) {
     return observer;
 }
 
-function initializeCustomerSelect(element) {
+function initializeEntitySelect(element) {
     const $ = window.jQuery;
 
     if (!$) {
@@ -91,34 +91,34 @@ function initializeCustomerSelect(element) {
         dropdownParent: $(element.closest('dialog')),
         placeholder: element.dataset.placeholder,
         allowClear: true,
-        templateSelection: (data) => renderCustomerSelection(data, element),
-        templateResult: (data) => renderCustomerResult(data, element),
+        templateSelection: (data) => renderEntitySelection(data, element),
+        templateResult: (data) => renderEntityResult(data, element),
         tags: true,
         ajax: {
-            url: element.dataset.customerSearchUrl,
+            url: element.dataset.entitySearchUrl,
             dataType: 'json',
             delay: 250,
             headers: { Accept: 'application/json' },
             data: (params) => ({ q: params.term ?? '' }),
             processResults: (data) => {
                 const projectForm = window.Alpine.$data(form).form;
-                const selectedArchivedCustomer = projectForm.method === 'PUT'
-                    && projectForm.customer_active === false
-                    && projectForm.customer_id
-                    && projectForm.customer_name
+                const selectedArchivedEntity = projectForm.method === 'PUT'
+                    && projectForm.entity_active === false
+                    && projectForm.entity_id
+                    && projectForm.entity_name
                     ? [{
-                        id: String(projectForm.customer_id),
-                        text: projectForm.customer_name,
+                        id: String(projectForm.entity_id),
+                        text: projectForm.entity_name,
                         active: false,
                     }]
                     : [];
-                const archivedCustomerId = selectedArchivedCustomer[0]?.id;
-                const results = archivedCustomerId
-                    ? data.results.filter((result) => String(result.id) !== archivedCustomerId)
+                const archivedEntityId = selectedArchivedEntity[0]?.id;
+                const results = archivedEntityId
+                    ? data.results.filter((result) => String(result.id) !== archivedEntityId)
                     : data.results;
 
                 return {
-                    results: [...selectedArchivedCustomer, ...results].map((result) => ({
+                    results: [...selectedArchivedEntity, ...results].map((result) => ({
                         ...result,
                         // Select2 4.0.13 calls its AJAX normalizer unbound.
                         _resultId: `select2-${element.id}-result-${result.id}`,
@@ -141,10 +141,10 @@ function initializeCustomerSelect(element) {
             }
 
             return {
-                id: `new-customer:${name}`,
+                id: `new-entity:${name}`,
                 text: `${element.dataset.createLabel}: ${name}`,
                 newTag: true,
-                customerName: name,
+                entityName: name,
             };
         },
     }).on('select2:select', async (event) => {
@@ -152,23 +152,23 @@ function initializeCustomerSelect(element) {
         const projectForm = window.Alpine.$data(form);
 
         if (!option.newTag) {
-            projectForm.form.customer_name = option.text;
-            projectForm.form.customer_active = option.active === false ? false : true;
-            projectForm.form.customerCreateError = '';
+            projectForm.form.entity_name = option.text;
+            projectForm.form.entity_active = option.active === false ? false : true;
+            projectForm.form.entityCreateError = '';
             element.dispatchEvent(new Event('change', { bubbles: true }));
 
             return;
         }
 
-        const customerForm = element.closest('form');
+        const entityForm = element.closest('form');
         const temporaryValue = String(option.id);
-        const csrfToken = customerForm.querySelector('input[name="_token"]').value;
+        const csrfToken = entityForm.querySelector('input[name="_token"]').value;
 
-        projectForm.form.customerCreateError = '';
-        projectForm.form.customerCreating = true;
+        projectForm.form.entityCreateError = '';
+        projectForm.form.entityCreating = true;
 
         try {
-            const response = await fetch(element.dataset.customerStoreUrl, {
+            const response = await fetch(element.dataset.entityStoreUrl, {
                 method: 'POST',
                 headers: {
                     Accept: 'application/json',
@@ -176,7 +176,7 @@ function initializeCustomerSelect(element) {
                     'X-CSRF-TOKEN': csrfToken,
                     'X-Requested-With': 'XMLHttpRequest',
                 },
-                body: JSON.stringify({ name: option.customerName }),
+                body: JSON.stringify({ name: option.entityName }),
             });
             const result = await response.json();
 
@@ -186,22 +186,22 @@ function initializeCustomerSelect(element) {
 
             element.querySelector(`option[value="${CSS.escape(temporaryValue)}"]`)?.remove();
 
-            const customerOption = new Option(result.name, String(result.id), true, true);
-            customerOption.dataset.active = 'true';
-            element.add(customerOption);
-            projectForm.form.customer_name = result.name;
-            projectForm.form.customer_active = true;
+            const entityOption = new Option(result.name, String(result.id), true, true);
+            entityOption.dataset.active = 'true';
+            element.add(entityOption);
+            projectForm.form.entity_name = result.name;
+            projectForm.form.entity_active = true;
             select.val(String(result.id));
             element.dispatchEvent(new Event('change', { bubbles: true }));
         } catch (error) {
             element.querySelector(`option[value="${CSS.escape(temporaryValue)}"]`)?.remove();
             select.val(null).trigger('change.select2');
             element.dispatchEvent(new Event('change', { bubbles: true }));
-            projectForm.form.customer_name = '';
-            projectForm.form.customer_active = null;
-            projectForm.form.customerCreateError = error.message || element.dataset.createError;
+            projectForm.form.entity_name = '';
+            projectForm.form.entity_active = null;
+            projectForm.form.entityCreateError = error.message || element.dataset.createError;
         } finally {
-            projectForm.form.customerCreating = false;
+            projectForm.form.entityCreating = false;
         }
     });
 }

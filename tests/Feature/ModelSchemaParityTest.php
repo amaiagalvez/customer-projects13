@@ -1,9 +1,9 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -41,14 +41,14 @@ class ModelSchemaParityTest extends TestCase
         'active_name',
         'epic_id',
         'user_id',
-        // Written by amaia/customer-projects13 with `forceFill()`, from the attributes it validated
+        // Written by amaia/entity-projects13 with `forceFill()`, from the attributes it validated
         // itself. It is deliberately absent from `#[Fillable]`: a mass assignment would let any
-        // request that reached the model attach a project to a customer it never checked.
-        'customer_id',
+        // request that reached the model attach a project to a entity it never checked.
+        'entity_id',
     ];
 
     private const MODELS = [
-        Customer::class,
+        Entity::class,
         Project::class,
         Epic::class,
         EpicComment::class,

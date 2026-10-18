@@ -1,11 +1,11 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature;
+namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use CustomerProjects13\Tests\Support\RacesNameInsert;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Models\Customer;
+use EntityProjects13\Tests\Support\RacesNameInsert;
+use EntityProjects13\Tests\TestCase;
+use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Projects13\Models\Epic;
@@ -23,19 +23,19 @@ class ConcurrentNameInsertTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * @return array<string, array{0: 'customer'|'project'|'epic', 1: non-empty-string}>
+     * @return array<string, array{0: 'entity'|'project'|'epic', 1: non-empty-string}>
      */
     public static function resources(): array
     {
         return [
-            'customers' => ['customer', 'customers.index'],
+            'entities' => ['entity', 'entities.index'],
             'projects' => ['project', 'projects.index'],
             'epics' => ['epic', 'epics.index'],
         ];
     }
 
     /**
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  non-empty-string  $indexRoute
      */
     #[DataProvider('resources')]
@@ -44,12 +44,12 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $name = 'Concurrent Store '.$singular;
+        $name = 'Concurrent Store ' . $singular;
         $payload = $this->payloadFor($singular, $name);
         $parentId = $this->parentIdFromPayload($payload);
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
         $table = match ($singular) {
-            'customer' => (new Customer)->getTable(),
+            'entity' => (new Entity)->getTable(),
             'project' => (new Project)->getTable(),
             'epic' => (new Epic)->getTable(),
         };
@@ -57,11 +57,11 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $parentId),
+            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $parentId),
         );
 
         $this->from(route($indexRoute))
-            ->post(route($routePrefix.'.store'), $payload)
+            ->post(route($routePrefix . '.store'), $payload)
             ->assertRedirect(route($indexRoute))
             ->assertSessionHasErrors([
                 'name' => __('validation.unique', ['attribute' => __('Name')]),
@@ -73,7 +73,7 @@ class ConcurrentNameInsertTest extends TestCase
     }
 
     /**
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  non-empty-string  $indexRoute
      */
     #[DataProvider('resources')]
@@ -82,8 +82,8 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $existing = $this->makeRecord($singular, ['name' => 'Original '.$singular]);
-        $name = 'Concurrent Update '.$singular;
+        $existing = $this->makeRecord($singular, ['name' => 'Original ' . $singular]);
+        $name = 'Concurrent Update ' . $singular;
         $payload = $this->payloadFor($singular, $name, parentId: $this->parentIdOf($existing));
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
         $table = $existing->getTable();
@@ -91,17 +91,17 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdFromPayload($payload)),
+            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdFromPayload($payload)),
         );
 
         $this->from(route($indexRoute))
-            ->put(route($routePrefix.'.update', $existing), $payload)
+            ->put(route($routePrefix . '.update', $existing), $payload)
             ->assertRedirect(route($indexRoute))
             ->assertSessionHasErrors([
                 'name' => __('validation.unique', ['attribute' => __('Name')]),
             ]);
 
-        $this->assertDatabaseHas($table, ['id' => $existing->id, 'name' => 'Original '.$singular]);
+        $this->assertDatabaseHas($table, ['id' => $existing->id, 'name' => 'Original ' . $singular]);
         $this->assertDatabaseHas($table, ['name' => $name, 'deleted_at' => null]);
     }
 
@@ -110,7 +110,7 @@ class ConcurrentNameInsertTest extends TestCase
      * The race is on the name the trashed record already carries, because the restore looks that up
      * itself; no name is sent in the body.
      *
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  non-empty-string  $indexRoute
      */
     #[DataProvider('resources')]
@@ -119,7 +119,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $name = 'Concurrent Restore '.$singular;
+        $name = 'Concurrent Restore ' . $singular;
         $deleted = $this->makeRecord($singular, ['name' => $name], trashed: true);
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
         $table = $deleted->getTable();
@@ -127,11 +127,11 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdOf($deleted)),
+            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdOf($deleted)),
         );
 
-        $this->patch(route($routePrefix.'.trash.restore', $deleted->id))
-            ->assertRedirect(route($routePrefix.'.trash.index'))
+        $this->patch(route($routePrefix . '.trash.restore', $deleted->id))
+            ->assertRedirect(route($routePrefix . '.trash.index'))
             ->assertSessionHas('error', __('basics13::messages.cannot_restore_name_taken'));
 
         $this->assertSoftDeleted($deleted);
@@ -142,18 +142,18 @@ class ConcurrentNameInsertTest extends TestCase
      * Epic names are unique per project, so a competitor must land in the same project as the
      * record it is racing, or its name is legitimately free.
      *
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @param  array<string, mixed>  $attributes
      */
-    private function makeRecord(string $singular, array $attributes = [], bool $trashed = false, ?int $parentId = null): Customer|Project|Epic
+    private function makeRecord(string $singular, array $attributes = [], bool $trashed = false, ?int $parentId = null): Entity|Project|Epic
     {
         return match ($singular) {
-            'customer' => $trashed
-                ? Customer::factory()->trashed()->create($attributes)
-                : Customer::factory()->create($attributes),
+            'entity' => $trashed
+                ? Entity::factory()->trashed()->create($attributes)
+                : Entity::factory()->create($attributes),
             'project' => $trashed
-                ? Project::factory()->for($this->customer())->trashed()->create($attributes)
-                : Project::factory()->for($this->customer())->create($attributes),
+                ? Project::factory()->for($this->entity())->trashed()->create($attributes)
+                : Project::factory()->for($this->entity())->create($attributes),
             // The parent may itself be trashed, so it is resolved with withTrashed(). When no parent
             // is given, a fresh one is built, which is what an epic fixture needs on its own.
             default => $trashed
@@ -169,7 +169,7 @@ class ConcurrentNameInsertTest extends TestCase
      */
     private function parentIdFromPayload(array $payload): ?int
     {
-        $id = $payload['customer_id'] ?? $payload['project_id'] ?? null;
+        $id = $payload['entity_id'] ?? $payload['project_id'] ?? null;
 
         return is_int($id) ? $id : null;
     }
@@ -181,18 +181,18 @@ class ConcurrentNameInsertTest extends TestCase
     private function projectFor(?int $parentId): Project
     {
         return $parentId === null
-            ? Project::factory()->for($this->customer())->create(['name' => 'Concurrent Epic Parent'])
+            ? Project::factory()->for($this->entity())->create(['name' => 'Concurrent Epic Parent'])
             : Project::withTrashed()->findOrFail($parentId);
     }
 
     /**
      * The foreign key the record hangs from, or null when the record is itself the parent.
      */
-    private function parentIdOf(Customer|Project|Epic $record): ?int
+    private function parentIdOf(Entity|Project|Epic $record): ?int
     {
         return match (true) {
             $record instanceof Epic => $record->project_id,
-            $record instanceof Project => $record->getAttribute('customer_id'),
+            $record instanceof Project => $record->getAttribute('entity_id'),
             default => null,
         };
     }
@@ -201,21 +201,21 @@ class ConcurrentNameInsertTest extends TestCase
      * The parent must already exist before the request: project and epic lock it inside their
      * transaction, so creating it lazily here would deadlock the race instead of exercising it.
      *
-     * @param  'customer'|'project'|'epic'  $singular
+     * @param  'entity'|'project'|'epic'  $singular
      * @return array<string, mixed>
      */
     private function payloadFor(string $singular, string $name, ?int $parentId = null): array
     {
         return match ($singular) {
-            'customer' => ['name' => $name],
+            'entity' => ['name' => $name],
             'project' => [
                 'name' => $name,
                 'start_date' => '2045-07-09',
-                'customer_id' => $parentId ?? Customer::factory()->create()->id,
+                'entity_id' => $parentId ?? Entity::factory()->create()->id,
             ],
             default => [
                 'name' => $name,
-                'project_id' => $parentId ?? Project::factory()->for($this->customer())->create(['name' => 'Concurrent Parent'])->id,
+                'project_id' => $parentId ?? Project::factory()->for($this->entity())->create(['name' => 'Concurrent Parent'])->id,
             ],
         };
     }

@@ -1,17 +1,17 @@
 <?php
 
-namespace CustomerProjects13\Tests\Feature\Migrations;
+namespace EntityProjects13\Tests\Feature\Migrations;
 
-use CustomerProjects13\Tests\TestCase;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
-class CustomerIdOnProjectsMigrationTest extends TestCase
+class EntityIdOnProjectsMigrationTest extends TestCase
 {
-    public function test_customer_id_migration_can_be_rolled_back(): void
+    public function test_entity_id_migration_can_be_rolled_back(): void
     {
-        $connectionName = 'customer_projects13_customer_id_migration_test';
+        $connectionName = 'entity_projects13_entity_id_migration_test';
         $originalDefault = config('database.default');
         $sqliteConnection = config('database.connections.sqlite');
 
@@ -39,31 +39,31 @@ class CustomerIdOnProjectsMigrationTest extends TestCase
                 $table->timestamps();
             });
 
-            // Create the customers table for the foreign key
-            Schema::create('CUM_customers', function (Blueprint $table): void {
+            // Create the entities table for the foreign key
+            Schema::create('CUM_entities', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name');
                 $table->softDeletes();
                 $table->timestamps();
             });
 
-            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_11_000000_add_customer_id_to_projects_table.php';
+            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_11_000000_add_entity_id_to_projects_table.php';
             $migration->up();
 
-            $this->assertTrue(Schema::hasColumn('PRO_projects', 'customer_id'));
+            $this->assertTrue(Schema::hasColumn('PRO_projects', 'entity_id'));
 
             $keys = array_values(array_filter(
                 Schema::getForeignKeys('PRO_projects'),
-                static fn (array $key): bool => $key['columns'] === ['customer_id'],
+                static fn(array $key): bool => $key['columns'] === ['entity_id'],
             ));
 
             $this->assertNotEmpty($keys, 'the foreign key has to be enforced, not just declared');
-            $this->assertSame('CUM_customers', $keys[0]['foreign_table']);
+            $this->assertSame('CUM_entities', $keys[0]['foreign_table']);
             $this->assertSame(['id'], $keys[0]['foreign_columns']);
 
             $migration->down();
 
-            $this->assertFalse(Schema::hasColumn('PRO_projects', 'customer_id'));
+            $this->assertFalse(Schema::hasColumn('PRO_projects', 'entity_id'));
         } finally {
             DB::purge($connectionName);
             config([
