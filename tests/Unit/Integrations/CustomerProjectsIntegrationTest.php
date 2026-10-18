@@ -60,7 +60,7 @@ class CustomerProjectsIntegrationTest extends TestCase
     {
         $integration = new CustomerProjectsIntegration;
 
-        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer']);
+        $customer = Customer::factory()->make(['id' => 1, 'name' => 'Test Customer', 'active' => true]);
         $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
         $project->setRelation('customer', $customer);
 
@@ -71,6 +71,7 @@ class CustomerProjectsIntegrationTest extends TestCase
 
         $this->assertSame([
             'customer' => 'Test Customer',
+            'customer_active' => true,
             'project_label' => 'Test Project (Test Customer)',
         ], $result);
     }

@@ -2,12 +2,12 @@
 
 namespace CustomerProjects13\Tests\Browser\Epics;
 
-use Laravel\Dusk\Browser;
-use Illuminate\Support\Str;
-use Projects13\Models\Epic;
-use Projects13\Models\Project;
 use CustomerProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Str;
+use Laravel\Dusk\Browser;
+use Projects13\Models\Epic;
+use Projects13\Models\Project;
 
 class EpicFormTest extends DuskTestCase
 {

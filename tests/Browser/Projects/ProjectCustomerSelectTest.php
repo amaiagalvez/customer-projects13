@@ -2,12 +2,12 @@
 
 namespace CustomerProjects13\Tests\Browser\Projects;
 
-use Laravel\Dusk\Browser;
-use Illuminate\Support\Str;
-use Projects13\Models\Project;
-use Customers13\Models\Customer;
 use CustomerProjects13\Tests\DuskTestCase;
+use Customers13\Models\Customer;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Str;
+use Laravel\Dusk\Browser;
+use Projects13\Models\Project;
 
 class ProjectCustomerSelectTest extends DuskTestCase
 {
