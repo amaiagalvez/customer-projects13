@@ -2,21 +2,21 @@
 
 namespace CustomerProjects13\Integrations;
 
+use Customers13\Models\Customer;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
+use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectDisplayIntegrationDefaults;
+use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectQueryIntegrationDefaults;
+use Projects13\Contracts\ProjectValidationIntegration;
+use Projects13\Contracts\ProjectValidationIntegrationDefaults;
+use Projects13\Http\Requests\ProjectRequest;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
-use Illuminate\Validation\Rule;
-use Customers13\Models\Customer;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Validation\Rules\Exists;
-use Illuminate\Database\Eloquent\Builder;
-use Projects13\Http\Requests\ProjectRequest;
-use Projects13\Contracts\ProjectQueryIntegration;
-use Projects13\Contracts\ProjectDisplayIntegration;
-use Projects13\Contracts\ProjectValidationIntegration;
-use Projects13\Contracts\ProjectQueryIntegrationDefaults;
-use Projects13\Contracts\ProjectDisplayIntegrationDefaults;
-use Projects13\Contracts\ProjectValidationIntegrationDefaults;
 
 /**
  * A project hangs from a customer, and everything that follows from it: the field in the form, the
@@ -97,9 +97,13 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
             $owner.'.customer_id',
         );
 
-        // Without the column selected the relation cannot be resolved afterwards, and the label of
-        // a project is half a customer.
-        $query->addSelect($owner.'.customer_id');
+        // Select customer columns to avoid N+1 when the transformer accesses the customer relation.
+        // Use distinct aliases to avoid conflict with PRO_projects.customer_id (the FK).
+        $query->addSelect([
+            $alias.'.name as customer_name',
+            $alias.'.id as customer_id_joined',
+            $alias.'.active as customer_active',
+        ]);
 
         if ($scope === 'epic') {
             // The relation feeds the integration's customer fields and the base edit payload's
@@ -158,6 +162,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
 
             return array_filter([
                 'customer' => $customer?->name,
+                'customer_active' => $customer?->active,
                 'project_label' => $this->label($record->project),
             ], static fn (mixed $value): bool => $value !== null);
         }
@@ -220,8 +225,33 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
         };
     }
 
-    private function customerOf(Project $project): ?Customer
+    /**
+     * @return object{name: string, id: int, active: bool}|null
+     */
+    private function customerOf(Project $project): ?object
     {
-        return $project->getRelationValue('customer');
+        // Prefer joined columns (set by scope()) to avoid N+1. Fall back to the relation
+        // for unit tests that set the relation directly without the joined columns.
+        $name = $project->getAttribute('customer_name');
+
+        if ($name !== null) {
+            return (object) [
+                'name' => $name,
+                'id' => $project->getAttribute('customer_id_joined'),
+                'active' => (bool) $project->getAttribute('customer_active'),
+            ];
+        }
+
+        $customer = $project->getRelationValue('customer');
+
+        if ($customer === null) {
+            return null;
+        }
+
+        return (object) [
+            'name' => $customer->name,
+            'id' => $customer->id,
+            'active' => $customer->active,
+        ];
     }
 }
