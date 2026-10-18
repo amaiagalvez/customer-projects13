@@ -67,9 +67,31 @@ class ListTransformerContractTest extends TestCase
     {
         app()->setLocale('en');
         $list = $this->payload($transformerClass, $state);
+        $prefix = match ($transformerClass) {
+            CustomerListTransformer::class => 'customers',
+            ProjectListTransformer::class => 'projects',
+            EpicListTransformer::class => 'epics',
+            default => throw new \LogicException("Unsupported transformer class [{$transformerClass}]."),
+        };
 
         $this->assertSame(self::ENVELOPE_KEYS, array_keys($list));
         $this->assertSame($state === 'active', $list['create']);
+        $this->assertSame(
+            route($prefix.'.'.match ($state) {
+                'active' => 'index',
+                'archived' => 'archived.index',
+                'trash' => 'trash.index',
+            }),
+            $list['search']['action'],
+        );
+        $this->assertSame(
+            [
+                route($prefix.'.index'),
+                route($prefix.'.archived.index'),
+                route($prefix.'.trash.index'),
+            ],
+            array_column($list['tabs'], 'url'),
+        );
         $this->assertSame(
             match ($state) {
                 'active' => __('Created at'),
@@ -100,6 +122,30 @@ class ListTransformerContractTest extends TestCase
 
         $this->assertSame([null, null, null], array_column($tabsWithoutCounts, 'count'));
         $this->assertSame([2, 1, 3], array_column($tabsWithCounts, 'count'));
+    }
+
+    /**
+     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     */
+    #[DataProvider('transformers')]
+    public function test_every_resource_uses_the_same_active_empty_state_message(string $transformerClass): void
+    {
+        /** @var array<string, mixed> $list */
+        $list = $this->payload($transformerClass, 'active');
+
+        $this->assertSame('No records yet.', $list['emptyMessage']);
+    }
+
+    /**
+     * @param  class-string<CustomerListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
+     */
+    #[DataProvider('transformers')]
+    public function test_every_resource_uses_the_same_no_match_message(string $transformerClass): void
+    {
+        /** @var array<string, mixed> $list */
+        $list = $this->payload($transformerClass, 'active', null, 'missing');
+
+        $this->assertSame('No records match your search.', $list['emptyMessage']);
     }
 
     /**
@@ -188,28 +234,28 @@ class ListTransformerContractTest extends TestCase
      * @param  array{active: int, archived: int, trashed: int}|null  $counts
      * @return array<string, mixed>
      */
-    private function payload(string $transformerClass, string $state, ?array $counts = null): array
+    private function payload(string $transformerClass, string $state, ?array $counts = null, string $search = ''): array
     {
         return match (true) {
             $transformerClass === CustomerListTransformer::class => $this->customerState(
                 app(CustomerListTransformer::class),
                 $this->customers(),
                 $state,
-                '',
+                $search,
                 $counts,
             ),
             $transformerClass === ProjectListTransformer::class => $this->projectState(
                 app(ProjectListTransformer::class),
                 $this->projects(),
                 $state,
-                '',
+                $search,
                 $counts,
             ),
             default => $this->epicState(
                 app(EpicListTransformer::class),
                 $this->epics(),
                 $state,
-                '',
+                $search,
                 $counts,
             ),
         };

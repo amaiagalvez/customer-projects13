@@ -196,7 +196,7 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index', ['search' => '2001-02-03']))
             ->assertOk()
-            ->assertSee(__('No projects match your search.'))
+            ->assertSee('No records match your search.')
             ->assertDontSee('Website redesign');
     }
 
@@ -464,7 +464,7 @@ class ProjectCrudTest extends TestCase
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSee('data-test="list-empty-state"', false)
-            ->assertSee(__('No projects yet.'));
+            ->assertSee('No records yet.');
     }
 
     public function test_guests_are_redirected_to_login_from_the_projects_list(): void
