@@ -13,17 +13,14 @@ foreach ([$storageDir, $cacheDir] as $dir) {
 }
 
 foreach (glob($storageDir.'/*.php') ?: [] as $compiledView) {
-    $compiledViewContents = file_get_contents($compiledView);
+    // A parallel worker may remove the view between the glob and the read.
+    $compiledViewContents = @file_get_contents($compiledView);
 
-    if ($compiledViewContents === false) {
-        throw new RuntimeException(sprintf('Unable to read compiled view: %s', $compiledView));
-    }
-
-    if (! str_contains($compiledViewContents, 'PATH /packages/')) {
+    if ($compiledViewContents === false || ! str_contains($compiledViewContents, 'PATH /packages/')) {
         continue;
     }
 
-    if (! unlink($compiledView)) {
+    if (! @unlink($compiledView) && is_file($compiledView)) {
         throw new RuntimeException(sprintf('Unable to clear compiled view: %s', $compiledView));
     }
 }
@@ -38,4 +35,5 @@ if (! is_dir($tempDir) && ! mkdir($tempDir, 0777, true) && ! is_dir($tempDir)) {
 
 putenv(sprintf('VIEW_COMPILED_PATH=%s', $storageDir));
 
-require __DIR__.'/../vendor/autoload.php';
+$loader = require __DIR__.'/../vendor/autoload.php';
+$loader->addPsr4('Basics13\\Tests\\', __DIR__.'/../vendor/amaia/basics13/tests/');

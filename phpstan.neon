@@ -4,6 +4,9 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
+    bootstrapFiles:
+        - tests/bootstrap.php
+
     paths:
         - config/
         - database/

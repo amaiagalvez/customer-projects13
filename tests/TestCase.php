@@ -3,8 +3,8 @@
 namespace CustomerProjects13\Tests;
 
 use App\Models\User;
-use Basics13\Tests\TestCase as Basics13TestCase;
 use Basics13\Support\Testing\ValidatesFormRequests;
+use Basics13\Tests\TestCase as Basics13TestCase;
 use Carbon\CarbonImmutable;
 use CustomerProjects13\ServiceProvider as CustomerProjects13ServiceProvider;
 use Customers13\Models\Customer;
@@ -56,6 +56,7 @@ abstract class TestCase extends Basics13TestCase
     protected function getPackageProviders($app): array
     {
         return [
+            ...parent::getPackageProviders($app),
             FluxServiceProvider::class,
             Customers13ServiceProvider::class,
             Projects13ServiceProvider::class,
