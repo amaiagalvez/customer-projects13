@@ -17,8 +17,6 @@ return [
     */
 
     'project' => [
-        'customer_column' => 'customer_id',
-        'customer_table' => 'CUM_customers',
     ],
 
 ];
