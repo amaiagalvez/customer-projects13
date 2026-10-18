@@ -3,7 +3,7 @@
 namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use entities13\Database\Seeders\DevelopEntitySeeder;
+use Entities13\Database\Seeders\DevelopEntitySeeder;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Database\Seeders\DevelopProjectSeeder;
@@ -27,7 +27,7 @@ class PackageSeederTest extends TestCase
         $this->assertDatabaseCount('PRO_epics', 15);
         $this->assertDatabaseCount('PRO_epic_comments', 36);
         $this->assertSame(0, Project::query()->distinct()->count('entity_id'));
-        $this->assertSame(12, Epic::query()->whereHas('project', fn ($query) => $query
+        $this->assertSame(12, Epic::query()->whereHas('project', fn($query) => $query
             ->where('name', 'like', 'Perf Project %'))->count());
         $this->assertSame(36, EpicComment::query()->count());
     }
