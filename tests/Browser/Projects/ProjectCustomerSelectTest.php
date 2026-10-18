@@ -2,12 +2,12 @@
 
 namespace CustomerProjects13\Tests\Browser\Projects;
 
-use CustomerProjects13\Tests\DuskTestCase;
-use Customers13\Models\Customer;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
+use Illuminate\Support\Str;
 use Projects13\Models\Project;
+use Customers13\Models\Customer;
+use CustomerProjects13\Tests\DuskTestCase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class ProjectCustomerSelectTest extends DuskTestCase
 {
@@ -150,7 +150,11 @@ class ProjectCustomerSelectTest extends DuskTestCase
                     10,
                 )
                 ->assertSeeIn(self::OPEN_DIALOG.' .select2-results', $activeCustomer->name)
-                ->assertDontSeeIn(self::OPEN_DIALOG.' .select2-results', $archivedCustomer->name)
+                ->assertSeeIn(self::OPEN_DIALOG.' .select2-results', $archivedCustomer->name)
+                ->assertSeeIn(
+                    self::OPEN_DIALOG.' .select2-results',
+                    __('basics13::messages.archived_label'),
+                )
                 ->assertDontSeeIn(self::OPEN_DIALOG.' .select2-results', $otherInactiveCustomer->name)
                 ->assertSelected(self::OPEN_DIALOG.' #project-customer-id', (string) $archivedCustomer->id)
                 ->click('#select2-project-customer-id-result-'.$activeCustomer->id)

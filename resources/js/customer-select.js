@@ -29,8 +29,20 @@ function renderCustomerSelection(data, element) {
         return data.text;
     }
 
+    return renderArchivedCustomer(data.text, element);
+}
+
+function renderCustomerResult(data, element) {
+    if (data.active !== false) {
+        return data.text;
+    }
+
+    return renderArchivedCustomer(data.text, element);
+}
+
+function renderArchivedCustomer(text, element) {
     const selection = document.createElement('span');
-    selection.append(document.createTextNode(`${data.text} `));
+    selection.append(document.createTextNode(`${text} `));
 
     const badge = document.createElement('span');
     badge.className = 'rounded-full bg-zinc-800/5 px-2 py-0.5 text-xs text-zinc-600 dark:bg-white/10 dark:text-zinc-300';
@@ -80,6 +92,7 @@ function initializeCustomerSelect(element) {
         placeholder: element.dataset.placeholder,
         allowClear: true,
         templateSelection: (data) => renderCustomerSelection(data, element),
+        templateResult: (data) => renderCustomerResult(data, element),
         tags: true,
         ajax: {
             url: element.dataset.customerSearchUrl,
@@ -87,13 +100,31 @@ function initializeCustomerSelect(element) {
             delay: 250,
             headers: { Accept: 'application/json' },
             data: (params) => ({ q: params.term ?? '' }),
-            processResults: (data) => ({
-                results: data.results.map((result) => ({
-                    ...result,
-                    // Select2 4.0.13 calls its AJAX normalizer unbound.
-                    _resultId: `select2-${element.id}-result-${result.id}`,
-                })),
-            }),
+            processResults: (data) => {
+                const projectForm = window.Alpine.$data(form).form;
+                const selectedArchivedCustomer = projectForm.method === 'PUT'
+                    && projectForm.customer_active === false
+                    && projectForm.customer_id
+                    && projectForm.customer_name
+                    ? [{
+                        id: String(projectForm.customer_id),
+                        text: projectForm.customer_name,
+                        active: false,
+                    }]
+                    : [];
+                const archivedCustomerId = selectedArchivedCustomer[0]?.id;
+                const results = archivedCustomerId
+                    ? data.results.filter((result) => String(result.id) !== archivedCustomerId)
+                    : data.results;
+
+                return {
+                    results: [...selectedArchivedCustomer, ...results].map((result) => ({
+                        ...result,
+                        // Select2 4.0.13 calls its AJAX normalizer unbound.
+                        _resultId: `select2-${element.id}-result-${result.id}`,
+                    })),
+                };
+            },
             cache: true,
         },
         language: {
@@ -122,7 +153,7 @@ function initializeCustomerSelect(element) {
 
         if (!option.newTag) {
             projectForm.form.customer_name = option.text;
-            projectForm.form.customer_active = true;
+            projectForm.form.customer_active = option.active === false ? false : true;
             projectForm.form.customerCreateError = '';
             element.dispatchEvent(new Event('change', { bubbles: true }));
 
