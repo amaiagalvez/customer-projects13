@@ -40,25 +40,25 @@ class EntityIdOnProjectsMigrationTest extends TestCase
             });
 
             // Create the entities table for the foreign key
-            Schema::create('CUM_entities', function (Blueprint $table): void {
+            Schema::create('ENT_entities', function (Blueprint $table): void {
                 $table->id();
                 $table->string('name');
                 $table->softDeletes();
                 $table->timestamps();
             });
 
-            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_11_000000_add_entity_id_to_projects_table.php';
+            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_11_000000_add_entity_id_to_projects_table.php';
             $migration->up();
 
             $this->assertTrue(Schema::hasColumn('PRO_projects', 'entity_id'));
 
             $keys = array_values(array_filter(
                 Schema::getForeignKeys('PRO_projects'),
-                static fn(array $key): bool => $key['columns'] === ['entity_id'],
+                static fn (array $key): bool => $key['columns'] === ['entity_id'],
             ));
 
             $this->assertNotEmpty($keys, 'the foreign key has to be enforced, not just declared');
-            $this->assertSame('CUM_entities', $keys[0]['foreign_table']);
+            $this->assertSame('ENT_entities', $keys[0]['foreign_table']);
             $this->assertSame(['id'], $keys[0]['foreign_columns']);
 
             $migration->down();

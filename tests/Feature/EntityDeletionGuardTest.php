@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Feature;
 
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -71,11 +71,11 @@ class EntityDeletionGuardTest extends TestCase
 
         DB::listen(
             static function (QueryExecuted $query) use (&$levels): void {
-                if (str_starts_with($query->sql, 'select') && str_contains($query->sql, 'CUM_entities')) {
+                if (str_starts_with($query->sql, 'select') && str_contains($query->sql, 'ENT_entities')) {
                     $levels['guard'] = DB::transactionLevel();
                 }
 
-                if (str_starts_with($query->sql, 'update') && str_contains($query->sql, 'CUM_entities')) {
+                if (str_starts_with($query->sql, 'update') && str_contains($query->sql, 'ENT_entities')) {
                     $levels['delete'] = DB::transactionLevel();
                 }
             },
@@ -111,7 +111,7 @@ class EntityDeletionGuardTest extends TestCase
 
         $this->expectException(QueryException::class);
 
-        DB::table('CUM_entities')->where('id', $entity->id)->delete();
+        DB::table('ENT_entities')->where('id', $entity->id)->delete();
     }
 
     public function test_a_entity_without_projects_can_be_deleted(): void
@@ -136,7 +136,7 @@ class EntityDeletionGuardTest extends TestCase
 
         $response->assertOk();
         $this->assertStringContainsString(
-            'entity-archive-' . $entity->id,
+            'entity-archive-'.$entity->id,
             $response->getContent() ?: '',
         );
     }

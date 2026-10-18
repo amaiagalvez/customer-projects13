@@ -18,19 +18,19 @@ class EpicCommentTest extends DuskTestCase
     public function test_comment_added_from_the_edit_drawer_is_shown_after_reopening_it(): void
     {
         $user = $this->user(['name' => 'Dusk commenter']);
-        $epicName = 'Dusk epic ' . Str::uuid()->toString();
+        $epicName = 'Dusk epic '.Str::uuid()->toString();
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create(['name' => $epicName]);
-        $existingComment = 'Existing comment ' . Str::uuid()->toString();
+        $existingComment = 'Existing comment '.Str::uuid()->toString();
         EpicComment::factory()->for($epic)->for($user)->create(['body' => $existingComment]);
-        $commentBody = 'Dusk comment ' . Str::uuid()->toString();
+        $commentBody = 'Dusk comment '.Str::uuid()->toString();
 
         $this->browse(function (Browser $browser) use ($user, $epic, $epicName, $existingComment, $commentBody): void {
             $browser->loginAs($user)
-                ->visit('/epics?search=' . urlencode($epicName))
-                ->assertSeeIn('[data-test="epic-comments-count-' . $epic->id . '"]', '1')
+                ->visit('/epics?search='.urlencode($epicName))
+                ->assertSeeIn('[data-test="epic-comments-count-'.$epic->id.'"]', '1')
                 ->assertDontSee($existingComment)
-                ->click('[data-test="epic-edit-' . $epic->id . '"]')
+                ->click('[data-test="epic-edit-'.$epic->id.'"]')
                 ->waitFor('dialog[open] [data-test="epic-comments"]')
                 ->waitFor('dialog[open] [data-test="epic-comment"]')
                 ->assertSeeIn('dialog[open]', $existingComment)
@@ -39,7 +39,7 @@ class EpicCommentTest extends DuskTestCase
                     false,
                 )
                 ->type('dialog[open] [data-test="epic-comment-body"]', $commentBody)
-                ->waitForReload(fn(Browser $browser) => $browser->click(
+                ->waitForReload(fn (Browser $browser) => $browser->click(
                     'dialog[open] [data-test="epic-comment-submit"]'
                 ))
                 ->waitFor('dialog[open] [data-test="epic-comment"]')
@@ -47,7 +47,7 @@ class EpicCommentTest extends DuskTestCase
                 ->assertSeeIn('dialog[open]', $existingComment)
                 ->assertSeeIn('dialog[open] [data-test="epic-comment"]', $commentBody)
                 ->assertSeeIn('dialog[open] [data-test="epic-comment"]', 'Dusk commenter')
-                ->assertSeeIn('[data-test="epic-comments-count-' . $epic->id . '"]', '2');
+                ->assertSeeIn('[data-test="epic-comments-count-'.$epic->id.'"]', '2');
         });
 
         $this->assertDatabaseHas('PRO_epic_comments', [
@@ -62,7 +62,7 @@ class EpicCommentTest extends DuskTestCase
         $user = $this->user();
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create([
-            'name' => 'Timezone epic ' . Str::uuid()->toString(),
+            'name' => 'Timezone epic '.Str::uuid()->toString(),
             'start_date' => '2026-10-01',
             'end_date' => '2026-10-02',
         ]);
@@ -78,7 +78,7 @@ class EpicCommentTest extends DuskTestCase
                 ['timezoneId' => 'Europe/Madrid'],
             );
 
-            $browser->visit('/epics?search=' . urlencode($epic->name))
+            $browser->visit('/epics?search='.urlencode($epic->name))
                 ->assertScript(
                     'document.querySelector(\'tbody time[data-local-datetime="date"]\').dateTime',
                     '2026-10-01',
@@ -91,7 +91,7 @@ class EpicCommentTest extends DuskTestCase
                     'document.querySelector(\'tbody time[data-local-datetime="date"]\').textContent.trim() === window.formatLocalDateTime(document.querySelector(\'tbody time[data-local-datetime="date"]\').dateTime, "date")',
                     true,
                 )
-                ->click('[data-test="epic-edit-' . $epic->id . '"]')
+                ->click('[data-test="epic-edit-'.$epic->id.'"]')
                 ->waitFor('dialog[open] [data-test="epic-comment-written-at"]')
                 ->assertScript('new Intl.DateTimeFormat().resolvedOptions().timeZone', 'Europe/Madrid')
                 ->assertScript(

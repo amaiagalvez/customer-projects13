@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d7c1201bca36341b5d52bd71eaf1808c",
+    "content-hash": "07e02cbf0d9efce0beeeecec2e32e340",
     "packages": [],
     "packages-dev": [
         {
@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "dd71d1b448d88cd8f84b0eeec8499aada676da41"
+                "reference": "ca1e6f4696999f96aba62fafc7935b4e294080f8"
             },
             "require": {
                 "laravel/boost": "^2.10",
@@ -67,12 +67,12 @@
             }
         },
         {
-            "name": "amaia/customers13",
+            "name": "amaia/entities13",
             "version": "1.0.0",
             "dist": {
                 "type": "path",
-                "url": "../packages/customers13",
-                "reference": "6b6e2ad93e3850a783561c443f80b58f90ff6a64"
+                "url": "../packages/entities13",
+                "reference": "ebe1170c40b1c669a65fddd368ad8ebc28f02932"
             },
             "require": {
                 "php": "^8.3"
@@ -90,27 +90,27 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "Customers13\\ServiceProvider"
+                        "entities13\\ServiceProvider"
                     ]
                 }
             },
             "autoload": {
                 "psr-4": {
-                    "Customers13\\Database\\Factories\\": "database/factories/",
-                    "Customers13\\Database\\Seeders\\": "database/seeders/",
-                    "Customers13\\": "src/"
+                    "entities13\\Database\\Factories\\": "database/factories/",
+                    "entities13\\Database\\Seeders\\": "database/seeders/",
+                    "entities13\\": "src/"
                 }
             },
             "autoload-dev": {
                 "psr-4": {
                     "App\\": "tests/Fixtures/App/",
-                    "Customers13\\Tests\\": "tests/"
+                    "entities13\\Tests\\": "tests/"
                 }
             },
             "license": [
                 "MIT"
             ],
-            "description": "Customer management for Laravel 13: CRUD, soft deletes, archive, trash and select options.",
+            "description": "Entity management for Laravel 13: CRUD, soft deletes, archive, trash and select options.",
             "transport-options": {
                 "symlink": true,
                 "relative": true
@@ -122,7 +122,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "643d6cc5fcfcf0d9d4bfaacdecb9cbdc575f3a9e"
+                "reference": "6570d86068b188d5b460efe9a36964cb5534f1f1"
             },
             "require": {
                 "php": "^8.3"

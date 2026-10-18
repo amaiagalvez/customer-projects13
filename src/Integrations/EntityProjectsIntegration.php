@@ -67,7 +67,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
     {
         $id = $request->integer('entity_id');
 
-        DB::transaction(static fn(): Entity => Entity::query()->lockForUpdate()->findOrFail($id));
+        DB::transaction(static fn (): Entity => Entity::query()->lockForUpdate()->findOrFail($id));
 
         return ['entity_id' => $id];
     }
@@ -91,18 +91,18 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
         // left join the row stays where it is and simply carries no entity, and the validation
         // below is what stops that state from being reachable through the application.
         $query->leftJoin(
-            (new Entity)->getTable() . ' as ' . $alias,
-            $alias . '.id',
+            (new Entity)->getTable().' as '.$alias,
+            $alias.'.id',
             '=',
-            $owner . '.entity_id',
+            $owner.'.entity_id',
         );
 
         // Select entity columns to avoid N+1 when the transformer accesses the entity relation.
         // Use distinct aliases to avoid conflict with PRO_projects.entity_id (the FK).
         $query->addSelect([
-            $alias . '.name as entity_name',
-            $alias . '.id as entity_id_joined',
-            $alias . '.active as entity_active',
+            $alias.'.name as entity_name',
+            $alias.'.id as entity_id_joined',
+            $alias.'.active as entity_active',
         ]);
 
         if ($scope === 'epic') {
@@ -118,7 +118,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
     public function orderings(string $scope, string $alias): array
     {
         return match ($scope) {
-            'project', 'epic' => [$alias . '.name'],
+            'project', 'epic' => [$alias.'.name'],
             default => [],
         };
     }
@@ -129,7 +129,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
      */
     public function searchColumns(string $scope, array $columns): array
     {
-        return [...$columns, $this->aliasFor($scope) . '.name'];
+        return [...$columns, $this->aliasFor($scope).'.name'];
     }
 
     /**
@@ -139,7 +139,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
      */
     public function label(Project $project): string
     {
-        return $project->name . ' (' . $this->entityOf($project)?->name . ')';
+        return $project->name.' ('.$this->entityOf($project)?->name.')';
     }
 
     /**
@@ -164,7 +164,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
                 'entity' => $entity?->name,
                 'entity_active' => $entity?->active,
                 'project_label' => $this->label($record->project),
-            ], static fn(mixed $value): bool => $value !== null);
+            ], static fn (mixed $value): bool => $value !== null);
         }
 
         if (! $record instanceof Project) {

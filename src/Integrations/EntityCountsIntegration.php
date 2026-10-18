@@ -31,18 +31,18 @@ final class EntityCountsIntegration extends EntityIntegration
     public function scope(Builder $query, string $scope, string $alias): void
     {
         $query
-            ->select('CUM_entities.*')
+            ->select('ENT_entities.*')
             // A left join, not an inner one: most entities have no projects at all, and an inner
             // join would drop them from the page and from its total before a count is even read.
-            ->leftJoin(self::ALIAS_TABLE, self::ALIAS . '.entity_id', '=', 'CUM_entities.id')
-            ->distinct('CUM_entities.id')
+            ->leftJoin(self::ALIAS_TABLE, self::ALIAS.'.entity_id', '=', 'ENT_entities.id')
+            ->distinct('ENT_entities.id')
             ->withCount([
-                'projects' => fn(Builder $projects): Builder => $projects->where('PRO_projects.active', true),
-                'epics' => fn(Builder $epics): Builder => $epics
+                'projects' => fn (Builder $projects): Builder => $projects->where('PRO_projects.active', true),
+                'epics' => fn (Builder $epics): Builder => $epics
                     ->where('PRO_epics.active', true)
                     ->where('PRO_projects.active', true),
             ])
-            ->withExists(['projects' => fn(Builder $projects): Builder => $projects
+            ->withExists(['projects' => fn (Builder $projects): Builder => $projects
                 ->withoutGlobalScope(SoftDeletingScope::class)])
             ->selectSub($this->activeCommentsCount(), 'comments_count');
     }
@@ -56,7 +56,7 @@ final class EntityCountsIntegration extends EntityIntegration
      */
     public function searchColumns(string $scope, array $columns): array
     {
-        return [...$columns, self::ALIAS . '.name'];
+        return [...$columns, self::ALIAS.'.name'];
     }
 
     /**
@@ -94,7 +94,7 @@ final class EntityCountsIntegration extends EntityIntegration
             ->selectRaw('count(*)')
             ->join('PRO_epics', 'PRO_epics.id', '=', 'PRO_epic_comments.epic_id')
             ->join('PRO_projects', 'PRO_projects.id', '=', 'PRO_epics.project_id')
-            ->whereColumn('PRO_projects.entity_id', 'CUM_entities.id')
+            ->whereColumn('PRO_projects.entity_id', 'ENT_entities.id')
             ->where('PRO_projects.active', true)
             ->whereNull('PRO_projects.deleted_at')
             ->where('PRO_epics.active', true)

@@ -4,8 +4,8 @@ namespace EntityProjects13\Tests\Feature\Epics;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Projects13\Models\Project;
 
 class ProjectSelectOptionsTest extends TestCase
@@ -47,6 +47,6 @@ class ProjectSelectOptionsTest extends TestCase
         $this->getJson(route('projects.options', ['q' => 'select project']))
             ->assertOk()
             ->assertJsonCount(1, 'results')
-            ->assertJsonPath('results.0.text', 'Active select project (' . $entity->name . ')');
+            ->assertJsonPath('results.0.text', 'Active select project ('.$entity->name.')');
     }
 }

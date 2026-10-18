@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Browser\Projects;
 
-use EntityProjects13\Tests\DuskTestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
@@ -37,9 +37,9 @@ class ProjectEntitySelectTest extends DuskTestCase
     {
         $user = $this->user();
         $executionId = Str::uuid()->toString();
-        $existingEntityName = 'Northwind ' . $executionId;
-        $newEntityName = 'Dusk Select2 ' . $executionId;
-        $projectName = 'Select2 project ' . $executionId;
+        $existingEntityName = 'Northwind '.$executionId;
+        $newEntityName = 'Dusk Select2 '.$executionId;
+        $projectName = 'Select2 project '.$executionId;
         Entity::factory()->create(['name' => $existingEntityName]);
 
         $this->browse(function (Browser $browser) use (
@@ -60,7 +60,7 @@ class ProjectEntitySelectTest extends DuskTestCase
                 ->click('#select2-project-entity-id-container')
                 ->type('dialog[open] .select2-container--open .select2-search__field', 'Northwind')
                 ->waitUntil(
-                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes(' . json_encode($existingEntityName) . ')',
+                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes('.json_encode($existingEntityName).')',
                     10,
                 )
                 ->assertSeeIn('dialog[open] .select2-results', $existingEntityName)
@@ -73,16 +73,16 @@ class ProjectEntitySelectTest extends DuskTestCase
                     $newEntityName,
                 )
                 ->waitUntil(
-                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes(' . json_encode(__('Create entity') . ': ' . $newEntityName) . ')',
+                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes('.json_encode(__('Create entity').': '.$newEntityName).')',
                     10,
                 )
                 ->assertSeeIn(
                     'dialog[open] .select2-results',
-                    __('Create entity') . ': ' . $newEntityName,
+                    __('Create entity').': '.$newEntityName,
                 )
                 ->click('dialog[open] .select2-results__option--selectable')
                 ->waitUntil(
-                    'document.querySelector("#project-entity-id option:checked")?.text === ' . json_encode($newEntityName),
+                    'document.querySelector("#project-entity-id option:checked")?.text === '.json_encode($newEntityName),
                     10,
                 )
                 ->type('dialog[open] [data-test="project-name"]', $projectName);
@@ -92,7 +92,7 @@ class ProjectEntitySelectTest extends DuskTestCase
             $browser
                 ->click('dialog[open] [data-test="project-submit"]')
                 ->waitFor('[data-test="project-status"]')
-                ->visit('/projects?search=' . urlencode($projectName))
+                ->visit('/projects?search='.urlencode($projectName))
                 ->waitUntil(
                     '(() => { const element = document.querySelector(\'tbody time[data-local-datetime="date"]\'); return element && element.textContent.trim() === window.formatLocalDateTime(element.dateTime, "date"); })()',
                     10,
@@ -131,36 +131,36 @@ class ProjectEntitySelectTest extends DuskTestCase
             $project,
         ): void {
             $browser->loginAs($user)
-                ->visit('/projects?search=' . urlencode($project->name))
-                ->click('[data-test="project-edit-' . $project->id . '"]')
-                ->waitFor(self::OPEN_DIALOG . ' [data-test="project-name"]')
-                ->assertSelected(self::OPEN_DIALOG . ' #project-entity-id', (string) $archivedEntity->id)
+                ->visit('/projects?search='.urlencode($project->name))
+                ->click('[data-test="project-edit-'.$project->id.'"]')
+                ->waitFor(self::OPEN_DIALOG.' [data-test="project-name"]')
+                ->assertSelected(self::OPEN_DIALOG.' #project-entity-id', (string) $archivedEntity->id)
                 ->assertSeeIn(
-                    self::OPEN_DIALOG . ' #select2-project-entity-id-container',
+                    self::OPEN_DIALOG.' #select2-project-entity-id-container',
                     $archivedEntity->name,
                 )
                 ->assertSeeIn(
-                    self::OPEN_DIALOG . ' #select2-project-entity-id-container',
+                    self::OPEN_DIALOG.' #select2-project-entity-id-container',
                     __('basics13::messages.archived_label'),
                 )
                 ->click('#select2-project-entity-id-container')
-                ->type(self::OPEN_DIALOG . ' .select2-container--open .select2-search__field', 'option entity')
+                ->type(self::OPEN_DIALOG.' .select2-container--open .select2-search__field', 'option entity')
                 ->waitUntil(
-                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes(' . json_encode($activeEntity->name) . ')',
+                    'document.querySelector("dialog[open] .select2-results")?.textContent.includes('.json_encode($activeEntity->name).')',
                     10,
                 )
-                ->assertSeeIn(self::OPEN_DIALOG . ' .select2-results', $activeEntity->name)
-                ->assertSeeIn(self::OPEN_DIALOG . ' .select2-results', $archivedEntity->name)
+                ->assertSeeIn(self::OPEN_DIALOG.' .select2-results', $activeEntity->name)
+                ->assertSeeIn(self::OPEN_DIALOG.' .select2-results', $archivedEntity->name)
                 ->assertSeeIn(
-                    self::OPEN_DIALOG . ' .select2-results',
+                    self::OPEN_DIALOG.' .select2-results',
                     __('basics13::messages.archived_label'),
                 )
-                ->assertDontSeeIn(self::OPEN_DIALOG . ' .select2-results', $otherInactiveEntity->name)
-                ->assertSelected(self::OPEN_DIALOG . ' #project-entity-id', (string) $archivedEntity->id)
-                ->click('#select2-project-entity-id-result-' . $activeEntity->id)
-                ->assertSelected(self::OPEN_DIALOG . ' #project-entity-id', (string) $activeEntity->id)
+                ->assertDontSeeIn(self::OPEN_DIALOG.' .select2-results', $otherInactiveEntity->name)
+                ->assertSelected(self::OPEN_DIALOG.' #project-entity-id', (string) $archivedEntity->id)
+                ->click('#select2-project-entity-id-result-'.$activeEntity->id)
+                ->assertSelected(self::OPEN_DIALOG.' #project-entity-id', (string) $activeEntity->id)
                 ->assertDontSeeIn(
-                    self::OPEN_DIALOG . ' #select2-project-entity-id-container',
+                    self::OPEN_DIALOG.' #select2-project-entity-id-container',
                     __('basics13::messages.archived_label'),
                 );
         });

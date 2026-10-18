@@ -9,13 +9,13 @@ use Basics13\Http\Requests\TrashDestroyRequest;
 use Basics13\Queries\ListQueryBase;
 use Basics13\Support\Validation\MaxLength;
 use Closure;
-use EntityProjects13\Tests\TestCase;
 use entities13\Http\Requests\EntityListRequest;
 use entities13\Http\Requests\EntityRequest;
 use entities13\Models\Entity;
 use entities13\Policies\EntityPolicy;
 use entities13\Queries\Entities\EntityListQuery;
 use entities13\Transformers\EntityListTransformer;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Http\FormRequest;
@@ -51,9 +51,9 @@ class ResourceUniformityTest extends TestCase
             'name' => 'Uniform epic',
             'project_id' => 1,
         ]);
-        $entityRules = $this->requestRules($entityRequest, static fn(): array => $entityRequest->rules());
-        $projectRules = $this->requestRules($projectRequest, static fn(): array => $projectRequest->rules());
-        $epicRules = $this->requestRules($epicRequest, static fn(): array => $epicRequest->rules());
+        $entityRules = $this->requestRules($entityRequest, static fn (): array => $entityRequest->rules());
+        $projectRules = $this->requestRules($projectRequest, static fn (): array => $projectRequest->rules());
+        $epicRules = $this->requestRules($epicRequest, static fn (): array => $epicRequest->rules());
 
         // `entity_type_ids` is the multi-select entities13 owns, so it sits among the fields of
         // the resource rather than after the shared deleted-name flag.
@@ -74,7 +74,7 @@ class ResourceUniformityTest extends TestCase
 
         foreach ([$entityRules, $projectRules, $epicRules] as $rules) {
             $this->assertSame(
-                ['required', 'string', 'min:4', 'max:' . MaxLength::string()],
+                ['required', 'string', 'min:4', 'max:'.MaxLength::string()],
                 array_slice($rules['name'], 0, 4),
             );
             $this->assertArrayHasKey('reuse_deleted_name', $rules);
@@ -194,11 +194,11 @@ class ResourceUniformityTest extends TestCase
         }
 
         foreach ($byResource as $model => $source) {
-            $byResource[$model] = $source . $shared;
+            $byResource[$model] = $source.$shared;
         }
 
         foreach ([...$entityAbilities, 'comment'] as $ability) {
-            $pattern = '/->(?:authorize|can)\(\s*[\'\"]' . preg_quote($ability, '/') . '[\'\"]/';
+            $pattern = '/->(?:authorize|can)\(\s*[\'\"]'.preg_quote($ability, '/').'[\'\"]/';
             $missing = [];
 
             foreach ($byResource as $model => $source) {
@@ -212,7 +212,7 @@ class ResourceUniformityTest extends TestCase
                 }
             }
 
-            $this->assertSame([], $missing, "No HTTP call site for [{$ability}] in: " . implode(', ', $missing));
+            $this->assertSame([], $missing, "No HTTP call site for [{$ability}] in: ".implode(', ', $missing));
         }
     }
 
@@ -255,15 +255,15 @@ class ResourceUniformityTest extends TestCase
     public function test_resource_factories_generate_unique_names(): void
     {
         $entityNames = array_map(
-            fn(Entity $entity): string => $this->factoryName($entity),
+            fn (Entity $entity): string => $this->factoryName($entity),
             Entity::factory()->count(20)->make()->all(),
         );
         $projectNames = array_map(
-            fn(Project $project): string => $this->factoryName($project),
+            fn (Project $project): string => $this->factoryName($project),
             Project::factory()->for($this->entity())->count(20)->make()->all(),
         );
         $epicNames = array_map(
-            fn(Epic $epic): string => $this->factoryName($epic),
+            fn (Epic $epic): string => $this->factoryName($epic),
             Epic::factory()->count(20)->make()->all(),
         );
 
@@ -416,9 +416,9 @@ class ResourceUniformityTest extends TestCase
      */
     private function requestRules(FormRequest $request, Closure $rules): array
     {
-        $route = new Route($request->getMethod(), '/', static fn(): null => null);
+        $route = new Route($request->getMethod(), '/', static fn (): null => null);
         $route->bind($request);
-        $request->setRouteResolver(static fn(): Route => $route);
+        $request->setRouteResolver(static fn (): Route => $route);
 
         return $rules();
     }
@@ -430,7 +430,7 @@ class ResourceUniformityTest extends TestCase
     private function listRequestRules(string $requestClass): array
     {
         $request = $requestClass::create('/', 'GET');
-        $request->setRouteResolver(static fn(): null => null);
+        $request->setRouteResolver(static fn (): null => null);
 
         return $request->rules();
     }
@@ -441,7 +441,7 @@ class ResourceUniformityTest extends TestCase
     private function normalizedSearch(string $requestClass, mixed $input): string
     {
         $request = $requestClass::create('/', 'GET', ['search' => $input]);
-        $request->setRouteResolver(static fn(): null => null);
+        $request->setRouteResolver(static fn (): null => null);
 
         return $request->search();
     }

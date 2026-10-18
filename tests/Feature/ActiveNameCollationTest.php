@@ -3,8 +3,8 @@
 namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;

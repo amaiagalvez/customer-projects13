@@ -3,8 +3,8 @@
 namespace EntityProjects13\Tests\Feature\Epics;
 
 use App\Models\User;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
@@ -49,7 +49,7 @@ class EpicTrashTest extends TestCase
             '2026-01-03',
             '2026-08-04',
         ]);
-        $response->assertSee('data-test="epic-comments-count-' . $epic->id . '"></span>', false);
+        $response->assertSee('data-test="epic-comments-count-'.$epic->id.'"></span>', false);
     }
 
     public function test_trash_can_be_searched_by_project_and_entity_names(): void

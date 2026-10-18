@@ -2,10 +2,10 @@
 
 namespace EntityProjects13;
 
-use EntityProjects13\Integrations\EntityCountsIntegration;
-use EntityProjects13\Integrations\EntityProjectsIntegration;
 use entities13\Contracts\EntityIntegration;
 use entities13\Models\Entity;
+use EntityProjects13\Integrations\EntityCountsIntegration;
+use EntityProjects13\Integrations\EntityProjectsIntegration;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -21,22 +21,22 @@ class ServiceProvider extends BaseServiceProvider
 {
     public function boot(): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'entity-projects13');
-        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'entity-projects13');
-        $this->loadJsonTranslationsFrom(__DIR__ . '/../resources/lang');
+        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
+        $this->loadViewsFrom(__DIR__.'/../resources/views', 'entity-projects13');
+        $this->loadTranslationsFrom(__DIR__.'/../resources/lang', 'entity-projects13');
+        $this->loadJsonTranslationsFrom(__DIR__.'/../resources/lang');
 
         $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/vendor/entity-projects13'),
+            __DIR__.'/../resources/views' => resource_path('views/vendor/entity-projects13'),
         ], 'entity-projects13-views');
 
         $this->publishes([
-            __DIR__ . '/../resources/js' => resource_path('js/vendor/entity-projects13'),
-            __DIR__ . '/../resources/css' => resource_path('css/vendor/entity-projects13'),
+            __DIR__.'/../resources/js' => resource_path('js/vendor/entity-projects13'),
+            __DIR__.'/../resources/css' => resource_path('css/vendor/entity-projects13'),
         ], 'entity-projects13-assets');
 
         $this->publishes([
-            __DIR__ . '/../resources/lang' => lang_path('vendor/entity-projects13'),
+            __DIR__.'/../resources/lang' => lang_path('vendor/entity-projects13'),
         ], 'entity-projects13-lang');
 
         $this->declareIntegrationViews();
@@ -46,7 +46,7 @@ class ServiceProvider extends BaseServiceProvider
 
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/entity-projects13.php', 'entity-projects13');
+        $this->mergeConfigFrom(__DIR__.'/../config/entity-projects13.php', 'entity-projects13');
 
         // Both bindings are unconditional: this package is the one that knows how a project and a
         // entity fit together, and the base packages keep whatever they bound when they found
@@ -108,19 +108,19 @@ class ServiceProvider extends BaseServiceProvider
         // of the function that calls them, and inside a closure there is no such name to guess from.
         Project::resolveRelationUsing(
             'entity',
-            fn(Project $project): BelongsTo => $project
+            fn (Project $project): BelongsTo => $project
                 ->belongsTo(Entity::class, 'entity_id', 'id')
                 ->withTrashed(),
         );
 
         Entity::resolveRelationUsing(
             'projects',
-            fn(Entity $entity): HasMany => $entity->hasMany(Project::class, 'entity_id', 'id'),
+            fn (Entity $entity): HasMany => $entity->hasMany(Project::class, 'entity_id', 'id'),
         );
 
         Entity::resolveRelationUsing(
             'epics',
-            fn(Entity $entity): HasManyThrough => $entity->hasManyThrough(
+            fn (Entity $entity): HasManyThrough => $entity->hasManyThrough(
                 Epic::class,
                 Project::class,
                 'entity_id',
@@ -141,7 +141,7 @@ class ServiceProvider extends BaseServiceProvider
     private function blockEntityDeletionWithProjects(): void
     {
         Entity::deleting(function (Entity $entity): bool {
-            $locked = DB::transaction(static fn(): Entity => Entity::withTrashed()
+            $locked = DB::transaction(static fn (): Entity => Entity::withTrashed()
                 ->whereKey($entity->getKey())
                 ->lockForUpdate()
                 ->firstOrFail());

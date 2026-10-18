@@ -3,8 +3,8 @@
 namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -30,15 +30,15 @@ class ResourceWriteAccessTest extends TestCase
         $routes = [];
 
         foreach (['entity', 'project', 'epic'] as $singular) {
-            $plural = $singular === 'entity' ? 'entities' : $singular . 's';
+            $plural = $singular === 'entity' ? 'entities' : $singular.'s';
 
-            $routes["{$singular} store"] = [$singular, $plural . '.store'];
-            $routes["{$singular} update"] = [$singular, $plural . '.update'];
-            $routes["{$singular} destroy"] = [$singular, $plural . '.destroy'];
-            $routes["{$singular} deactivate"] = [$singular, $plural . '.archive'];
-            $routes["{$singular} reactivate"] = [$singular, $plural . '.archived.activate'];
-            $routes["{$singular} restore"] = [$singular, $plural . '.trash.restore'];
-            $routes["{$singular} force delete"] = [$singular, $plural . '.trash.destroy'];
+            $routes["{$singular} store"] = [$singular, $plural.'.store'];
+            $routes["{$singular} update"] = [$singular, $plural.'.update'];
+            $routes["{$singular} destroy"] = [$singular, $plural.'.destroy'];
+            $routes["{$singular} deactivate"] = [$singular, $plural.'.archive'];
+            $routes["{$singular} reactivate"] = [$singular, $plural.'.archived.activate'];
+            $routes["{$singular} restore"] = [$singular, $plural.'.trash.restore'];
+            $routes["{$singular} force delete"] = [$singular, $plural.'.trash.destroy'];
         }
 
         return $routes;

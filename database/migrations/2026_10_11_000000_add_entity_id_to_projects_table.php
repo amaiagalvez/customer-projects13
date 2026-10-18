@@ -14,7 +14,7 @@ return new class extends Migration
             // config/entity-projects13.php.
             $table->foreignId('entity_id')
                 ->nullable()
-                ->constrained('CUM_entities')
+                ->constrained('ENT_entities')
                 ->restrictOnDelete();
         });
     }

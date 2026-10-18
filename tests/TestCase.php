@@ -6,9 +6,9 @@ use App\Models\User;
 use Basics13\Support\Testing\ValidatesFormRequests;
 use Basics13\Tests\TestCase as Basics13TestCase;
 use Carbon\CarbonImmutable;
-use EntityProjects13\ServiceProvider as EntityProjects13ServiceProvider;
 use entities13\Models\Entity;
 use entities13\ServiceProvider as entities13ServiceProvider;
+use EntityProjects13\ServiceProvider as EntityProjects13ServiceProvider;
 use Flux\FluxServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
@@ -76,7 +76,7 @@ abstract class TestCase extends Basics13TestCase
         $app['config']->set('database.default', getenv('DB_CONNECTION') ?: 'sqlite');
         $app['config']->set('database.connections.sqlite.foreign_key_constraints', true);
         $app['config']->set('auth.providers.users.model', User::class);
-        $app['config']->set('view.compiled', dirname(__DIR__) . '/storage/framework/views');
+        $app['config']->set('view.compiled', dirname(__DIR__).'/storage/framework/views');
     }
 
     protected function setUp(): void
@@ -84,6 +84,6 @@ abstract class TestCase extends Basics13TestCase
         parent::setUp();
 
         // The host application's layout, which these tests do not have.
-        Blade::anonymousComponentPath(__DIR__ . '/Fixtures/views/layouts', 'layouts');
+        Blade::anonymousComponentPath(__DIR__.'/Fixtures/views/layouts', 'layouts');
     }
 }

@@ -4,8 +4,8 @@ namespace EntityProjects13\Tests\Unit\Support\Validation;
 
 use Basics13\Support\Validation\FieldHints;
 use Basics13\Support\Validation\MaxLength;
-use EntityProjects13\Tests\TestCase;
 use entities13\Http\Requests\EntityRequest;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Projects13\Http\Requests\EpicCommentRequest;

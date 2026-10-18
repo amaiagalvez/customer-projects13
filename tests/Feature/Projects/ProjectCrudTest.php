@@ -4,8 +4,8 @@ namespace EntityProjects13\Tests\Feature\Projects;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -213,8 +213,8 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertSeeInOrder(['project-epics-count-' . $project->id, '2'])
-            ->assertSeeInOrder(['project-comments-count-' . $project->id, '3']);
+            ->assertSeeInOrder(['project-epics-count-'.$project->id, '2'])
+            ->assertSeeInOrder(['project-comments-count-'.$project->id, '3']);
     }
 
     public function test_projects_are_ordered_by_start_date_end_date_and_entity_name(): void
@@ -301,7 +301,7 @@ class ProjectCrudTest extends TestCase
             ->assertOk()
             ->assertSee('data-test="project-breadcrumbs"', false)
             ->assertSeeInOrder([
-                'href="' . route('dashboard') . '"',
+                'href="'.route('dashboard').'"',
                 __('Dashboard'),
                 __('Projects'),
             ], false)
@@ -338,17 +338,17 @@ class ProjectCrudTest extends TestCase
         $response
             ->assertOk()
             ->assertSeeInOrder([
-                'data-test="project-name-' . $project->id . '"',
+                'data-test="project-name-'.$project->id.'"',
                 'editProject(JSON.parse(',
             ], false)
-            ->assertSee('href="' . route('epics.index', ['search' => 'Website redesign']) . '"', false)
+            ->assertSee('href="'.route('epics.index', ['search' => 'Website redesign']).'"', false)
             ->assertSee(__('View :count epics', ['count' => 1]))
-            ->assertDontSee('href="' . route('epics.index', ['search' => 'Lonely project']) . '"', false)
-            ->assertSee('data-test="project-epics-count-' . $lonelyProject->id . '"></span>', false)
-            ->assertSee('data-test="project-comments-count-' . $lonelyProject->id . '"></span>', false)
-            ->assertDontSee('data-test="project-delete-' . $project->id . '"', false)
-            ->assertSee('data-test="project-archive-' . $project->id . '"', false)
-            ->assertSee('data-test="project-delete-' . $lonelyProject->id . '"', false);
+            ->assertDontSee('href="'.route('epics.index', ['search' => 'Lonely project']).'"', false)
+            ->assertSee('data-test="project-epics-count-'.$lonelyProject->id.'"></span>', false)
+            ->assertSee('data-test="project-comments-count-'.$lonelyProject->id.'"></span>', false)
+            ->assertDontSee('data-test="project-delete-'.$project->id.'"', false)
+            ->assertSee('data-test="project-archive-'.$project->id.'"', false)
+            ->assertSee('data-test="project-delete-'.$lonelyProject->id.'"', false);
     }
 
     public function test_project_with_an_active_epic_cannot_be_deleted(): void

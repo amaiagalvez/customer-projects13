@@ -2,9 +2,9 @@
 
 namespace EntityProjects13\Tests\Unit\Integrations;
 
+use entities13\Models\Entity;
 use EntityProjects13\Integrations\EntityCountsIntegration;
 use EntityProjects13\Tests\TestCase;
-use entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Model;
 
 class EntityCountsIntegrationTest extends TestCase

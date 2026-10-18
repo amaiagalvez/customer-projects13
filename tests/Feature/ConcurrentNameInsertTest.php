@@ -3,9 +3,9 @@
 namespace EntityProjects13\Tests\Feature;
 
 use App\Models\User;
+use entities13\Models\Entity;
 use EntityProjects13\Tests\Support\RacesNameInsert;
 use EntityProjects13\Tests\TestCase;
-use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Projects13\Models\Epic;
@@ -44,7 +44,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $name = 'Concurrent Store ' . $singular;
+        $name = 'Concurrent Store '.$singular;
         $payload = $this->payloadFor($singular, $name);
         $parentId = $this->parentIdFromPayload($payload);
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
@@ -57,11 +57,11 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $parentId),
+            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $parentId),
         );
 
         $this->from(route($indexRoute))
-            ->post(route($routePrefix . '.store'), $payload)
+            ->post(route($routePrefix.'.store'), $payload)
             ->assertRedirect(route($indexRoute))
             ->assertSessionHasErrors([
                 'name' => __('validation.unique', ['attribute' => __('Name')]),
@@ -82,8 +82,8 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $existing = $this->makeRecord($singular, ['name' => 'Original ' . $singular]);
-        $name = 'Concurrent Update ' . $singular;
+        $existing = $this->makeRecord($singular, ['name' => 'Original '.$singular]);
+        $name = 'Concurrent Update '.$singular;
         $payload = $this->payloadFor($singular, $name, parentId: $this->parentIdOf($existing));
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
         $table = $existing->getTable();
@@ -91,17 +91,17 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdFromPayload($payload)),
+            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdFromPayload($payload)),
         );
 
         $this->from(route($indexRoute))
-            ->put(route($routePrefix . '.update', $existing), $payload)
+            ->put(route($routePrefix.'.update', $existing), $payload)
             ->assertRedirect(route($indexRoute))
             ->assertSessionHasErrors([
                 'name' => __('validation.unique', ['attribute' => __('Name')]),
             ]);
 
-        $this->assertDatabaseHas($table, ['id' => $existing->id, 'name' => 'Original ' . $singular]);
+        $this->assertDatabaseHas($table, ['id' => $existing->id, 'name' => 'Original '.$singular]);
         $this->assertDatabaseHas($table, ['name' => $name, 'deleted_at' => null]);
     }
 
@@ -119,7 +119,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $indexRoute,
     ): void {
         $this->actingAs(User::factory()->create());
-        $name = 'Concurrent Restore ' . $singular;
+        $name = 'Concurrent Restore '.$singular;
         $deleted = $this->makeRecord($singular, ['name' => $name], trashed: true);
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));
         $table = $deleted->getTable();
@@ -127,11 +127,11 @@ class ConcurrentNameInsertTest extends TestCase
         RacesNameInsert::afterUniquenessSelect(
             $table,
             $name,
-            fn() => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdOf($deleted)),
+            fn () => $this->makeRecord($singular, ['name' => $name], parentId: $this->parentIdOf($deleted)),
         );
 
-        $this->patch(route($routePrefix . '.trash.restore', $deleted->id))
-            ->assertRedirect(route($routePrefix . '.trash.index'))
+        $this->patch(route($routePrefix.'.trash.restore', $deleted->id))
+            ->assertRedirect(route($routePrefix.'.trash.index'))
             ->assertSessionHas('error', __('basics13::messages.cannot_restore_name_taken'));
 
         $this->assertSoftDeleted($deleted);

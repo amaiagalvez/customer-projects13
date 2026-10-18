@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Feature;
 
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Project;
 

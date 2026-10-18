@@ -3,9 +3,9 @@
 namespace EntityProjects13\Tests\Unit;
 
 use Basics13\Support\Validation\MaxLength;
-use EntityProjects13\Tests\TestCase;
 use entities13\Http\Requests\EntityRequest;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Foundation\Http\FormRequest;
 use Projects13\Http\Requests\EpicCommentRequest;
@@ -55,8 +55,8 @@ class ValidationCoverageTest extends TestCase
     public function test_direct_literal_string_and_boolean_inputs_have_form_request_rules(): void
     {
         $controllerFiles = [
-            ...(glob(dirname($this->requestDirectory(EntityRequest::class)) . '/Controllers/*.php') ?: []),
-            ...(glob(dirname($this->requestDirectory(ProjectRequest::class)) . '/Controllers/*.php') ?: []),
+            ...(glob(dirname($this->requestDirectory(EntityRequest::class)).'/Controllers/*.php') ?: []),
+            ...(glob(dirname($this->requestDirectory(ProjectRequest::class)).'/Controllers/*.php') ?: []),
         ];
 
         foreach ($controllerFiles as $file) {
@@ -78,22 +78,22 @@ class ValidationCoverageTest extends TestCase
 
                 if (preg_match('/(\w+Request)\s+\$request\b/', $block, $request) !== 1) {
                     $this->fail(
-                        basename($file) . '::' . $method[1] . ' reads input without declaring a FormRequest',
+                        basename($file).'::'.$method[1].' reads input without declaring a FormRequest',
                     );
                 }
 
                 if (preg_match('/^namespace\s+([^;]+);/m', $source, $namespace) !== 1) {
-                    $this->fail('Missing namespace declaration in ' . basename($file));
+                    $this->fail('Missing namespace declaration in '.basename($file));
                 }
 
                 $requestNamespace = str_replace('\\Controllers', '\\Requests', $namespace[1]);
-                $rules = $this->rulesOf($requestNamespace . '\\' . $request[1]);
+                $rules = $this->rulesOf($requestNamespace.'\\'.$request[1]);
 
                 foreach (array_unique($keys[1]) as $key) {
                     $this->assertArrayHasKey(
                         $key,
                         $rules,
-                        basename($file) . '::' . $method[1] . " reads \${$key} but {$request[1]} has no rule for it",
+                        basename($file).'::'.$method[1]." reads \${$key} but {$request[1]} has no rule for it",
                     );
                 }
             }
@@ -116,11 +116,11 @@ class ValidationCoverageTest extends TestCase
                 $this->requestDirectory(ProjectRequest::class),
             ] as $directory
         ) {
-            foreach (glob($directory . '/*.php') ?: [] as $path) {
+            foreach (glob($directory.'/*.php') ?: [] as $path) {
                 preg_match_all('/\'(max:\d+)\'/', (string) file_get_contents($path), $matches);
 
                 foreach ($matches[1] as $limit) {
-                    $literals[] = basename($path) . ' hardcodes max:' . $limit;
+                    $literals[] = basename($path).' hardcodes max:'.$limit;
                 }
             }
         }
@@ -170,7 +170,7 @@ class ValidationCoverageTest extends TestCase
     {
         /** @var FormRequest $instance */
         $instance = new $request;
-        $instance->setRouteResolver(fn() => null);
+        $instance->setRouteResolver(fn () => null);
 
         if (! method_exists($instance, 'rules')) {
             $this->fail("{$request} must define rules()");

@@ -2,11 +2,11 @@
 
 namespace EntityProjects13\Tests\Feature;
 
+use entities13\Contracts\EntityIntegration;
+use entities13\Models\Entity;
 use EntityProjects13\Integrations\EntityCountsIntegration;
 use EntityProjects13\Integrations\EntityProjectsIntegration;
 use EntityProjects13\Tests\TestCase;
-use entities13\Contracts\EntityIntegration;
-use entities13\Models\Entity;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Schema;
 use Projects13\Contracts\ProjectDisplayIntegration;
@@ -36,7 +36,7 @@ class InstallationTest extends TestCase
 
     public function test_a_project_may_only_hang_from_a_entity_that_exists(): void
     {
-        $this->assertDatabaseHas('CUM_entities', ['id' => Entity::factory()->create()->id]);
+        $this->assertDatabaseHas('ENT_entities', ['id' => Entity::factory()->create()->id]);
     }
 
     public function test_the_column_and_its_foreign_key_reach_the_projects_table(): void
@@ -45,11 +45,11 @@ class InstallationTest extends TestCase
 
         $keys = array_values(array_filter(
             Schema::getForeignKeys('PRO_projects'),
-            static fn(array $key): bool => $key['columns'] === ['entity_id'],
+            static fn (array $key): bool => $key['columns'] === ['entity_id'],
         ));
 
         $this->assertNotEmpty($keys, 'the foreign key has to be enforced, not just declared');
-        $this->assertSame('CUM_entities', $keys[0]['foreign_table']);
+        $this->assertSame('ENT_entities', $keys[0]['foreign_table']);
         $this->assertSame(['id'], $keys[0]['foreign_columns']);
     }
 }

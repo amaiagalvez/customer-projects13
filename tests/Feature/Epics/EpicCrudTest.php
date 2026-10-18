@@ -4,8 +4,8 @@ namespace EntityProjects13\Tests\Feature\Epics;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;

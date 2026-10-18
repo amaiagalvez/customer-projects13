@@ -5,9 +5,9 @@ namespace EntityProjects13\Tests\Feature;
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
 use Basics13\Support\Validation\MaxLength;
-use EntityProjects13\Tests\TestCase;
 use entities13\Http\Requests\EntitySelectOptionsRequest;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -132,6 +132,6 @@ class SelectOptionsRequestTest extends TestCase
 
     private function expectedText(string $routeName, string $name): string
     {
-        return $routeName === 'entities.options' ? $name : $name . ' (' . $name . ')';
+        return $routeName === 'entities.options' ? $name : $name.' ('.$name.')';
     }
 }

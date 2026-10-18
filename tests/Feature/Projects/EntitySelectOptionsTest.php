@@ -4,8 +4,8 @@ namespace EntityProjects13\Tests\Feature\Projects;
 
 use App\Models\User;
 use Basics13\Queries\ListQueryBase;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class EntitySelectOptionsTest extends TestCase
@@ -37,7 +37,7 @@ class EntitySelectOptionsTest extends TestCase
             ->assertOk()
             ->assertSee(__('No active entities are available. Open the entity form to create one.'))
             ->assertSee(__('Open entity form'))
-            ->assertSee('href="' . route('entities.index', ['create' => 1]) . '"', false)
+            ->assertSee('href="'.route('entities.index', ['create' => 1]).'"', false)
             ->assertSee('project-no-entity-form-button');
     }
 }

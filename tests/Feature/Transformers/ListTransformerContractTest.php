@@ -2,9 +2,9 @@
 
 namespace EntityProjects13\Tests\Feature\Transformers;
 
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
 use entities13\Transformers\EntityListTransformer;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -55,7 +55,7 @@ class ListTransformerContractTest extends TestCase
      */
     public static function transformers(): array
     {
-        return array_map(static fn(string $class): array => [$class], self::transformerClasses());
+        return array_map(static fn (string $class): array => [$class], self::transformerClasses());
     }
 
     /**
@@ -77,7 +77,7 @@ class ListTransformerContractTest extends TestCase
         $this->assertSame(self::ENVELOPE_KEYS, array_keys($list));
         $this->assertSame($state === 'active', $list['create']);
         $this->assertSame(
-            route($prefix . '.' . match ($state) {
+            route($prefix.'.'.match ($state) {
                 'active' => 'index',
                 'archived' => 'archived.index',
                 'trash' => 'trash.index',
@@ -86,9 +86,9 @@ class ListTransformerContractTest extends TestCase
         );
         $this->assertSame(
             [
-                route($prefix . '.index'),
-                route($prefix . '.archived.index'),
-                route($prefix . '.trash.index'),
+                route($prefix.'.index'),
+                route($prefix.'.archived.index'),
+                route($prefix.'.trash.index'),
             ],
             array_column($list['tabs'], 'url'),
         );

@@ -3,8 +3,8 @@
 namespace EntityProjects13\Tests\Feature\Concerns;
 
 use App\Models\User;
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -172,7 +172,7 @@ class TracksAuditColumnsTest extends TestCase
 
         $record->forceDelete();
 
-        $this->assertDatabaseMissing('CUM_entities', ['id' => $id]);
+        $this->assertDatabaseMissing('ENT_entities', ['id' => $id]);
     }
 
     /**

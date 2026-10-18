@@ -2,9 +2,9 @@
 
 namespace EntityProjects13\Tests\Feature;
 
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
 use entities13\Queries\Entities\EntityListQuery;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -110,7 +110,7 @@ class IntegrationSurfacesTest extends TestCase
         $this->get(route('entities.index'))
             ->assertOk()
             // The count itself is bound by Alpine, so the cell is what the markup has to carry.
-            ->assertSee('entity-projects-count-' . $entity->id, false);
+            ->assertSee('entity-projects-count-'.$entity->id, false);
     }
 
     public function test_the_entity_row_counts_only_what_is_alive(): void

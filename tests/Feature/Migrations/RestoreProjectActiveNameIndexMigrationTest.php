@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Feature\Migrations;
 
-use EntityProjects13\Tests\TestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +61,7 @@ class RestoreProjectActiveNameIndexMigrationTest extends TestCase
             // Manually create the unique index that the migration would restore
             DB::statement('CREATE UNIQUE INDEX "PRO_projects_active_name_unique" ON "PRO_projects" ("name") WHERE "deleted_at" IS NULL');
 
-            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
+            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
             $migration->up();
 
             // The migration runs the restore function, which on SQLite drops and recreates the index
@@ -120,7 +120,7 @@ class RestoreProjectActiveNameIndexMigrationTest extends TestCase
                 $table->timestamps();
             });
 
-            $migration = require dirname(__DIR__, 3) . '/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
+            $migration = require dirname(__DIR__, 3).'/database/migrations/2026_10_13_000000_restore_project_active_name_index.php';
 
             // On SQLite, the migration runs the restore function
             // We can't easily mock the driver in this test setup, so we just verify

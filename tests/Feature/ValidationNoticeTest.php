@@ -91,7 +91,7 @@ class ValidationNoticeTest extends TestCase
 
             foreach ($notices as $notice) {
                 $this->assertStringContainsString(
-                    'data-test="' . $notice . '"',
+                    'data-test="'.$notice.'"',
                     $content,
                     "The {$resource} form is missing the notice of a field.",
                 );

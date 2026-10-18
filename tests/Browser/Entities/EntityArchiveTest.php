@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Browser\Entities;
 
-use EntityProjects13\Tests\DuskTestCase;
 use entities13\Models\Entity;
+use EntityProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Laravel\Dusk\Browser;
 use Projects13\Models\Project;

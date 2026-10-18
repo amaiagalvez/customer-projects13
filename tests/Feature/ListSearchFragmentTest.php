@@ -34,7 +34,7 @@ class ListSearchFragmentTest extends TestCase
             $response
                 ->assertOk()
                 ->assertSee('data-list-results')
-                ->assertSee('data-test="' . $prefix . '-search"', false)
+                ->assertSee('data-test="'.$prefix.'-search"', false)
                 ->assertDontSee('<!DOCTYPE html>');
         }
     }
@@ -48,13 +48,13 @@ class ListSearchFragmentTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         foreach (['entity', 'project', 'epic'] as $prefix) {
-            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix . 's';
-            $this->get(route($routePrefix . '.index'), ['X-List-Fragment' => 'true'])
+            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix.'s';
+            $this->get(route($routePrefix.'.index'), ['X-List-Fragment' => 'true'])
                 ->assertOk()
-                ->assertSee('data-test="' . $prefix . '-search"', false)
-                ->assertDontSee('data-test="' . $prefix . '-breadcrumbs"', false)
-                ->assertDontSee('data-test="' . $prefix . '-tabs"', false)
-                ->assertDontSee('data-test="' . $prefix . '-create-button"', false);
+                ->assertSee('data-test="'.$prefix.'-search"', false)
+                ->assertDontSee('data-test="'.$prefix.'-breadcrumbs"', false)
+                ->assertDontSee('data-test="'.$prefix.'-tabs"', false)
+                ->assertDontSee('data-test="'.$prefix.'-create-button"', false);
         }
     }
 
@@ -63,17 +63,17 @@ class ListSearchFragmentTest extends TestCase
         $this->actingAs(User::factory()->create());
 
         foreach (['entity', 'project', 'epic'] as $prefix) {
-            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix . 's';
-            $this->get(route($routePrefix . '.index'))
+            $routePrefix = $prefix === 'entity' ? 'entities' : $prefix.'s';
+            $this->get(route($routePrefix.'.index'))
                 ->assertOk()
-                ->assertSee('data-test="' . $prefix . '-breadcrumbs"', false)
-                ->assertSee('data-test="' . $prefix . '-tabs"', false)
-                ->assertSee('data-test="' . $prefix . '-create-button"', false);
+                ->assertSee('data-test="'.$prefix.'-breadcrumbs"', false)
+                ->assertSee('data-test="'.$prefix.'-tabs"', false)
+                ->assertSee('data-test="'.$prefix.'-create-button"', false);
 
-            $this->get(route($routePrefix . '.trash.index'))
+            $this->get(route($routePrefix.'.trash.index'))
                 ->assertOk()
-                ->assertSee('data-test="' . $prefix . '-tabs"', false)
-                ->assertDontSee('data-test="' . $prefix . '-create-button"', false);
+                ->assertSee('data-test="'.$prefix.'-tabs"', false)
+                ->assertDontSee('data-test="'.$prefix.'-create-button"', false);
         }
     }
 
@@ -85,7 +85,7 @@ class ListSearchFragmentTest extends TestCase
             $url = route($route, ['search' => 'reload-check']);
 
             $this->get($url)
-                ->assertSee('href="' . $url . '"', false);
+                ->assertSee('href="'.$url.'"', false);
         }
     }
 }
