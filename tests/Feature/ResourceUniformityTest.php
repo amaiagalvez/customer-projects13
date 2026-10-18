@@ -2,42 +2,42 @@
 
 namespace CustomerProjects13\Tests\Feature;
 
-use Basics13\Http\Controllers\ArchivedController as BasicsArchivedController;
-use Basics13\Http\Requests\RestoreRequest;
-use Basics13\Http\Requests\SearchableListRequest;
-use Basics13\Http\Requests\TrashDestroyRequest;
-use Basics13\Queries\ListQueryBase;
-use Basics13\Support\Validation\MaxLength;
 use Closure;
-use CustomerProjects13\Tests\TestCase;
-use Customers13\Http\Requests\CustomerListRequest;
-use Customers13\Http\Requests\CustomerRequest;
-use Customers13\Models\Customer;
-use Customers13\Policies\CustomerPolicy;
-use Customers13\Queries\Customers\CustomerListQuery;
-use Customers13\Transformers\CustomerListTransformer;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Routing\Route;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Validator;
-use PHPUnit\Framework\Attributes\DataProvider;
-use Projects13\Http\Requests\EpicListRequest;
-use Projects13\Http\Requests\EpicRequest;
-use Projects13\Http\Requests\ProjectListRequest;
-use Projects13\Http\Requests\ProjectRequest;
-use Projects13\Models\Epic;
-use Projects13\Models\Project;
-use Projects13\Policies\EpicPolicy;
-use Projects13\Policies\ProjectPolicy;
-use Projects13\Queries\Epics\EpicListQuery;
-use Projects13\Queries\Projects\ProjectListQuery;
-use Projects13\Transformers\EpicListTransformer;
-use Projects13\Transformers\ProjectListTransformer;
 use ReflectionClass;
 use ReflectionMethod;
+use Projects13\Models\Epic;
+use Illuminate\Routing\Route;
+use Projects13\Models\Project;
+use Customers13\Models\Customer;
+use Basics13\Queries\ListQueryBase;
+use Projects13\Policies\EpicPolicy;
+use Illuminate\Support\Facades\File;
+use CustomerProjects13\Tests\TestCase;
+use Projects13\Policies\ProjectPolicy;
+use Illuminate\Database\Eloquent\Model;
+use Customers13\Policies\CustomerPolicy;
+use Illuminate\Support\Facades\Validator;
+use Projects13\Http\Requests\EpicRequest;
+use Basics13\Http\Requests\RestoreRequest;
+use Basics13\Support\Validation\MaxLength;
+use Illuminate\Foundation\Http\FormRequest;
+use Projects13\Queries\Epics\EpicListQuery;
+use Projects13\Http\Requests\ProjectRequest;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Projects13\Http\Requests\EpicListRequest;
+use Customers13\Http\Requests\CustomerRequest;
+use PHPUnit\Framework\Attributes\DataProvider;
+use Basics13\Http\Requests\TrashDestroyRequest;
+use Projects13\Http\Requests\ProjectListRequest;
+use Projects13\Transformers\EpicListTransformer;
+use Basics13\Http\Requests\SearchableListRequest;
+use Projects13\Queries\Projects\ProjectListQuery;
+use Customers13\Http\Requests\CustomerListRequest;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Projects13\Transformers\ProjectListTransformer;
+use Customers13\Queries\Customers\CustomerListQuery;
+use Customers13\Transformers\CustomerListTransformer;
+use Basics13\Http\Controllers\ArchivedController as BasicsArchivedController;
 
 class ResourceUniformityTest extends TestCase
 {
@@ -354,6 +354,7 @@ class ResourceUniformityTest extends TestCase
             'customer',
             'customer_id',
             'customer_name',
+            'customer_active',
         ]);
         $this->assertRowActionContract($epicRows[0], 'epic', [
             'id',
@@ -363,6 +364,7 @@ class ResourceUniformityTest extends TestCase
             'end_date',
             'project_id',
             'project_label',
+            'project_active',
             'commentAction',
             'commentsUrl',
             'commentsCount',

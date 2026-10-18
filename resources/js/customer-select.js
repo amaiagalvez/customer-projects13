@@ -24,6 +24,22 @@ export function initializeCustomerSelects(root = document) {
     });
 }
 
+function renderCustomerSelection(data, element) {
+    if (data.element?.dataset.active !== 'false') {
+        return data.text;
+    }
+
+    const selection = document.createElement('span');
+    selection.append(document.createTextNode(`${data.text} `));
+
+    const badge = document.createElement('span');
+    badge.className = 'rounded-full bg-zinc-800/5 px-2 py-0.5 text-xs text-zinc-600 dark:bg-white/10 dark:text-zinc-300';
+    badge.textContent = element.dataset.archivedLabel;
+    selection.append(badge);
+
+    return window.jQuery(selection);
+}
+
 /**
  * Every drawer in the page is re-rendered when it opens, so the selects are watched instead of
  * being bound once on load: an element that was not in the DOM yet has never seen select2.
@@ -63,6 +79,7 @@ function initializeCustomerSelect(element) {
         dropdownParent: $(element.closest('dialog')),
         placeholder: element.dataset.placeholder,
         allowClear: true,
+        templateSelection: (data) => renderCustomerSelection(data, element),
         tags: true,
         ajax: {
             url: element.dataset.customerSearchUrl,
@@ -105,6 +122,7 @@ function initializeCustomerSelect(element) {
 
         if (!option.newTag) {
             projectForm.form.customer_name = option.text;
+            projectForm.form.customer_active = true;
             projectForm.form.customerCreateError = '';
             element.dispatchEvent(new Event('change', { bubbles: true }));
 
@@ -137,8 +155,11 @@ function initializeCustomerSelect(element) {
 
             element.querySelector(`option[value="${CSS.escape(temporaryValue)}"]`)?.remove();
 
-            element.add(new Option(result.name, String(result.id), true, true));
+            const customerOption = new Option(result.name, String(result.id), true, true);
+            customerOption.dataset.active = 'true';
+            element.add(customerOption);
             projectForm.form.customer_name = result.name;
+            projectForm.form.customer_active = true;
             select.val(String(result.id));
             element.dispatchEvent(new Event('change', { bubbles: true }));
         } catch (error) {
@@ -146,6 +167,7 @@ function initializeCustomerSelect(element) {
             select.val(null).trigger('change.select2');
             element.dispatchEvent(new Event('change', { bubbles: true }));
             projectForm.form.customer_name = '';
+            projectForm.form.customer_active = null;
             projectForm.form.customerCreateError = error.message || element.dataset.createError;
         } finally {
             projectForm.form.customerCreating = false;

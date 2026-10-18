@@ -41,7 +41,19 @@ class CustomerProjectsIntegrationTest extends TestCase
             'customer' => 'Test Customer',
             'customer_id' => 1,
             'customer_name' => 'Test Customer',
+            'customer_active' => true,
         ], $result);
+    }
+
+    public function test_row_marks_an_archived_customer_for_the_project_form(): void
+    {
+        $integration = new CustomerProjectsIntegration;
+
+        $customer = Customer::factory()->archived()->make(['id' => 1, 'name' => 'Archived Customer']);
+        $project = Project::factory()->for($customer)->make(['id' => 1, 'name' => 'Test Project']);
+        $project->setRelation('customer', $customer);
+
+        $this->assertFalse($integration->row($project)['customer_active']);
     }
 
     public function test_row_returns_customer_data_for_epic(): void
@@ -76,6 +88,7 @@ class CustomerProjectsIntegrationTest extends TestCase
             'customer' => null,
             'customer_id' => null,
             'customer_name' => null,
+            'customer_active' => null,
         ], $result);
     }
 
@@ -168,6 +181,29 @@ class CustomerProjectsIntegrationTest extends TestCase
 
         $result = $integration->noRelatedEntitiesBanner();
 
+        $this->assertArrayHasKey('message', $result);
+        $this->assertArrayHasKey('action_label', $result);
+        $this->assertArrayHasKey('action_url', $result);
+    }
+
+    public function test_no_related_entities_banner_returns_null_when_active_customers_exist(): void
+    {
+        $integration = new CustomerProjectsIntegration;
+        Customer::factory()->create(['active' => true]);
+
+        $result = $integration->noRelatedEntitiesBanner();
+
+        $this->assertNull($result);
+    }
+
+    public function test_no_related_entities_banner_returns_banner_when_no_active_customers(): void
+    {
+        $integration = new CustomerProjectsIntegration;
+        Customer::factory()->create(['active' => false]);
+
+        $result = $integration->noRelatedEntitiesBanner();
+
+        $this->assertNotNull($result);
         $this->assertArrayHasKey('message', $result);
         $this->assertArrayHasKey('action_label', $result);
         $this->assertArrayHasKey('action_url', $result);

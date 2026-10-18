@@ -74,7 +74,7 @@ class ServiceProvider extends BaseServiceProvider
         config([
             'projects13.views.project_form' => [
                 'fields' => 'customer-projects13::projects.form-fields',
-                'state' => ['customer_id', 'customer_name', 'customerCreating', 'customerCreateError'],
+                'state' => ['customer_id', 'customer_name', 'customer_active', 'customerCreating', 'customerCreateError'],
                 'submit_guard' => 'Boolean(form.customerCreating)',
             ],
             'projects13.views.project_list' => [

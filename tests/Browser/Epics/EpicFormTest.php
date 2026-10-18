@@ -2,12 +2,12 @@
 
 namespace CustomerProjects13\Tests\Browser\Epics;
 
-use CustomerProjects13\Tests\DuskTestCase;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Support\Str;
 use Laravel\Dusk\Browser;
+use Illuminate\Support\Str;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
+use CustomerProjects13\Tests\DuskTestCase;
+use Illuminate\Foundation\Testing\DatabaseMigrations;
 
 class EpicFormTest extends DuskTestCase
 {
@@ -83,18 +83,26 @@ class EpicFormTest extends DuskTestCase
     public function test_opening_the_project_select_loads_other_projects_for_an_existing_epic(): void
     {
         $user = $this->user();
-        $archivedProject = Project::factory()->for($this->customer())->archived()->create([
+        $customer = $this->customer();
+        $archivedProject = Project::factory()->for($customer)->archived()->create([
             'name' => 'Inactive selected project '.Str::uuid()->toString(),
         ]);
         $epic = Epic::factory()->for($archivedProject)->create();
-        $otherProject = Project::factory()->for($this->customer())->create([
+        $otherProject = Project::factory()->for($customer)->create([
             'name' => 'Other project '.Str::uuid()->toString(),
         ]);
-        $otherInactiveProject = Project::factory()->for($this->customer())->archived()->create([
+        $otherInactiveProject = Project::factory()->for($customer)->archived()->create([
             'name' => 'Other archived project '.Str::uuid()->toString(),
         ]);
 
-        $this->browse(function (Browser $browser) use ($user, $epic, $archivedProject, $otherProject, $otherInactiveProject): void {
+        $this->browse(function (Browser $browser) use (
+            $user,
+            $epic,
+            $customer,
+            $archivedProject,
+            $otherProject,
+            $otherInactiveProject,
+        ): void {
             $browser->loginAs($user)
                 ->visit('/epics?search='.urlencode($epic->name))
                 ->click('[data-test="epic-edit-'.$epic->id.'"]')
@@ -104,13 +112,30 @@ class EpicFormTest extends DuskTestCase
                     'document.querySelector(\'dialog[open] [data-test="epic-project"] option[value="'.$otherProject->id.'"]\') !== null',
                     10,
                 )
+                ->assertScript(
+                    'window.Alpine.$data(document.querySelector(\'[data-test="epic-project"]\')).projectOptions.find((project) => String(project.id) === String('.$epic->project_id.'))?.active',
+                    false,
+                )
+                ->assertScript(
+                    'document.querySelector(\'dialog[open] [data-test="epic-project"] option[value="'.$epic->project_id.'"]\').textContent',
+                    $archivedProject->name.' ('.$customer->name.') ('.__('basics13::messages.archived_label').')',
+                )
                 ->assertSelected('dialog[open] [data-test="epic-project"]', (string) $epic->project_id)
+                ->assertScript(
+                    'window.Alpine.$data(document.querySelector(\'[data-test="epic-project"]\')).form.project_active',
+                    false,
+                )
                 ->assertSeeIn(
                     'dialog[open] [data-test="epic-project"]',
                     $otherProject->name,
                 )
                 ->assertDontSeeIn('dialog[open] [data-test="epic-project"]', $otherInactiveProject->name)
-                ->assertSelected('dialog[open] [data-test="epic-project"]', (string) $archivedProject->id);
+                ->assertSelected('dialog[open] [data-test="epic-project"]', (string) $archivedProject->id)
+                ->select('dialog[open] [data-test="epic-project"]', (string) $otherProject->id)
+                ->assertScript(
+                    'document.querySelector(\'dialog[open] [data-test="epic-project"]\').selectedOptions[0].text',
+                    $otherProject->name.' ('.$customer->name.')',
+                );
         });
     }
 }

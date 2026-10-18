@@ -33,6 +33,7 @@
                     option = new Option(form.customer_name, customerId, true, true);
                     $el.add(option);
                 }
+                option.dataset.active = String(form.customer_active !== false);
                 option.selected = true;
             }
             window.jQuery($el).val(customerId || null).trigger('change.select2')
@@ -44,10 +45,11 @@
         data-create-error="{{ __('Unable to create customer.') }}"
         data-search-error="{{ __('Unable to load customers.') }}"
         data-no-results-label="{{ __('No customers found.') }}"
+        data-archived-label="{{ __('basics13::messages.archived_label') }}"
         data-placeholder="{{ __('Select a customer') }}">
         <option></option>
         @if ($selectedCustomerId !== '')
-            <option value="{{ $selectedCustomerId }}" selected>{{ $selectedCustomerName }}</option>
+            <option value="{{ $selectedCustomerId }}" selected data-active="true">{{ $selectedCustomerName }}</option>
         @endif
     </select>
     {{-- Carried back on the next submit so a failed save can name the chosen customer again. --}}

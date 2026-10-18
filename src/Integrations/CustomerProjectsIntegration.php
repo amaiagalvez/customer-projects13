@@ -2,21 +2,21 @@
 
 namespace CustomerProjects13\Integrations;
 
-use Customers13\Models\Customer;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Exists;
-use Projects13\Contracts\ProjectDisplayIntegration;
-use Projects13\Contracts\ProjectDisplayIntegrationDefaults;
-use Projects13\Contracts\ProjectQueryIntegration;
-use Projects13\Contracts\ProjectQueryIntegrationDefaults;
-use Projects13\Contracts\ProjectValidationIntegration;
-use Projects13\Contracts\ProjectValidationIntegrationDefaults;
-use Projects13\Http\Requests\ProjectRequest;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
+use Illuminate\Validation\Rule;
+use Customers13\Models\Customer;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Validation\Rules\Exists;
+use Illuminate\Database\Eloquent\Builder;
+use Projects13\Http\Requests\ProjectRequest;
+use Projects13\Contracts\ProjectQueryIntegration;
+use Projects13\Contracts\ProjectDisplayIntegration;
+use Projects13\Contracts\ProjectValidationIntegration;
+use Projects13\Contracts\ProjectQueryIntegrationDefaults;
+use Projects13\Contracts\ProjectDisplayIntegrationDefaults;
+use Projects13\Contracts\ProjectValidationIntegrationDefaults;
 
 /**
  * A project hangs from a customer, and everything that follows from it: the field in the form, the
@@ -102,9 +102,9 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
         $query->addSelect($owner.'.customer_id');
 
         if ($scope === 'epic') {
-            // The row also names the project, and the project relation feeds the integration's own
-            // row fields; the base only needs the join.
-            $query->with('project:id,name,customer_id');
+            // The relation feeds the integration's customer fields and the base edit payload's
+            // active state, so keep both columns along with the keys needed to match it.
+            $query->with('project:id,name,customer_id,active');
         }
     }
 
@@ -172,6 +172,7 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
             'customer' => $customer?->name,
             'customer_id' => $customer?->id,
             'customer_name' => $customer?->name,
+            'customer_active' => $customer?->active,
         ];
     }
 
@@ -181,10 +182,14 @@ final class CustomerProjectsIntegration implements ProjectDisplayIntegration, Pr
     }
 
     /**
-     * @return array{message: string, action_label: string, action_url: string}
+     * @return array{message: string, action_label: string, action_url: string}|null
      */
-    public function noRelatedEntitiesBanner(): array
+    public function noRelatedEntitiesBanner(): ?array
     {
+        if ($this->hasActiveRelatedEntities()) {
+            return null;
+        }
+
         return [
             'message' => __('No active customers are available. Open the customer form to create one.'),
             'action_label' => __('Open customer form'),

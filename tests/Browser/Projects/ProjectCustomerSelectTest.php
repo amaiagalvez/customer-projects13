@@ -135,6 +135,14 @@ class ProjectCustomerSelectTest extends DuskTestCase
                 ->click('[data-test="project-edit-'.$project->id.'"]')
                 ->waitFor(self::OPEN_DIALOG.' [data-test="project-name"]')
                 ->assertSelected(self::OPEN_DIALOG.' #project-customer-id', (string) $archivedCustomer->id)
+                ->assertSeeIn(
+                    self::OPEN_DIALOG.' #select2-project-customer-id-container',
+                    $archivedCustomer->name,
+                )
+                ->assertSeeIn(
+                    self::OPEN_DIALOG.' #select2-project-customer-id-container',
+                    __('basics13::messages.archived_label'),
+                )
                 ->click('#select2-project-customer-id-container')
                 ->type(self::OPEN_DIALOG.' .select2-container--open .select2-search__field', 'option customer')
                 ->waitUntil(
@@ -144,7 +152,13 @@ class ProjectCustomerSelectTest extends DuskTestCase
                 ->assertSeeIn(self::OPEN_DIALOG.' .select2-results', $activeCustomer->name)
                 ->assertDontSeeIn(self::OPEN_DIALOG.' .select2-results', $archivedCustomer->name)
                 ->assertDontSeeIn(self::OPEN_DIALOG.' .select2-results', $otherInactiveCustomer->name)
-                ->assertSelected(self::OPEN_DIALOG.' #project-customer-id', (string) $archivedCustomer->id);
+                ->assertSelected(self::OPEN_DIALOG.' #project-customer-id', (string) $archivedCustomer->id)
+                ->click('#select2-project-customer-id-result-'.$activeCustomer->id)
+                ->assertSelected(self::OPEN_DIALOG.' #project-customer-id', (string) $activeCustomer->id)
+                ->assertDontSeeIn(
+                    self::OPEN_DIALOG.' #select2-project-customer-id-container',
+                    __('basics13::messages.archived_label'),
+                );
         });
     }
 }
