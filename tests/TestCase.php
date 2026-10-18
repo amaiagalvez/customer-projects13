@@ -3,7 +3,7 @@
 namespace CustomerProjects13\Tests;
 
 use App\Models\User;
-use Basics13\ServiceProvider as Basics13ServiceProvider;
+use Basics13\Tests\TestCase as Basics13TestCase;
 use Basics13\Support\Testing\ValidatesFormRequests;
 use Carbon\CarbonImmutable;
 use CustomerProjects13\ServiceProvider as CustomerProjects13ServiceProvider;
@@ -13,9 +13,6 @@ use Flux\FluxServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
-use Illuminate\Support\Facades\Route;
-use Livewire\LivewireServiceProvider;
-use Orchestra\Testbench\TestCase as TestbenchTestCase;
 use Projects13\ServiceProvider as Projects13ServiceProvider;
 
 /**
@@ -27,7 +24,7 @@ use Projects13\ServiceProvider as Projects13ServiceProvider;
  * suites, which run with neither of the other two installed and are guarded by their
  * PackageIsolationTest.
  */
-abstract class TestCase extends TestbenchTestCase
+abstract class TestCase extends Basics13TestCase
 {
     use RefreshDatabase, ValidatesFormRequests;
 
@@ -59,9 +56,7 @@ abstract class TestCase extends TestbenchTestCase
     protected function getPackageProviders($app): array
     {
         return [
-            LivewireServiceProvider::class,
             FluxServiceProvider::class,
-            Basics13ServiceProvider::class,
             Customers13ServiceProvider::class,
             Projects13ServiceProvider::class,
             CustomerProjects13ServiceProvider::class,
@@ -70,23 +65,17 @@ abstract class TestCase extends TestbenchTestCase
 
     protected function getEnvironmentSetUp($app): void
     {
+        parent::getEnvironmentSetUp($app);
+
         Date::use(CarbonImmutable::class);
 
-        $app['config']->set('database.default', getenv('DB_CONNECTION') ?: 'sqlite');
-        $app['config']->set('app.key', 'base64:'.base64_encode(str_repeat('a', 32)));
-        $app['config']->set('database.connections.sqlite.database', ':memory:');
+        // Allow overriding the database connection for CI (e.g., MySQL).
         // The foreign key that stops a customer from being deleted with live projects is part of
         // what is under test, so SQLite has to enforce it rather than accept the column silently.
+        $app['config']->set('database.default', getenv('DB_CONNECTION') ?: 'sqlite');
         $app['config']->set('database.connections.sqlite.foreign_key_constraints', true);
         $app['config']->set('auth.providers.users.model', User::class);
         $app['config']->set('view.compiled', dirname(__DIR__).'/storage/framework/views');
-    }
-
-    protected function defineRoutes($router): void
-    {
-        Route::get('login', static fn (): string => 'Login')->name('login');
-        Route::get('email/verify', static fn (): string => 'Verify email')->name('verification.notice');
-        Route::get('dashboard', static fn (): string => 'Dashboard')->name('dashboard');
     }
 
     protected function setUp(): void
