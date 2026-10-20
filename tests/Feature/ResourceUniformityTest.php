@@ -252,6 +252,33 @@ class ResourceUniformityTest extends TestCase
         }
     }
 
+    /**
+     * All resource models must share the same set of essential traits:
+     * - SoftDeletes
+     * - TracksAuditColumns
+     * - TransactionalDelete
+     *
+     * This ensures consistency across resources and prevents drifts like
+     * the EpicComment gap that was previously CRITICAL-001.
+     */
+    public function test_all_resource_models_have_uniform_traits(): void
+    {
+        $resourceModels = [Entity::class, Project::class, Epic::class, \Projects13\Models\EpicComment::class];
+        $requiredTraits = [\Illuminate\Database\Eloquent\SoftDeletes::class, \Basics13\Concerns\TracksAuditColumns::class, \Basics13\Concerns\TransactionalDelete::class];
+
+        foreach ($resourceModels as $modelClass) {
+            $traits = class_uses_recursive($modelClass);
+
+            foreach ($requiredTraits as $trait) {
+                $this->assertContains(
+                    $trait,
+                    $traits,
+                    "{$modelClass::class} must use {$trait->name} trait",
+                );
+            }
+        }
+    }
+
     public function test_resource_factories_generate_unique_names(): void
     {
         $entityNames = array_map(
