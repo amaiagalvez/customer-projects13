@@ -2,7 +2,7 @@
 
 namespace EntityProjects13\Tests;
 
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 
 abstract class DuskTestCase extends \Basics13\Support\Testing\DuskTestCase
 {

@@ -2,8 +2,8 @@
 
 namespace EntityProjects13;
 
-use entities13\Contracts\EntityIntegration;
-use entities13\Models\Entity;
+use Entities13\Contracts\EntityIntegration;
+use Entities13\Models\Entity;
 use EntityProjects13\Integrations\EntityCountsIntegration;
 use EntityProjects13\Integrations\EntityProjectsIntegration;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

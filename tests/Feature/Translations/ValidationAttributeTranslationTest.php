@@ -2,7 +2,7 @@
 
 namespace EntityProjects13\Tests\Feature\Translations;
 
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Validator;

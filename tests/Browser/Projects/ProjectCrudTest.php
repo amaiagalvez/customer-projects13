@@ -2,7 +2,7 @@
 
 namespace EntityProjects13\Tests\Browser\Projects;
 
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\DuskTestCase;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Str;
@@ -17,7 +17,7 @@ class ProjectCrudTest extends DuskTestCase
 
     use DatabaseMigrations;
 
-    public function test_project_row_name_opens_the_edit_form(): void
+    public function test_project_row_name_is_not_interactive(): void
     {
         $user = $this->user();
         $project = Project::factory()->for($this->entity())->create(['name' => 'Editable from the row']);
@@ -26,10 +26,11 @@ class ProjectCrudTest extends DuskTestCase
             $browser->loginAs($user)
                 ->visit('/projects')
                 ->waitUntil('typeof window.jQuery?.fn?.select2 === "function"', 10)
-                ->click('[data-test="project-name-'.$project->id.'"]')
-                ->waitFor(self::PROJECT_NAME_SELECTOR)
-                ->assertSeeIn('dialog[open]', __('Edit project'))
-                ->assertInputValue(self::PROJECT_NAME_SELECTOR, $project->name);
+                ->assertSeeIn('[data-test="project-name-'.$project->id.'"]', $project->name)
+                ->assertScript(
+                    'document.querySelector(\'[data-test="project-name-'.$project->id.'"]\').closest(\'a, button\') === null',
+                    true,
+                );
         });
     }
 

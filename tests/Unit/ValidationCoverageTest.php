@@ -3,8 +3,8 @@
 namespace EntityProjects13\Tests\Unit;
 
 use Basics13\Support\Validation\MaxLength;
-use entities13\Http\Requests\EntityRequest;
-use entities13\Models\Entity;
+use Entities13\Http\Requests\EntityRequest;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Foundation\Http\FormRequest;

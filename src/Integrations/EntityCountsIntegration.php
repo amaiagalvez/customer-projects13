@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Integrations;
 
-use entities13\Contracts\EntityIntegration;
-use entities13\Models\Entity;
+use Entities13\Contracts\EntityIntegration;
+use Entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;

@@ -2,6 +2,8 @@
 
 namespace EntityProjects13\Tests\Feature;
 
+use Basics13\Concerns\TracksAuditColumns;
+use Basics13\Concerns\TransactionalDelete;
 use Basics13\Http\Controllers\ArchivedController as BasicsArchivedController;
 use Basics13\Http\Requests\RestoreRequest;
 use Basics13\Http\Requests\SearchableListRequest;
@@ -9,12 +11,12 @@ use Basics13\Http\Requests\TrashDestroyRequest;
 use Basics13\Queries\ListQueryBase;
 use Basics13\Support\Validation\MaxLength;
 use Closure;
-use entities13\Http\Requests\EntityListRequest;
-use entities13\Http\Requests\EntityRequest;
-use entities13\Models\Entity;
-use entities13\Policies\EntityPolicy;
-use entities13\Queries\Entities\EntityListQuery;
-use entities13\Transformers\EntityListTransformer;
+use Entities13\Http\Requests\EntityListRequest;
+use Entities13\Http\Requests\EntityRequest;
+use Entities13\Models\Entity;
+use Entities13\Policies\EntityPolicy;
+use Entities13\Queries\Entities\EntityListQuery;
+use Entities13\Transformers\EntityListTransformer;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -29,6 +31,7 @@ use Projects13\Http\Requests\EpicRequest;
 use Projects13\Http\Requests\ProjectListRequest;
 use Projects13\Http\Requests\ProjectRequest;
 use Projects13\Models\Epic;
+use Projects13\Models\EpicComment;
 use Projects13\Models\Project;
 use Projects13\Policies\EpicPolicy;
 use Projects13\Policies\ProjectPolicy;
@@ -263,8 +266,8 @@ class ResourceUniformityTest extends TestCase
      */
     public function test_all_resource_models_have_uniform_traits(): void
     {
-        $resourceModels = [Entity::class, Project::class, Epic::class, \Projects13\Models\EpicComment::class];
-        $requiredTraits = [\Illuminate\Database\Eloquent\SoftDeletes::class, \Basics13\Concerns\TracksAuditColumns::class, \Basics13\Concerns\TransactionalDelete::class];
+        $resourceModels = [Entity::class, Project::class, Epic::class, EpicComment::class];
+        $requiredTraits = [SoftDeletes::class, TracksAuditColumns::class, TransactionalDelete::class];
 
         foreach ($resourceModels as $modelClass) {
             $traits = class_uses_recursive($modelClass);
@@ -273,7 +276,7 @@ class ResourceUniformityTest extends TestCase
                 $this->assertContains(
                     $trait,
                     $traits,
-                    "{$modelClass::class} must use {$trait->name} trait",
+                    $modelClass.'::class must use '.$trait.' trait',
                 );
             }
         }

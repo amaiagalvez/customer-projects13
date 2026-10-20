@@ -27,7 +27,7 @@ class PackageSeederTest extends TestCase
         $this->assertDatabaseCount('PRO_epics', 15);
         $this->assertDatabaseCount('PRO_epic_comments', 36);
         $this->assertSame(0, Project::query()->distinct()->count('entity_id'));
-        $this->assertSame(12, Epic::query()->whereHas('project', fn($query) => $query
+        $this->assertSame(12, Epic::query()->whereHas('project', fn ($query) => $query
             ->where('name', 'like', 'Perf Project %'))->count());
         $this->assertSame(36, EpicComment::query()->count());
     }

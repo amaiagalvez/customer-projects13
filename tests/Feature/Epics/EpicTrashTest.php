@@ -3,7 +3,7 @@
 namespace EntityProjects13\Tests\Feature\Epics;
 
 use App\Models\User;
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;

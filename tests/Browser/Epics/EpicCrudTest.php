@@ -19,7 +19,7 @@ class EpicCrudTest extends DuskTestCase
 
     use DatabaseMigrations;
 
-    public function test_epic_row_name_opens_the_edit_form(): void
+    public function test_epic_row_name_is_not_interactive(): void
     {
         $user = $this->user();
         $project = Project::factory()->for($this->entity())->create();
@@ -28,10 +28,11 @@ class EpicCrudTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($user, $epic): void {
             $browser->loginAs($user)
                 ->visit('/epics')
-                ->click('[data-test="epic-name-'.$epic->id.'"]')
-                ->waitFor('dialog[open] [data-test="epic-comments"]')
-                ->assertSeeIn('dialog[open]', __('Edit epic'))
-                ->assertInputValue(self::EPIC_NAME_SELECTOR, $epic->name);
+                ->assertSeeIn('[data-test="epic-name-'.$epic->id.'"]', $epic->name)
+                ->assertScript(
+                    'document.querySelector(\'[data-test="epic-name-'.$epic->id.'"]\').closest(\'a, button\') === null',
+                    true,
+                );
         });
     }
 

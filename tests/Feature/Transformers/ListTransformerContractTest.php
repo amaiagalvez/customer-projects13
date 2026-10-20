@@ -2,8 +2,8 @@
 
 namespace EntityProjects13\Tests\Feature\Transformers;
 
-use entities13\Models\Entity;
-use entities13\Transformers\EntityListTransformer;
+use Entities13\Models\Entity;
+use Entities13\Transformers\EntityListTransformer;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;

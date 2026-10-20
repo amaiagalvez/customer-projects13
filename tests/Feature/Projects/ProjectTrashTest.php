@@ -3,7 +3,7 @@
 namespace EntityProjects13\Tests\Feature\Projects;
 
 use App\Models\User;
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Epic;

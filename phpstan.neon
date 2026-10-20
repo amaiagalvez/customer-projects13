@@ -4,6 +4,9 @@ includes:
     - phpstan-baseline.neon
 
 parameters:
+    scanFiles:
+        - vendor/amaia/basics13/tests/TestCase.php
+
     paths:
         - config/
         - database/

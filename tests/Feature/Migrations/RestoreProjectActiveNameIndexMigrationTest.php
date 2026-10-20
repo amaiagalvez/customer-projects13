@@ -2,7 +2,7 @@
 
 namespace EntityProjects13\Tests\Feature\Migrations;
 
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;

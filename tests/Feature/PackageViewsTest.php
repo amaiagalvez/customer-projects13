@@ -50,7 +50,7 @@ class PackageViewsTest extends TestCase
     public function test_package_field_label_component_uses_the_form_request_rules(): void
     {
         $html = Blade::render(<<<'BLADE'
-            <x-basics13::forms.field-label :request="\entities13\Http\Requests\EntityRequest::class" field="name"
+            <x-basics13::forms.field-label :request="\Entities13\Http\Requests\EntityRequest::class" field="name"
                 test="entity-name-info">
                 {{ __('Name') }}
             </x-basics13::forms.field-label>

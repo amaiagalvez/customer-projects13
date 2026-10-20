@@ -2,7 +2,7 @@
 
 namespace EntityProjects13\Tests\Unit\Integrations;
 
-use entities13\Models\Entity;
+use Entities13\Models\Entity;
 use EntityProjects13\Integrations\EntityProjectsIntegration;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Eloquent\Model;
