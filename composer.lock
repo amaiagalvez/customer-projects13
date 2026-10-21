@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "500fbebfdb386329bfb83ba9fc4ff32ecc90c19d"
+                "reference": "92b7b47cd8aac169692b49e584e0ec3f52c78627"
             },
             "require": {
                 "laravel/boost": "^2.10",
@@ -72,7 +72,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/entities13",
-                "reference": "3947dde08411b6fd5a7a3fb60491b379e02e12b6"
+                "reference": "8de4f2bcc98c375914f30c74f8acf562e5396440"
             },
             "require": {
                 "php": "^8.3"
@@ -122,7 +122,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "cc2688efecd1903e719940b4fcaebac8da31ad7d"
+                "reference": "217c94ad0249246b5ae269c28d4a40a0fabd1835"
             },
             "require": {
                 "php": "^8.3"
@@ -3360,16 +3360,16 @@
         },
         {
             "name": "livewire/flux",
-            "version": "v2.20.1",
+            "version": "v2.21.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/livewire/flux.git",
-                "reference": "ee9ad7f91087ea117a2c80993a14cb25bb902f70"
+                "reference": "7ab277f7da3be4ffd26111b01e3b0766052f4472"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/livewire/flux/zipball/ee9ad7f91087ea117a2c80993a14cb25bb902f70",
-                "reference": "ee9ad7f91087ea117a2c80993a14cb25bb902f70",
+                "url": "https://api.github.com/repos/livewire/flux/zipball/7ab277f7da3be4ffd26111b01e3b0766052f4472",
+                "reference": "7ab277f7da3be4ffd26111b01e3b0766052f4472",
                 "shasum": ""
             },
             "require": {
@@ -3420,9 +3420,9 @@
             ],
             "support": {
                 "issues": "https://github.com/livewire/flux/issues",
-                "source": "https://github.com/livewire/flux/tree/v2.20.1"
+                "source": "https://github.com/livewire/flux/tree/v2.21.0"
             },
-            "time": "2026-09-28T18:14:53+00:00"
+            "time": "2026-10-21T14:45:58+00:00"
         },
         {
             "name": "livewire/livewire",

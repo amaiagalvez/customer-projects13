@@ -104,6 +104,7 @@ class ServiceProvider extends BaseServiceProvider
                 'entity_id' => [
                     'column' => 'PRO_projects.entity_id',
                     'label' => 'Entity',
+                    'help' => 'Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.',
                     'type' => 'select',
                     'nullable' => true,
                     'visible' => true,

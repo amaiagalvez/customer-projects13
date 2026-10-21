@@ -2,6 +2,7 @@
     "Choose a entity from the list or create a new one.": "Aukeratu atzilea zerrendan edo sortu berria.",
     "Create entity": "Sortu atzilea",
     "Entity": "Bezeroa",
+    "Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.": "«Berdina da»: hautatutako bezeroetako edozeinen proiektuak; «ez da berdina»: horietako batena ere ez direnak; «hutsik dago»: bezerorik gabeko proiektuak.",
     "No entities found.": "Bezeroak ez direkitut.",
     "Select a entity": "Aukeratu atzilea",
     "Unable to create entity.": "Ezin da atzilea sortu.",

@@ -2,6 +2,7 @@
     "Choose a entity from the list or create a new one.": "Choose a entity from the list or create a new one.",
     "Create entity": "Create entity",
     "Entity": "Entity",
+    "Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.": "Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.",
     "No entities found.": "No entities found.",
     "Select a entity": "Select a entity",
     "Unable to create entity.": "Unable to create entity.",

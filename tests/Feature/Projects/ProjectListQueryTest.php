@@ -29,4 +29,37 @@ class ProjectListQueryTest extends TestCase
 
         $this->assertTrue($listedProject->getRelationValue('entity')->is($entity));
     }
+
+    public function test_entity_filter_matches_projects_of_any_selected_entity(): void
+    {
+        [$north, $south, $west] = Entity::factory()->count(3)->create();
+        $northProject = Project::factory()->for($north)->create();
+        $southProject = Project::factory()->for($south)->create();
+        Project::factory()->for($west)->create();
+        Project::factory()->create(['entity_id' => null]);
+
+        $projects = app(ProjectListQuery::class)->active('', [
+            'entity_id' => ['operator' => 'equals', 'value' => [(string) $north->id, (string) $south->id]],
+        ]);
+
+        $this->assertEqualsCanonicalizing([$northProject->id, $southProject->id], $projects->pluck('id')->all());
+    }
+
+    public function test_entity_filter_excludes_selected_entities_and_finds_projects_without_entity(): void
+    {
+        [$north, $south] = Entity::factory()->count(2)->create();
+        Project::factory()->for($north)->create();
+        $southProject = Project::factory()->for($south)->create();
+        $orphanProject = Project::factory()->create(['entity_id' => null]);
+
+        $notNorth = app(ProjectListQuery::class)->active('', [
+            'entity_id' => ['operator' => 'not_equals', 'value' => [(string) $north->id]],
+        ]);
+        $withoutEntity = app(ProjectListQuery::class)->active('', [
+            'entity_id' => ['operator' => 'is_empty', 'value' => null],
+        ]);
+
+        $this->assertSame([$southProject->id], $notNorth->pluck('id')->all());
+        $this->assertSame([$orphanProject->id], $withoutEntity->pluck('id')->all());
+    }
 }

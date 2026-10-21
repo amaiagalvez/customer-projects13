@@ -19,6 +19,41 @@ class EpicCrudTest extends DuskTestCase
 
     use DatabaseMigrations;
 
+    public function test_advanced_search_filters_epics_and_clears_all_filters(): void
+    {
+        $user = $this->user();
+        $project = Project::factory()->for($this->entity())->create();
+        $alpha = Epic::factory()->for($project)->create(['name' => 'Alpha epic '.Str::uuid()]);
+        $beta = Epic::factory()->for($project)->create(['name' => 'Beta epic '.Str::uuid()]);
+
+        $this->browse(function (Browser $browser) use ($user, $alpha, $beta): void {
+            $browser->loginAs($user)
+                ->visit('/epics')
+                ->click('[data-test="epic-advanced-search"]')
+                ->waitFor('dialog[open] #advanced-search-heading')
+                ->assertScript('document.querySelector(\'[data-test="active-advanced-search-operator"]\').value', '')
+                ->assertSeeIn('dialog[open]', __('Start date'))
+                ->assertSeeIn('dialog[open]', __('basics13::messages.created_at'))
+                ->assertDontSeeIn('dialog[open]', 'projects13::messages.')
+                ->type('dialog[open] input[wire\\:model="filters.name.value"]', 'Alpha')
+                ->select('[data-test="active-advanced-search-operator"]', 'is_true')
+                ->press(__('basics13::messages.apply_filters'))
+                ->waitFor('[data-test="epic-filter-remove-name"]')
+                ->assertSeeIn('[data-test="epic-filter-badges"]', __('basics13::messages.operator_is_true'))
+                ->assertSee($alpha->name)
+                ->assertDontSee($beta->name)
+                ->click('[data-test="epic-filter-clear-all"]')
+                ->waitUntilMissing('[data-test="epic-filter-badges"]')
+                ->assertSee($beta->name)
+                ->assertScript('location.search', '');
+
+            $this->assertSame([], array_values(array_filter(
+                $browser->driver->manage()->getLog('browser'),
+                fn (array $entry): bool => $entry['level'] === 'SEVERE',
+            )));
+        });
+    }
+
     public function test_epic_row_name_is_not_interactive(): void
     {
         $user = $this->user();

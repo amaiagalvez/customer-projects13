@@ -2,6 +2,7 @@
     "Choose a entity from the list or create a new one.": "Choisissez un client dans la liste ou créez-en un nouveau.",
     "Create entity": "Créer un client",
     "Entity": "Client",
+    "Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.": "« Est égal à » affiche les projets de l’un des clients choisis ; « n’est pas égal à », ceux d’aucun d’entre eux ; « est vide », les projets sans client.",
     "No entities found.": "Aucun client trouvé.",
     "Select a entity": "Sélectionnez un client",
     "Unable to create entity.": "Impossible de créer le client.",

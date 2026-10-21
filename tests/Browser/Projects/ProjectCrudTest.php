@@ -17,6 +17,43 @@ class ProjectCrudTest extends DuskTestCase
 
     use DatabaseMigrations;
 
+    public function test_advanced_search_filters_projects_by_entity_and_removes_the_filters(): void
+    {
+        $user = $this->user();
+        $north = Entity::factory()->create(['name' => 'North '.Str::uuid()]);
+        $south = Entity::factory()->create(['name' => 'South '.Str::uuid()]);
+        $northProject = Project::factory()->for($north)->create(['name' => 'North project '.Str::uuid()]);
+        $southProject = Project::factory()->for($south)->create(['name' => 'South project '.Str::uuid()]);
+
+        $this->browse(function (Browser $browser) use ($user, $north, $northProject, $southProject): void {
+            $browser->loginAs($user)
+                ->visit('/projects')
+                ->assertDontSee('1 emaitza')
+                ->click('[data-test="project-advanced-search"]')
+                ->waitFor('dialog[open] #advanced-search-heading')
+                ->assertMissing('dialog[open] select[multiple]')
+                ->assertVisible('[data-test="entity_id-advanced-search-info"]')
+                ->assertSeeIn('dialog[open]', __('Start date'))
+                ->assertSeeIn('dialog[open]', __('basics13::messages.created_at'))
+                ->assertDontSeeIn('dialog[open]', 'projects13::messages.')
+                ->assertScript('document.querySelector(\'[data-test="active-advanced-search-operator"]\').value', '')
+                ->check('[data-test="entity_id-advanced-search-options"] input[value="'.$north->id.'"]')
+                ->press(__('basics13::messages.apply_filters'))
+                ->waitFor('[data-test="project-filter-remove-entity_id"]')
+                ->assertMissing('[data-test="project-filter-remove-active"]')
+                ->assertSee($northProject->name)
+                ->assertDontSee($southProject->name)
+                ->click('[data-test="project-filter-remove-entity_id"]')
+                ->waitUntilMissing('[data-test="project-filter-badges"]')
+                ->assertSee($southProject->name);
+
+            $this->assertSame([], array_values(array_filter(
+                $browser->driver->manage()->getLog('browser'),
+                fn (array $entry): bool => $entry['level'] === 'SEVERE',
+            )));
+        });
+    }
+
     public function test_project_row_name_is_not_interactive(): void
     {
         $user = $this->user();
