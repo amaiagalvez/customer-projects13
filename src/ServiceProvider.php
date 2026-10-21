@@ -40,6 +40,7 @@ class ServiceProvider extends BaseServiceProvider
         ], 'entity-projects13-lang');
 
         $this->declareIntegrationViews();
+        $this->declareProjectSearchFields();
         $this->declareProjectEntityRelations();
         $this->blockEntityDeletionWithProjects();
     }
@@ -92,6 +93,30 @@ class ServiceProvider extends BaseServiceProvider
                 'columns' => 'entity-projects13::entities.list-columns',
                 'cells' => 'entity-projects13::entities.list-cells',
                 'count' => 3,
+            ],
+        ]);
+    }
+
+    private function declareProjectSearchFields(): void
+    {
+        config([
+            'projects13.searchable_fields' => [
+                'entity_id' => [
+                    'column' => 'PRO_projects.entity_id',
+                    'label' => 'Entity',
+                    'type' => 'select',
+                    'nullable' => true,
+                    'visible' => true,
+                    'order' => 10,
+                    'group' => 'relations',
+                    'options' => fn (string $scope): array => Entity::query()
+                        ->where('active', $scope === 'active')
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                        ->all(),
+                    'condition' => fn (string $scope): bool => ! request()->route('entity'),
+                    'multiple' => true,
+                ],
             ],
         ]);
     }

@@ -39,6 +39,7 @@ class IntegrationSurfacesTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
+            ->assertSee('data-test="project-advanced-search"', false)
             ->assertSee('Entity')
             ->assertSee('North client');
     }
