@@ -24,7 +24,7 @@ class ProjectEntitySelectTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($user): void {
             $browser->loginAs($user)
                 ->visit('/projects')
-                ->click('[data-test="project-no-entity-form-button"]')
+                ->click('[data-test="project-no-related-form-button"]')
                 ->assertPathIs('/entities')
                 ->waitFor(self::OPEN_DIALOG)
                 ->assertSeeIn(self::OPEN_DIALOG, __('New entity'))

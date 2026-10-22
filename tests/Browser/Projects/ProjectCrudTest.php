@@ -36,7 +36,7 @@ class ProjectCrudTest extends DuskTestCase
                 ->assertSeeIn('dialog[open]', __('Start date'))
                 ->assertSeeIn('dialog[open]', __('basics13::messages.created_at'))
                 ->assertDontSeeIn('dialog[open]', 'projects13::messages.')
-                ->assertScript('document.querySelector(\'[data-test="active-advanced-search-operator"]\').value', '')
+                ->assertMissing('[data-test="active-advanced-search-operator"]')
                 ->check('[data-test="entity_id-advanced-search-options"] input[value="'.$north->id.'"]')
                 ->press(__('basics13::messages.apply_filters'))
                 ->waitFor('[data-test="project-filter-remove-entity_id"]')

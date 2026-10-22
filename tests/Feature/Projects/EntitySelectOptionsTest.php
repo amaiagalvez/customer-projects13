@@ -52,6 +52,6 @@ class EntitySelectOptionsTest extends TestCase
             ->assertSee(__('No active entities are available. Open the entity form to create one.'))
             ->assertSee(__('Open entity form'))
             ->assertSee('href="'.route('entities.index', ['create' => 1]).'"', false)
-            ->assertSee('project-no-entity-form-button');
+            ->assertSee('project-no-related-form-button');
     }
 }

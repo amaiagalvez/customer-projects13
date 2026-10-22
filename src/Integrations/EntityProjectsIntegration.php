@@ -213,7 +213,7 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
         ];
     }
 
-    public function hasActiveRelatedEntities(): bool
+    public function hasActiveRelated(): bool
     {
         return Entity::query()->where('active', true)->exists();
     }
@@ -221,9 +221,9 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
     /**
      * @return array{message: string, action_label: string, action_url: string}|null
      */
-    public function noRelatedEntitiesBanner(): ?array
+    public function noRelatedBanner(): ?array
     {
-        if ($this->hasActiveRelatedEntities()) {
+        if ($this->hasActiveRelated()) {
             return null;
         }
 

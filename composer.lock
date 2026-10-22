@@ -13,10 +13,9 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "fa405f6e8f4b706137718e76811ccc7d29fa2256"
+                "reference": "0256538533088725e03e1395f799a2de34b9190b"
             },
             "require": {
-                "laravel/chisel": "^0.1.0",
                 "laravel/fortify": "^1.37.2",
                 "laravel/framework": "^13",
                 "livewire/flux": "^2",
@@ -71,7 +70,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/entities13",
-                "reference": "d9d22549377eff5067005d4734f8c41f54d95948"
+                "reference": "9f6383c73b6718bc4c5d767f160a031a15b7b514"
             },
             "require": {
                 "php": "^8.5"
@@ -121,7 +120,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "56c58ef3f1cc866034defffbdfad464f2502b60d"
+                "reference": "bf94fd4077169a808d26f44e8db8ed0d97e661c6"
             },
             "require": {
                 "php": "^8.5"
@@ -1765,58 +1764,6 @@
                 }
             ],
             "time": "2026-10-07T14:14:28+00:00"
-        },
-        {
-            "name": "laravel/chisel",
-            "version": "v0.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/laravel/chisel.git",
-                "reference": "c2ac11cd1c6b763b412aa26b9d95fce70a489d31"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/laravel/chisel/zipball/c2ac11cd1c6b763b412aa26b9d95fce70a489d31",
-                "reference": "c2ac11cd1c6b763b412aa26b9d95fce70a489d31",
-                "shasum": ""
-            },
-            "require": {
-                "illuminate/process": "^10.20|^11.0|^12.0|^13.0",
-                "nikic/php-parser": "^5.0",
-                "php": "^8.2"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.24.0",
-                "pestphp/pest": "^4.1.0",
-                "phpstan/phpstan": "^2.1.26",
-                "rector/rector": "^2.1.7"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Laravel\\Chisel\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Taylor Otwell",
-                    "email": "taylor@laravel.com"
-                }
-            ],
-            "description": "Toolkit for building scripts that remove unwanted code, files, and dependencies.",
-            "keywords": [
-                "chisel",
-                "laravel"
-            ],
-            "support": {
-                "issues": "https://github.com/laravel/chisel/issues",
-                "source": "https://github.com/laravel/chisel/tree/v0.1.1"
-            },
-            "time": "2026-05-13T21:29:24+00:00"
         },
         {
             "name": "laravel/dusk",

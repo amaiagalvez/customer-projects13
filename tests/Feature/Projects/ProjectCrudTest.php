@@ -197,7 +197,7 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index', ['search' => '2001-02-03']))
             ->assertOk()
-            ->assertSee('No records match your search.')
+            ->assertSee(__('basics13::messages.no_matching_records'))
             ->assertDontSee('Website redesign');
     }
 

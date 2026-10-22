@@ -167,12 +167,12 @@ class EntityProjectsIntegrationTest extends TestCase
 
         // Test when no active entities exist
         Entity::factory()->create(['active' => false]);
-        $result = $integration->hasActiveRelatedEntities();
+        $result = $integration->hasActiveRelated();
         $this->assertFalse($result);
 
         // Test when active entities exist
         Entity::factory()->create(['active' => true]);
-        $result = $integration->hasActiveRelatedEntities();
+        $result = $integration->hasActiveRelated();
         $this->assertTrue($result);
     }
 
@@ -180,7 +180,7 @@ class EntityProjectsIntegrationTest extends TestCase
     {
         $integration = new EntityProjectsIntegration;
 
-        $result = $integration->noRelatedEntitiesBanner();
+        $result = $integration->noRelatedBanner();
 
         $this->assertArrayHasKey('message', $result);
         $this->assertArrayHasKey('action_label', $result);
@@ -192,7 +192,7 @@ class EntityProjectsIntegrationTest extends TestCase
         $integration = new EntityProjectsIntegration;
         Entity::factory()->create(['active' => true]);
 
-        $result = $integration->noRelatedEntitiesBanner();
+        $result = $integration->noRelatedBanner();
 
         $this->assertNull($result);
     }
@@ -202,7 +202,7 @@ class EntityProjectsIntegrationTest extends TestCase
         $integration = new EntityProjectsIntegration;
         Entity::factory()->create(['active' => false]);
 
-        $result = $integration->noRelatedEntitiesBanner();
+        $result = $integration->noRelatedBanner();
 
         $this->assertNotNull($result);
         $this->assertArrayHasKey('message', $result);

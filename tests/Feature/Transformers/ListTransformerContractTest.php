@@ -146,7 +146,7 @@ class ListTransformerContractTest extends TestCase
         /** @var array<string, mixed> $list */
         $list = $this->payload($transformerClass, 'active', null, 'missing');
 
-        $this->assertSame('No records match your search.', $list['emptyMessage']);
+        $this->assertSame(__('basics13::messages.no_matching_records'), $list['emptyMessage']);
     }
 
     /**
