@@ -1,11 +1,11 @@
 {
-    "Choose a entity from the list or create a new one.": "Aukeratu atzilea zerrendan edo sortu berria.",
-    "Create entity": "Sortu atzilea",
+    "Choose a entity from the list or create a new one.": "Aukeratu bezero bat zerrendan edo sortu berri bat.",
+    "Create entity": "Sortu bezeroa",
     "Entity": "Bezeroa",
     "Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.": "«Berdina da»: hautatutako bezeroetako edozeinen proiektuak; «ez da berdina»: horietako batena ere ez direnak; «hutsik dago»: bezerorik gabeko proiektuak.",
-    "No entities found.": "Bezeroak ez direkitut.",
-    "Select a entity": "Aukeratu atzilea",
-    "Unable to create entity.": "Ezin da atzilea sortu.",
-    "Unable to load entities.": "Ezin da atzileak kargatu.",
+    "No entities found.": "Ez da bezerorik aurkitu.",
+    "Select a entity": "Aukeratu bezero bat",
+    "Unable to create entity.": "Ezin izan da bezeroa sortu.",
+    "Unable to load entities.": "Ezin izan dira bezeroak kargatu.",
     "View :count projects": "Ikusi :count proiektu"
 }

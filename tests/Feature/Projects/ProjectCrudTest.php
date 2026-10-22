@@ -10,6 +10,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Projects13\Models\Epic;
 use Projects13\Models\EpicComment;
 use Projects13\Models\Project;
@@ -32,7 +33,7 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasEntities', true);
+            ->assertViewHas('hasRelated', true);
     }
 
     public function test_has_entities_is_false_when_only_archived_entities_exist(): void
@@ -42,7 +43,7 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasEntities', false);
+            ->assertViewHas('hasRelated', false);
     }
 
     public function test_has_entities_is_false_when_only_deleted_entities_exist(): void
@@ -52,7 +53,7 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertViewHas('hasEntities', false);
+            ->assertViewHas('hasRelated', false);
     }
 
     public function test_creating_and_reassigning_a_project_persists_its_entity_and_preserves_notes(): void
@@ -378,6 +379,7 @@ class ProjectCrudTest extends TestCase
         $this->assertNotSoftDeleted($project);
     }
 
+    #[Group('mariadb')]
     public function test_project_is_not_deleted_when_an_epic_appears_during_the_delete_transaction(): void
     {
         if (DB::connection()->getDriverName() !== 'mysql') {

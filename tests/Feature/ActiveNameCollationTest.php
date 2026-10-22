@@ -8,7 +8,9 @@ use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 
+#[Group('mariadb')]
 class ActiveNameCollationTest extends TestCase
 {
     use RefreshDatabase;

@@ -26,6 +26,7 @@ class ListTransformerContractTest extends TestCase
         'breadcrumbs',
         'extraDateHeading',
         'emptyMessage',
+        'narrowed',
         'search',
         'tabs',
         'create',

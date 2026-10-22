@@ -155,7 +155,7 @@ class ListQuerySharedBehaviourTest extends TestCase
     /**
      * The tab badges must not re-run the count the paginator already knows. The budget is per
      * resource: entities load their types, projects load no extra records, while epics load their
-     * project.
+     * project and its entity (one query each, whatever the number of rows).
      *
      * @param  class-string<EntityListQuery|ProjectListQuery|EpicListQuery>  $queryClass
      */
@@ -219,7 +219,7 @@ class ListQuerySharedBehaviourTest extends TestCase
         return [
             'entities' => [EntityListQuery::class, 5],
             'projects' => [ProjectListQuery::class, 4],
-            'epics' => [EpicListQuery::class, 5],
+            'epics' => [EpicListQuery::class, 6],
         ];
     }
 

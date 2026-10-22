@@ -42,7 +42,7 @@ class EntityCountsIntegrationTest extends TestCase
             'projectsUrl' => route('projects.index', ['search' => 'Test Entity']),
             'epicsCount' => 3,
             'commentsCount' => 2,
-            'projects_exists' => true,
+            'blocks_delete' => true,
         ], $result);
     }
 
@@ -63,7 +63,7 @@ class EntityCountsIntegrationTest extends TestCase
             'projectsUrl' => null,
             'epicsCount' => 0,
             'commentsCount' => 0,
-            'projects_exists' => false,
+            'blocks_delete' => false,
         ], $result);
     }
 }

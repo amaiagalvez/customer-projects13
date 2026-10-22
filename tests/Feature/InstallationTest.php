@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Schema;
 use Projects13\Contracts\ProjectDisplayIntegration;
 use Projects13\Contracts\ProjectQueryIntegration;
 use Projects13\Contracts\ProjectValidationIntegration;
+use Projects13\Queries\Projects\ProjectListQuery;
 
 /**
  * Installing this package replaces what both base packages bound by default. If the order in which
@@ -51,5 +52,30 @@ class InstallationTest extends TestCase
         $this->assertNotEmpty($keys, 'the foreign key has to be enforced, not just declared');
         $this->assertSame('ENT_entities', $keys[0]['foreign_table']);
         $this->assertSame(['id'], $keys[0]['foreign_columns']);
+    }
+
+    /**
+     * `config:cache` exports the whole configuration with `var_export` and loads it back, so a
+     * closure anywhere in it makes `config:cache` and `optimize` fail once this package is installed.
+     */
+    public function test_the_configuration_stays_serializable_for_config_cache(): void
+    {
+        $exported = var_export(config()->all(), true);
+
+        $this->assertSame(config()->all(), eval('return '.$exported.';'));
+    }
+
+    public function test_the_project_list_offers_the_entity_filter_with_the_scope_options(): void
+    {
+        $active = Entity::factory()->create(['name' => 'Active entity']);
+        $archived = Entity::factory()->create(['name' => 'Archived entity', 'active' => false]);
+
+        $field = app(ProjectListQuery::class)->searchableFields('active')['entity_id'] ?? null;
+
+        $options = $field['options'] ?? null;
+
+        $this->assertIsCallable($options);
+        $this->assertSame([$active->id => 'Active entity'], $options('active'));
+        $this->assertSame([$archived->id => 'Archived entity'], $options('archived'));
     }
 }

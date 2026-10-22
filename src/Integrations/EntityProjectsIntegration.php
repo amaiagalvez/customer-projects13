@@ -23,6 +23,8 @@ use Projects13\Models\Project;
  * rule that keeps the two consistent, the lock that keeps a project from being attached to a
  * entity that is being deleted at the same time, and the name and column the entity's presence
  * gives to a row.
+ *
+ * @phpstan-import-type SearchFields from \Basics13\Queries\ListQueryBase
  */
 final class EntityProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
 {
@@ -107,8 +109,10 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
 
         if ($scope === 'epic') {
             // The relation feeds the integration's entity fields and the base edit payload's
-            // active state, so keep both columns along with the keys needed to match it.
-            $query->with('project:id,name,entity_id,active');
+            // active state, so keep both columns along with the keys needed to match it. The
+            // joined entity columns sit on the epic, not on its project, so the project's entity
+            // is eager loaded too: otherwise each distinct project would load it on its own.
+            $query->with(['project:id,name,entity_id,active', 'project.entity:id,name,active']);
         }
     }
 
@@ -130,6 +134,34 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
     public function searchColumns(string $scope, array $columns): array
     {
         return [...$columns, $this->aliasFor($scope).'.name'];
+    }
+
+    /**
+     * The project list filters by entity. The options follow the list's scope.
+     *
+     * @return SearchFields
+     */
+    public function searchableFields(string $scope): array
+    {
+        return [
+            'entity_id' => [
+                'column' => 'PRO_projects.entity_id',
+                'label' => 'Entity',
+                'help' => 'Equals shows the projects of any of the selected entities; not equals, those of none of them; is empty, the projects without an entity.',
+                'type' => 'select',
+                'nullable' => true,
+                'visible' => true,
+                'order' => 10,
+                'group' => 'relations',
+                'options' => fn (string $scope): array => Entity::query()
+                    ->where('active', $scope === 'active')
+                    ->orderBy('name')
+                    ->pluck('name', 'id')
+                    ->all(),
+                'condition' => fn (string $scope): bool => ! request()->route('entity'),
+                'multiple' => true,
+            ],
+        ];
     }
 
     /**
@@ -218,10 +250,10 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
     private function aliasFor(string $scope): string
     {
         return match ($scope) {
-            'epic' => 'epic_entities',
-            'planning' => 'planning_entities',
-            'timeline' => 'timeline_entities',
-            default => 'project_entities',
+            'epic' => 'epic_related',
+            'planning' => 'planning_related',
+            'timeline' => 'timeline_related',
+            default => 'project_related',
         };
     }
 

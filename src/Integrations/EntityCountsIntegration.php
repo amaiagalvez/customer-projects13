@@ -78,7 +78,8 @@ final class EntityCountsIntegration extends EntityIntegration
                 : null,
             'epicsCount' => (int) $record->getAttribute('epics_count'),
             'commentsCount' => (int) $record->getAttribute('comments_count'),
-            'projects_exists' => (bool) $record->getAttribute('projects_exists'),
+            // Any project, trashed ones included, keeps the entity from being deleted.
+            'blocks_delete' => (bool) $record->getAttribute('projects_exists'),
         ];
     }
 
