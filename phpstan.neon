@@ -7,6 +7,8 @@ parameters:
     scanFiles:
         - vendor/amaia/basics13/tests/TestCase.php
         - vendor/amaia/basics13/tests/TranslationFilesTestCase.php
+        - vendor/amaia/basics13/tests/BootstrapTestCase.php
+        - vendor/amaia/basics13/tests/PackageIsolationTestCase.php
 
     paths:
         - config/

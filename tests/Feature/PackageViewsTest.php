@@ -5,35 +5,12 @@ namespace EntityProjects13\Tests\Feature;
 use App\Models\User;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\LazilyRefreshDatabase;
-use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\View;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class PackageViewsTest extends TestCase
 {
     use LazilyRefreshDatabase;
-
-    public function test_package_views_are_loaded(): void
-    {
-        $providers = array_keys($this->app->getLoadedProviders());
-        $this->assertContains('Basics13\ServiceProvider', $providers, 'Basics13 ServiceProvider not loaded');
-
-        $this->assertTrue(View::exists('basics13::components.list.create-action'));
-        $this->assertTrue(View::exists('basics13::components.forms.field-label'));
-    }
-
-    public function test_package_view_can_be_rendered(): void
-    {
-        $html = view('basics13::components.list.create-action', [
-            'prefix' => 'test',
-            'label' => 'Test Label',
-            'click' => 'testClick()',
-        ])->render();
-
-        $this->assertStringContainsString('Test Label', $html);
-        $this->assertStringContainsString('testClick()', $html);
-    }
 
     public function test_package_component_in_blade_template(): void
     {
@@ -75,16 +52,6 @@ class PackageViewsTest extends TestCase
         $this->assertStringContainsString('Entities', $html);
     }
 
-    public function test_package_validation_translations_are_available_to_the_validator(): void
-    {
-        $this->app->setLocale('eu');
-
-        $attributes = __('validation.attributes');
-
-        $this->assertIsArray($attributes);
-        $this->assertSame(__('basics13::validation.attributes.name'), $attributes['name']);
-    }
-
     public function test_project_submit_guard_converts_empty_integration_state_to_a_boolean(): void
     {
         $this->actingAs(User::factory()->create())
@@ -94,19 +61,6 @@ class PackageViewsTest extends TestCase
                 'x-bind:disabled="isSubmitting || !isDirty || Boolean(form.entityCreating)"',
                 false,
             );
-    }
-
-    public function test_package_table_keeps_the_pagination_summary_for_an_empty_list(): void
-    {
-        $html = Blade::render(
-            '<x-basics13::list.table prefix="entity" :paginator="$paginator" />',
-            ['paginator' => new LengthAwarePaginator([], 0, 15)],
-        );
-
-        $this->assertStringContainsString(
-            __('basics13::messages.pagination_summary', ['first' => 0, 'last' => 0, 'total' => 0]),
-            $html,
-        );
     }
 
     public function test_row_action_hints_do_not_replace_other_tooltips(): void

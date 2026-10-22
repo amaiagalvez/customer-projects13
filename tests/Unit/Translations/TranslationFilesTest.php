@@ -6,8 +6,8 @@ use Basics13\Tests\TranslationFilesTestCase;
 
 class TranslationFilesTest extends TranslationFilesTestCase
 {
-    protected function langPath(): string
+    protected function packageRoot(): string
     {
-        return dirname(__DIR__, 3).'/resources/lang';
+        return dirname(__DIR__, 3);
     }
 }

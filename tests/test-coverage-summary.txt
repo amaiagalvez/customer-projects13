@@ -1,0 +1,12 @@
+Executed at: 2026-10-22 16:14:33 CEST
+Time: 02:33.074, Memory: 89.00 MB
+Tests: 426, Assertions: 1798, Skipped: 6.
+Classes: 100.00% (3/3)
+Methods: 100.00% (24/24)
+Lines:   100.00% (210/210)
+Executed at: 2026-10-22 16:29:18 CEST
+Time: 02:05.509, Memory: 87.00 MB
+Tests: 426, Assertions: 1797, Skipped: 7.
+Classes: 100.00% (3/3)
+Methods: 100.00% (24/24)
+Lines:   100.00% (210/210)
