@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "0256538533088725e03e1395f799a2de34b9190b"
+                "reference": "31db3cf025c4f636030f15c01596d316c6d66760"
             },
             "require": {
                 "laravel/fortify": "^1.37.2",
@@ -70,7 +70,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/entities13",
-                "reference": "9f6383c73b6718bc4c5d767f160a031a15b7b514"
+                "reference": "ca972fe2e5bdd0b5f84cdce690726bd96c0abce4"
             },
             "require": {
                 "php": "^8.5"
@@ -120,7 +120,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "bf94fd4077169a808d26f44e8db8ed0d97e661c6"
+                "reference": "dbad23c463570b80807430df8c1ec55649d621f2"
             },
             "require": {
                 "php": "^8.5"

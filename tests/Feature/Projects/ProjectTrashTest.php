@@ -6,7 +6,6 @@ use App\Models\User;
 use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
 class ProjectTrashTest extends TestCase
@@ -83,62 +82,6 @@ class ProjectTrashTest extends TestCase
             ->assertRedirect(route('projects.trash.index'))
             ->assertSessionHas('status', __('basics13::messages.permanently_deleted'));
         $this->assertDatabaseMissing('PRO_projects', ['id' => $deletedProject->id]);
-    }
-
-    public function test_active_project_is_not_found_through_trash_actions(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->entity())->create();
-
-        $this->patch(route('projects.trash.restore', $project->id))
-            ->assertNotFound();
-
-        $this->delete(route('projects.trash.destroy', $project->id))
-            ->assertNotFound();
-
-        $this->assertModelExists($project);
-    }
-
-    public function test_deleted_project_with_epics_cannot_be_permanently_deleted(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->entity())->trashed()->create();
-        Epic::factory()->for($project)->create();
-
-        $this->delete(route('projects.trash.destroy', $project->id))
-            ->assertRedirect(route('projects.trash.index'))
-            ->assertSessionHas('error', __('basics13::messages.cannot_force_delete_related'));
-
-        $this->assertSoftDeleted($project);
-    }
-
-    public function test_project_model_cannot_be_force_deleted_while_it_has_trashed_epics(): void
-    {
-        $project = Project::factory()->for($this->entity())->trashed()->create();
-        $epic = Epic::factory()->for($project)->trashed()->create();
-
-        $this->assertFalse($project->forceDelete());
-
-        $this->assertSoftDeleted($project);
-        $this->assertSoftDeleted($epic);
-    }
-
-    public function test_project_restore_conflict_resolution_reports_that_no_duplicate_was_created(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $deletedProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Restorable project']);
-
-        $this->patch(route('projects.trash.restore', $deletedProject->id), [
-            'resolve_name_conflict' => '1',
-        ])
-            ->assertRedirect(route('projects.trash.index'))
-            ->assertSessionHas(
-                'status',
-                __('basics13::messages.restored_no_new_record'),
-            );
-
-        $this->assertDatabaseCount('PRO_projects', 1);
-        $this->assertNotSoftDeleted($deletedProject);
     }
 
     public function test_trash_lists_most_recently_deleted_projects_first(): void

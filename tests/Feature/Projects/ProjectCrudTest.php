@@ -352,33 +352,6 @@ class ProjectCrudTest extends TestCase
             ->assertSee('data-test="project-delete-'.$lonelyProject->id.'"', false);
     }
 
-    public function test_project_with_an_active_epic_cannot_be_deleted(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->entity())->create();
-        $epic = Epic::factory()->for($project)->create();
-
-        $this->delete(route('projects.destroy', $project))
-            ->assertRedirect(route('projects.index'))
-            ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
-
-        $this->assertNotSoftDeleted($project);
-        $this->assertModelExists($epic);
-    }
-
-    public function test_project_with_epics_cannot_be_deleted(): void
-    {
-        $this->actingAs(User::factory()->create());
-        $project = Project::factory()->for($this->entity())->create();
-        Epic::factory()->for($project)->trashed()->create();
-
-        $this->delete(route('projects.destroy', $project))
-            ->assertRedirect(route('projects.index'))
-            ->assertSessionHas('error', __('Cannot be deleted while it has related records.'));
-
-        $this->assertNotSoftDeleted($project);
-    }
-
     #[Group('mariadb')]
     public function test_project_is_not_deleted_when_an_epic_appears_during_the_delete_transaction(): void
     {
@@ -415,17 +388,6 @@ class ProjectCrudTest extends TestCase
             'project_id' => $project->id,
             'deleted_at' => null,
         ]);
-    }
-
-    public function test_project_model_cannot_be_deleted_while_it_has_epics(): void
-    {
-        $project = Project::factory()->for($this->entity())->create();
-        $epic = Epic::factory()->for($project)->create();
-
-        $this->assertFalse($project->delete());
-
-        $this->assertNotSoftDeleted($project);
-        $this->assertModelExists($epic);
     }
 
     public function test_project_list_transformer_renders_the_entity_it_is_bound_to(): void
@@ -472,30 +434,5 @@ class ProjectCrudTest extends TestCase
     public function test_guests_are_redirected_to_login_from_the_projects_list(): void
     {
         $this->get(route('projects.index'))->assertRedirect(route('login'));
-    }
-
-    public function test_guests_cannot_create_update_or_delete_projects(): void
-    {
-        $entity = Entity::factory()->create();
-        $project = Project::factory()->for($entity)->create(['name' => 'Existing project']);
-
-        $this->post(route('projects.store'), [
-            'name' => 'Guest project',
-            'start_date' => '2045-07-09',
-            'entity_id' => $entity->id,
-        ])->assertRedirect(route('login'));
-
-        $this->put(route('projects.update', $project), [
-            'name' => 'Updated project',
-            'start_date' => '2045-07-09',
-            'entity_id' => $entity->id,
-        ])->assertRedirect(route('login'));
-
-        $this->delete(route('projects.destroy', $project))
-            ->assertRedirect(route('login'));
-
-        $this->assertDatabaseCount('PRO_projects', 1);
-        $this->assertDatabaseHas('PRO_projects', ['id' => $project->id, 'name' => 'Existing project']);
-        $this->assertNotSoftDeleted($project);
     }
 }

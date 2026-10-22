@@ -9,14 +9,14 @@ use PHPUnit\Framework\Attributes\DataProvider;
 class ResourceAccessTest extends TestCase
 {
     /**
-     * @return array<string, array{string, string}>
+     * @return array<string, array{string, string, string}>
      */
     public static function resources(): array
     {
         return [
-            'entities' => ['entities.index', 'entities.trash.index'],
-            'projects' => ['projects.index', 'projects.trash.index'],
-            'epics' => ['epics.index', 'epics.trash.index'],
+            'entities' => ['entities.index', 'entities.trash.index', 'entities.archived.index'],
+            'projects' => ['projects.index', 'projects.trash.index', 'projects.archived.index'],
+            'epics' => ['epics.index', 'epics.trash.index', 'epics.archived.index'],
         ];
     }
 
@@ -35,14 +35,17 @@ class ResourceAccessTest extends TestCase
     /**
      * @param  non-empty-string  $indexRoute
      * @param  non-empty-string  $trashRoute
+     * @param  non-empty-string  $archivedRoute
      */
     #[DataProvider('resources')]
     public function test_guests_are_redirected_from_resource_lists_to_login(
         string $indexRoute,
         string $trashRoute,
+        string $archivedRoute,
     ): void {
         $this->get(route($indexRoute))->assertRedirect(route('login'));
         $this->get(route($trashRoute))->assertRedirect(route('login'));
+        $this->get(route($archivedRoute))->assertRedirect(route('login'));
     }
 
     /** @param non-empty-string $indexRoute */

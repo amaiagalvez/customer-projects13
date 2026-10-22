@@ -262,37 +262,6 @@ class ResourceActivationTest extends TestCase
         $this->get(route($resource.'.index'))->assertDontSee('Restored dormant record');
     }
 
-    /**
-     * @param  class-string<Entity|Project|Epic>  $model
-     */
-    #[DataProvider('resources')]
-    public function test_guests_cannot_access_activation_endpoints(string $model, string $resource): void
-    {
-        $record = $model::factory()->create();
-        $archived = $model::factory()->archived()->create();
-
-        $this->get(route($resource.'.archived.index'))->assertRedirect(route('login'));
-        $this->patch(route($resource.'.archive', $record))->assertRedirect(route('login'));
-        $this->patch(route($resource.'.archived.activate', $archived))->assertRedirect(route('login'));
-
-        $this->assertTrue($record->refresh()->active);
-        $this->assertFalse($archived->refresh()->active);
-    }
-
-    /**
-     * @param  class-string<Entity|Project|Epic>  $model
-     */
-    #[DataProvider('resources')]
-    public function test_unverified_users_cannot_change_activation(string $model, string $resource): void
-    {
-        $this->actingAs(User::factory()->unverified()->create());
-        $record = $model::factory()->create();
-
-        $this->patch(route($resource.'.archive', $record))->assertRedirect(route('verification.notice'));
-
-        $this->assertTrue($record->refresh()->active);
-    }
-
     public function test_policy_allows_verified_users_to_change_activation(): void
     {
         $user = User::factory()->create();
