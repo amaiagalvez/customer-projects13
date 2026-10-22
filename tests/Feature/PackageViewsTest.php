@@ -43,6 +43,7 @@ class PackageViewsTest extends TestCase
         $html = Blade::render(
             '<x-basics13::list.page-header :list="$list" prefix="entity" />',
             ['list' => [
+                'resource' => 'Entities',
                 'breadcrumbs' => [['label' => 'Entities', 'url' => null]],
                 'tabs' => [],
             ]],

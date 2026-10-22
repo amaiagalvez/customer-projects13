@@ -40,7 +40,7 @@ class ListSearchFragmentTest extends TestCase
     }
 
     /**
-     * The page header holds the breadcrumbs, the state tabs and the create action, and it stays
+     * The page header holds the heading, the state tabs and the create action, and it stays
      * outside the results fragment so the whole heading survives the morph triggered by searching.
      */
     public function test_page_header_stays_outside_the_results_fragment(): void
@@ -52,7 +52,7 @@ class ListSearchFragmentTest extends TestCase
             $this->get(route($routePrefix.'.index'), ['X-List-Fragment' => 'true'])
                 ->assertOk()
                 ->assertSee('data-test="'.$prefix.'-search"', false)
-                ->assertDontSee('data-test="'.$prefix.'-breadcrumbs"', false)
+                ->assertDontSee('data-test="'.$prefix.'-heading"', false)
                 ->assertDontSee('data-test="'.$prefix.'-tabs"', false)
                 ->assertDontSee('data-test="'.$prefix.'-create-button"', false);
         }
@@ -66,7 +66,7 @@ class ListSearchFragmentTest extends TestCase
             $routePrefix = $prefix === 'entity' ? 'entities' : $prefix.'s';
             $this->get(route($routePrefix.'.index'))
                 ->assertOk()
-                ->assertSee('data-test="'.$prefix.'-breadcrumbs"', false)
+                ->assertSee('data-test="'.$prefix.'-heading"', false)
                 ->assertSee('data-test="'.$prefix.'-tabs"', false)
                 ->assertSee('data-test="'.$prefix.'-create-button"', false);
 

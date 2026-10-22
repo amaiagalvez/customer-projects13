@@ -300,13 +300,9 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.index'))
             ->assertOk()
-            ->assertSee('data-test="project-breadcrumbs"', false)
-            ->assertSeeInOrder([
-                'href="'.route('dashboard').'"',
-                __('Dashboard'),
-                __('Projects'),
-            ], false)
-            ->assertSee('data-test="project-heading"', false)
+            // A root list has nothing to walk back to: the H1 names it, without breadcrumbs.
+            ->assertDontSee('data-test="project-breadcrumbs"', false)
+            ->assertSeeInOrder(['data-test="project-heading"', __('Projects')], false)
             ->assertSeeInOrder([
                 'data-test="project-active-link"',
                 'aria-current="page"',
@@ -319,11 +315,11 @@ class ProjectCrudTest extends TestCase
 
         $this->get(route('projects.archived.index'))
             ->assertOk()
-            ->assertSeeInOrder([__('Dashboard'), __('Projects'), __('Archived')], false);
+            ->assertSeeInOrder(['data-test="project-breadcrumbs"', 'href="'.route('projects.index').'"', __('Projects'), __('Archived')], false);
 
         $this->get(route('projects.trash.index'))
             ->assertOk()
-            ->assertSeeInOrder([__('Dashboard'), __('Projects'), __('Trash')], false);
+            ->assertSeeInOrder(['data-test="project-breadcrumbs"', 'href="'.route('projects.index').'"', __('Projects'), __('Trash')], false);
     }
 
     public function test_project_row_edits_from_the_name_and_links_the_epic_count_to_its_epics(): void
