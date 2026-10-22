@@ -37,7 +37,7 @@ class SelectOptionsRequestTest extends TestCase
     #[DataProvider('optionsRequests')]
     public function test_the_term_is_trimmed_before_matching(string $routeName, string $requestClass): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $name = $routeName === 'entities.options' ? 'Trimmed entity' : 'Trimmed project';
 
         $this->recordFor($routeName, $name);
@@ -55,7 +55,7 @@ class SelectOptionsRequestTest extends TestCase
     #[DataProvider('optionsRequests')]
     public function test_a_term_that_matches_nothing_returns_no_options(string $routeName, string $requestClass): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->recordFor($routeName, 'Something else');
 
         $this->getJson(route($routeName, ['q' => 'no such thing']))
@@ -71,7 +71,7 @@ class SelectOptionsRequestTest extends TestCase
     #[DataProvider('optionsRequests')]
     public function test_the_options_are_limited_to_the_shared_page_size(string $routeName, string $requestClass): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         for ($index = 1; $index <= ListQueryBase::PER_PAGE + 1; $index++) {
             $this->recordFor($routeName, sprintf('Option %02d', $index));

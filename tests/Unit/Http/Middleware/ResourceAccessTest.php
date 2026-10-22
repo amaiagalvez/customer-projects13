@@ -3,6 +3,7 @@
 namespace EntityProjects13\Tests\Unit\Http\Middleware;
 
 use App\Models\User;
+use Basics13\Support\Testing\PermissionsActor;
 use EntityProjects13\Tests\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -68,9 +69,11 @@ class ResourceAccessTest extends TestCase
 
     private function actAsInMemoryUser(bool $unverified = false): static
     {
-        $user = $unverified
-            ? User::factory()->unverified()->make()
-            : User::factory()->make();
+        if (! $unverified) {
+            return $this->actingAs(PermissionsActor::holding(['entities.view', 'projects.view', 'epics.view']));
+        }
+
+        $user = User::factory()->unverified()->make();
         $user->forceFill(['id' => 1]);
 
         return $this->actingAs($user);

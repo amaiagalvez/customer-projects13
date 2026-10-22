@@ -22,7 +22,7 @@ class EntityArchiveTest extends DuskTestCase
 
     public function test_a_entity_with_projects_is_archived_instead_of_deleted(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $entity = Entity::factory()->create(['name' => 'Entity with projects']);
         Project::factory()->for($entity)->create();
 
@@ -44,7 +44,7 @@ class EntityArchiveTest extends DuskTestCase
 
     public function test_an_archived_entity_returns_to_the_active_list(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $entity = Entity::factory()->archived()->create(['name' => 'Archived entity']);
         Project::factory()->for($entity)->create();
 

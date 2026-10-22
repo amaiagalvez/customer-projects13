@@ -15,7 +15,7 @@ class ProjectSelectOptionsTest extends TestCase
 
     public function test_project_options_search_by_project_or_entity_and_are_limited_to_the_shared_page_size(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Shared search entity']);
 
         $total = ListQueryBase::PER_PAGE + 1;
@@ -41,7 +41,7 @@ class ProjectSelectOptionsTest extends TestCase
 
     public function test_project_options_only_include_active_projects(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         Project::factory()->for($entity)->create(['name' => 'Active select project']);
         Project::factory()->for($entity)->archived()->create(['name' => 'Inactive select project']);

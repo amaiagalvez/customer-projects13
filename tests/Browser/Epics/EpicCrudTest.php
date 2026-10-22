@@ -21,7 +21,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_advanced_search_filters_epics_and_clears_all_filters(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $project = Project::factory()->for($this->entity())->create();
         $alpha = Epic::factory()->for($project)->create(['name' => 'Alpha epic '.Str::uuid()]);
         $beta = Epic::factory()->for($project)->create(['name' => 'Beta epic '.Str::uuid()]);
@@ -54,7 +54,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_row_name_is_not_interactive(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create(['name' => 'Editable from the row']);
 
@@ -71,7 +71,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_table_keeps_the_actions_column_stuck_to_the_end(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $project = Project::factory()->for($this->entity())->create();
         $longName = 'Very long epic name '.str_repeat('x', 120);
         $epic = Epic::factory()->for($project)->create(['name' => $longName]);
@@ -100,7 +100,7 @@ class EpicCrudTest extends DuskTestCase
 
     public function test_epic_can_be_created_updated_and_deleted_from_the_drawer(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $suffix = Str::uuid()->toString();
         $project = Project::factory()->for($this->entity())->create(['name' => 'Dusk project '.$suffix]);
         $epicName = 'Dusk epic '.$suffix;

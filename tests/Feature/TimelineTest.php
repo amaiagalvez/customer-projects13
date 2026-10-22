@@ -18,7 +18,7 @@ class TimelineTest extends TestCase
         $entity = Entity::factory()->archived()->create(['name' => 'Sleeping entity']);
         Project::factory()->for($entity)->create(['name' => 'Still running']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('timeline'))
             ->assertOk()
             ->assertSee('Still running')
@@ -31,7 +31,7 @@ class TimelineTest extends TestCase
         $project = Project::factory()->for($entity)->create(['name' => 'Warehouse move']);
         Epic::factory()->for($project)->create(['name' => 'Shelf audit']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('timeline', ['search' => 'Northwind']))
             ->assertOk()
             ->assertSee('Warehouse move')

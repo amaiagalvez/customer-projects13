@@ -28,7 +28,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_has_entities_is_true_when_an_active_entity_exists(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         Entity::factory()->create();
 
         $this->get(route('projects.index'))
@@ -38,7 +38,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_has_entities_is_false_when_only_archived_entities_exist(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         Entity::factory()->archived()->create();
 
         $this->get(route('projects.index'))
@@ -48,7 +48,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_has_entities_is_false_when_only_deleted_entities_exist(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         Entity::factory()->trashed()->create();
 
         $this->get(route('projects.index'))
@@ -58,7 +58,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_creating_and_reassigning_a_project_persists_its_entity_and_preserves_notes(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $otherEntity = Entity::factory()->create();
 
@@ -125,7 +125,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_projects_can_be_searched_by_entity_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $matchingEntity = Entity::factory()->create(['name' => 'Northwind Studio']);
         $otherEntity = Entity::factory()->create(['name' => 'Contoso']);
         Project::factory()->for($matchingEntity)->create(['name' => 'Website redesign']);
@@ -140,7 +140,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_projects_can_be_searched_by_their_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         Project::factory()->for($entity)->create(['name' => 'Searchable project']);
         Project::factory()->for($entity)->create(['name' => 'Unrelated project']);
@@ -153,7 +153,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_name_with_non_latin_characters_can_be_stored_and_searched(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $name = 'Ñandú プロジェクト';
 
@@ -172,7 +172,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_search_is_kept_in_pagination_links(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
 
         foreach (range(1, 6) as $index) {
@@ -186,7 +186,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_projects_cannot_be_searched_by_their_unshown_creation_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         Project::factory()->for($entity)->create([
             'name' => 'Website redesign',
@@ -203,7 +203,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_list_shows_the_number_of_active_epics_and_their_comments(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
@@ -220,7 +220,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_projects_are_ordered_by_start_date_end_date_and_entity_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $alphaEntity = Entity::factory()->create(['name' => 'Alpha entity']);
         $zuluEntity = Entity::factory()->create(['name' => 'Zulu entity']);
 
@@ -256,7 +256,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_projects_with_matching_dates_and_entity_are_ordered_by_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Same entity']);
 
         Project::factory()->for($entity)->create([
@@ -279,7 +279,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_list_shows_pagination_when_more_than_one_page_exists(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         for ($index = 1; $index <= ListQueryBase::PER_PAGE + 1; $index++) {
             Project::factory()->for($entity)->create();
@@ -292,7 +292,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_list_header_offers_the_state_tabs_with_the_record_count_of_each_one(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         Project::factory()->for($this->entity())->count(2)->for($entity)->create();
         Project::factory()->for($entity)->archived()->create();
@@ -324,7 +324,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_project_row_edits_from_the_name_and_links_the_epic_count_to_its_epics(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $project = Project::factory()->for($entity)->create(['name' => 'Website redesign']);
         Epic::factory()->for($project)->create();
@@ -355,7 +355,7 @@ class ProjectCrudTest extends TestCase
             $this->markTestSkipped('The concurrent delete guard requires MySQL row locks.');
         }
 
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $project = Project::factory()->for($this->entity())->create();
         $competitorCreated = false;
 
@@ -420,7 +420,7 @@ class ProjectCrudTest extends TestCase
 
     public function test_empty_project_list_uses_the_shared_empty_state(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSee('data-test="list-empty-state"', false)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Basics13\Concerns\HasRoles;
 use Illuminate\Auth\MustVerifyEmail as MustVerifyEmailTrait;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Attributes\UseFactory;
@@ -16,7 +17,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, MustVerifyEmailTrait, SoftDeletes;
+    use HasFactory, HasRoles, MustVerifyEmailTrait, SoftDeletes;
 
     protected $guarded = [];
 }

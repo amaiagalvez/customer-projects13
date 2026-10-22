@@ -17,7 +17,7 @@ class PlanningTest extends TestCase
         $entity = Entity::factory()->archived()->create(['name' => 'Sleeping entity']);
         Project::factory()->for($entity)->create(['name' => 'Still running']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('planning'))
             ->assertOk()
             ->assertSee('Still running')
@@ -29,7 +29,7 @@ class PlanningTest extends TestCase
         $entity = Entity::factory()->create(['name' => 'Northwind Traders']);
         $project = Project::factory()->for($entity)->create(['name' => 'Warehouse move']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('planning', ['search' => 'Northwind']))
             ->assertOk()
             ->assertSee('Warehouse move');

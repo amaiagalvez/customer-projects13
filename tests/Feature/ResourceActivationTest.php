@@ -95,7 +95,7 @@ class ResourceActivationTest extends TestCase
         int $total,
         int $expectedCountQueries,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $model::factory()->count($count)->sequence(['name' => 'Matching active'], ['name' => 'Other active'])->create();
         $model::factory()->count($count)->archived()->sequence(['name' => 'Matching archived'], ['name' => 'Other archived'])->create();
         $model::factory()->count($count)->trashed()->sequence(['name' => 'Matching trashed'], ['name' => 'Other trashed'])->create();
@@ -133,7 +133,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_lists_partition_records_by_activation_and_trash(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $model::factory()->create(['name' => 'Active record']);
         $model::factory()->archived()->create(['name' => 'Inactive record']);
         $model::factory()->trashed()->create(['name' => 'Trashed active record']);
@@ -168,7 +168,7 @@ class ResourceActivationTest extends TestCase
         string $resource,
         string $prefix,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-10-02 12:30:00');
         $record = $model::factory()->archived()->create(['name' => 'Dormant record']);
 
@@ -188,7 +188,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_record_can_be_deactivated_and_reactivated(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-10-01 08:00:00');
         $record = $model::factory()->create();
         $this->travelTo('2026-10-02 10:00:00');
@@ -214,7 +214,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_repeated_activation_actions_are_idempotent(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $archived = $model::factory()->archived()->create();
         $active = $model::factory()->create();
 
@@ -233,7 +233,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_trashed_records_cannot_change_activation(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $active = $model::factory()->trashed()->create();
         $archived = $model::factory()->archived()->trashed()->create();
 
@@ -250,7 +250,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_restoring_an_archived_record_keeps_it_archived(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $record = $model::factory()->archived()->trashed()->create(['name' => 'Restored dormant record']);
 
         $this->patch(route($resource.'.trash.restore', $record->id))->assertRedirect();
@@ -262,9 +262,9 @@ class ResourceActivationTest extends TestCase
         $this->get(route($resource.'.index'))->assertDontSee('Restored dormant record');
     }
 
-    public function test_policy_allows_verified_users_to_change_activation(): void
+    public function test_admin_can_change_activation(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->admin()->create();
 
         foreach ([Entity::factory()->create(), Project::factory()->for($this->entity())->create(), Epic::factory()->create()] as $record) {
             $this->assertTrue($user->can('archive', $record));
@@ -291,7 +291,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('childStates')]
     public function test_entity_with_any_project_offers_deactivation_instead_of_deletion(array $states): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $projectFactory = Project::factory()->for($entity);
 
@@ -312,7 +312,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('childStates')]
     public function test_project_with_any_epic_offers_deactivation_instead_of_deletion(array $states): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $project = Project::factory()->for($this->entity())->create();
         $epicFactory = Epic::factory()->for($project);
 
@@ -329,7 +329,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_epics_without_comments_offer_deletion(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $epic = Epic::factory()->create();
 
         $this->get(route('epics.index'))
@@ -339,7 +339,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_epics_with_comments_offer_deactivation_instead_of_deletion(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $epic = Epic::factory()->create();
         $comment = EpicComment::factory()->for($epic)->create();
 
@@ -363,7 +363,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_archived_entities_are_searchable_by_name_and_update_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-03-01 10:00:00');
         $updatedEntity = Entity::factory()->archived()->create(['name' => 'Alpha Dormant']);
         Entity::factory()->archived()->create(['name' => 'Beta Dormant']);
@@ -383,7 +383,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_archived_projects_are_searchable_by_entity_name_and_update_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-03-01 10:00:00');
         $entity = Entity::factory()->create(['name' => 'Searchable Entity']);
         $otherEntity = Entity::factory()->create(['name' => 'Other Entity']);
@@ -406,7 +406,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_archived_epics_are_searchable_by_project_and_entity_names(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Epic Entity']);
         $project = Project::factory()->for($entity)->create(['name' => 'Epic Project']);
         $otherProject = Project::factory()->for(Entity::factory()->create(['name' => 'Other Entity']))
@@ -429,7 +429,7 @@ class ResourceActivationTest extends TestCase
      */
     public function test_archived_epics_are_searchable_by_update_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-03-01 10:00:00');
         $updatedEpic = Epic::factory()->archived()->create([
             'name' => 'Alpha Dormant',
@@ -463,7 +463,7 @@ class ResourceActivationTest extends TestCase
     #[DataProvider('resources')]
     public function test_archived_list_fragment_only_returns_results(string $model, string $resource): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $model::factory()->archived()->create(['name' => 'Fragment record']);
 
         $this->get(route($resource.'.archived.index'), ['X-List-Fragment' => 'true'])
@@ -482,7 +482,7 @@ class ResourceActivationTest extends TestCase
         string $resource,
         string $testPrefix,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         for ($index = 1; $index <= ListQueryBase::PER_PAGE + 1; $index++) {
             $model::factory()->archived()->create(['name' => "Inactive record {$index}"]);
@@ -523,7 +523,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_childless_parents_keep_the_delete_action(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         // The project needs a entity of its own: ProjectFactory adopts whichever entity the
         // factory finds first, which would make the childless entity below a parent after all.
@@ -540,7 +540,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_deactivating_a_parent_does_not_cascade_to_children(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $project = Project::factory()->for($entity)->create();
         $epic = Epic::factory()->for($project)->create();
@@ -555,7 +555,7 @@ class ResourceActivationTest extends TestCase
 
     public function test_archived_entity_keeps_its_name_reserved(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         Entity::factory()->archived()->create(['name' => 'Reserved name']);
 
         $this->post(route('entities.store'), ['name' => 'Reserved name'])

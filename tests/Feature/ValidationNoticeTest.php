@@ -18,7 +18,7 @@ class ValidationNoticeTest extends TestCase
 
     public function test_the_entity_name_notice_lists_every_rule_of_the_field(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('entities.index'))
             ->assertOk()
             ->assertSeeInOrder([
@@ -30,7 +30,7 @@ class ValidationNoticeTest extends TestCase
 
     public function test_the_project_end_date_notice_explains_the_rule_against_the_start_date(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSeeInOrder([
@@ -41,7 +41,7 @@ class ValidationNoticeTest extends TestCase
 
     public function test_the_epic_start_date_notice_says_when_it_is_asked_for(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('epics.index'))
             ->assertOk()
             ->assertSeeInOrder([
@@ -52,7 +52,7 @@ class ValidationNoticeTest extends TestCase
 
     public function test_the_project_entity_notice_explains_that_a_new_one_can_be_created(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSeeInOrder([
@@ -63,7 +63,7 @@ class ValidationNoticeTest extends TestCase
 
     public function test_every_field_with_something_to_announce_carries_its_notice(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $forms = [
             'entities' => [route('entities.index'), [
@@ -105,7 +105,7 @@ class ValidationNoticeTest extends TestCase
      */
     public function test_a_field_without_anything_to_announce_carries_no_notice(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertDontSee('data-test="project-start-date-info"', false);

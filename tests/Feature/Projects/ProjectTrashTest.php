@@ -20,7 +20,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_trash_preserves_index_columns_without_deletion_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-10-02 12:00:00');
         $project = Project::factory()->for($this->entity())->create([
             'name' => 'Project with dates',
@@ -48,7 +48,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_deleted_projects_can_be_restored_or_permanently_deleted(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $activeProject = Project::factory()->for($this->entity())->create(['name' => 'Active project']);
         $deletedProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Deleted project']);
 
@@ -86,7 +86,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_trash_lists_most_recently_deleted_projects_first(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-10-02 12:00:00');
         $olderProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Older deleted project']);
         $newerProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Newer deleted project']);
@@ -104,7 +104,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_trash_can_be_searched_by_project_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $matchingProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Archived project match']);
         $otherProject = Project::factory()->for($this->entity())->trashed()->create(['name' => 'Unrelated archived project']);
 
@@ -120,7 +120,7 @@ class ProjectTrashTest extends TestCase
      */
     public function test_trash_can_be_searched_by_entity_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Archived entity match']);
         $matchingProject = Project::factory()->for($entity)->trashed()->create(['name' => 'First archived project']);
         $otherEntity = Entity::factory()->create(['name' => 'Other entity']);
@@ -134,7 +134,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_project_cannot_be_restored_when_an_active_project_uses_its_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $deletedProject = Project::factory()->for($this->entity())->trashed()->create([
             'name' => 'Repeated project name',
         ]);
@@ -156,7 +156,7 @@ class ProjectTrashTest extends TestCase
 
     public function test_project_cannot_be_restored_when_an_archived_project_uses_its_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create();
         $deletedProject = Project::factory()->for($entity)->trashed()->create([
             'name' => 'Repeated project name',

@@ -27,7 +27,7 @@ class ActiveNameCollationTest extends TestCase
     #[DataProvider('nameVariants')]
     public function test_case_and_accent_variants_are_rejected_when_creating_a_entity(string $variant): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Mikel']);
 
         $this->from(route('entities.index'))
@@ -42,7 +42,7 @@ class ActiveNameCollationTest extends TestCase
     #[DataProvider('nameVariants')]
     public function test_case_and_accent_variants_cannot_be_restored_over_an_existing_name(string $variant): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $trashed = Entity::factory()->trashed()->create(['name' => $variant]);
         Entity::factory()->create(['name' => 'Mikel']);
 

@@ -43,7 +43,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $singular,
         string $indexRoute,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $name = 'Concurrent Store '.$singular;
         $payload = $this->payloadFor($singular, $name);
         $parentId = $this->parentIdFromPayload($payload);
@@ -81,7 +81,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $singular,
         string $indexRoute,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $existing = $this->makeRecord($singular, ['name' => 'Original '.$singular]);
         $name = 'Concurrent Update '.$singular;
         $payload = $this->payloadFor($singular, $name, parentId: $this->parentIdOf($existing));
@@ -118,7 +118,7 @@ class ConcurrentNameInsertTest extends TestCase
         string $singular,
         string $indexRoute,
     ): void {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $name = 'Concurrent Restore '.$singular;
         $deleted = $this->makeRecord($singular, ['name' => $name], trashed: true);
         $routePrefix = substr($indexRoute, 0, -strlen('.index'));

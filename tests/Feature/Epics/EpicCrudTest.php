@@ -24,7 +24,7 @@ class EpicCrudTest extends TestCase
 
     public function test_epic_list_renders_the_entity_of_its_project(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create(['name' => 'Checkout flow']);
 
@@ -56,7 +56,7 @@ class EpicCrudTest extends TestCase
 
     public function test_epics_are_ordered_by_start_date_end_date_project_and_entity(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $alphaEntity = Entity::factory()->create(['name' => 'Alpha entity']);
         $zuluEntity = Entity::factory()->create(['name' => 'Zulu entity']);
         $alphaProject = Project::factory()->for($zuluEntity)->create(['name' => 'Alpha project']);
@@ -94,7 +94,7 @@ class EpicCrudTest extends TestCase
 
     public function test_epics_can_be_searched_by_project_and_entity_name(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Northwind Studio']);
         $otherEntity = Entity::factory()->create(['name' => 'Southwind Studio']);
         Epic::factory()->for(Project::factory()->for($entity)->state(['name' => 'Website']))->create(['name' => 'Matching epic']);

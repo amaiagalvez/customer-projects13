@@ -2,8 +2,10 @@
 
 namespace EntityProjects13\Integrations;
 
+use Basics13\Concerns\ChecksPermissions;
 use Entities13\Contracts\EntityIntegration;
 use Entities13\Models\Entity;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -16,6 +18,8 @@ use Projects13\Models\EpicComment;
  */
 final class EntityCountsIntegration extends EntityIntegration
 {
+    use ChecksPermissions;
+
     /**
      * The alias the join and the search column share. A feature test searches the entity list by
      * a project name, which only works while both still name the same table.
@@ -100,5 +104,14 @@ final class EntityCountsIntegration extends EntityIntegration
             ->whereNull('PRO_projects.deleted_at')
             ->where('PRO_epics.active', true)
             ->whereNull('PRO_epics.deleted_at');
+    }
+
+    /**
+     * The project form needs an entity, so whoever creates or edits projects may pick one even
+     * without being allowed to list entities.
+     */
+    public function allowsSelectOptions(Authenticatable $user): bool
+    {
+        return $this->permits($user, 'projects.create') || $this->permits($user, 'projects.edit');
     }
 }

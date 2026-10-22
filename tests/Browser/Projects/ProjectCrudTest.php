@@ -19,7 +19,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_advanced_search_filters_projects_by_entity_and_removes_the_filters(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $north = Entity::factory()->create(['name' => 'North '.Str::uuid()]);
         $south = Entity::factory()->create(['name' => 'South '.Str::uuid()]);
         $northProject = Project::factory()->for($north)->create(['name' => 'North project '.Str::uuid()]);
@@ -56,7 +56,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_row_name_is_not_interactive(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $project = Project::factory()->for($this->entity())->create(['name' => 'Editable from the row']);
 
         $this->browse(function (Browser $browser) use ($user, $project): void {
@@ -73,7 +73,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_table_keeps_the_actions_column_stuck_to_the_end(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $entity = Entity::factory()->create();
         $longName = 'Very long project name '.str_repeat('x', 120);
         $project = Project::factory()->for($entity)->create(['name' => $longName]);
@@ -102,7 +102,7 @@ class ProjectCrudTest extends DuskTestCase
 
     public function test_project_can_be_created_updated_and_deleted_from_the_drawer(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $suffix = Str::uuid()->toString();
         $entityName = 'Dusk entity '.$suffix;
         $projectName = 'Dusk project '.$suffix;

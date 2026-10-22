@@ -17,7 +17,7 @@ class EpicCommentTest extends DuskTestCase
 
     public function test_comment_added_from_the_edit_drawer_is_shown_after_reopening_it(): void
     {
-        $user = $this->user(['name' => 'Dusk commenter']);
+        $user = $this->admin(['name' => 'Dusk commenter']);
         $epicName = 'Dusk epic '.Str::uuid()->toString();
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create(['name' => $epicName]);
@@ -52,14 +52,14 @@ class EpicCommentTest extends DuskTestCase
 
         $this->assertDatabaseHas('PRO_epic_comments', [
             'epic_id' => $epic->id,
-            'user_id' => $user->id,
+            'user_id' => $user->getKey(),
             'body' => $commentBody,
         ]);
     }
 
     public function test_comment_time_is_displayed_in_the_browser_timezone(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $project = Project::factory()->for($this->entity())->create();
         $epic = Epic::factory()->for($project)->create([
             'name' => 'Timezone epic '.Str::uuid()->toString(),

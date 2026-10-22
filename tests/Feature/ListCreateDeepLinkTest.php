@@ -41,7 +41,7 @@ class ListCreateDeepLinkTest extends TestCase
     #[DataProvider('resources')]
     public function test_the_create_flag_opens_the_drawer(string $indexRoute, string $formName, string $heading): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $this->get(route($indexRoute, ['create' => 1]))
             ->assertOk()
@@ -64,7 +64,7 @@ class ListCreateDeepLinkTest extends TestCase
         $project = Project::factory()->for($entity)->create();
         Epic::factory()->for($project)->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route($indexRoute, ['create' => 1]))
             ->assertOk()
             ->assertSee("modal-show', { name: '{$formName}'", escape: false);

@@ -17,7 +17,7 @@ class ProjectEntitySelectTest extends DuskTestCase
 
     public function test_no_active_entities_action_opens_the_entity_form(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         Entity::factory()->archived()->create();
         Entity::factory()->trashed()->create();
 
@@ -35,7 +35,7 @@ class ProjectEntitySelectTest extends DuskTestCase
 
     public function test_project_entity_select_can_search_and_create_entities(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $executionId = Str::uuid()->toString();
         $existingEntityName = 'Northwind '.$executionId;
         $newEntityName = 'Dusk Select2 '.$executionId;
@@ -117,7 +117,7 @@ class ProjectEntitySelectTest extends DuskTestCase
 
     public function test_edit_keeps_its_archived_entity_selected_and_only_offers_active_options(): void
     {
-        $user = $this->user();
+        $user = $this->admin();
         $archivedEntity = Entity::factory()->archived()->create(['name' => 'Inactive selected entity']);
         $activeEntity = Entity::factory()->create(['name' => 'Active option entity']);
         $otherInactiveEntity = Entity::factory()->archived()->create(['name' => 'Other archived entity']);

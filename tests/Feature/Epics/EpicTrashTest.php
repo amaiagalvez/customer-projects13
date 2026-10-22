@@ -21,7 +21,7 @@ class EpicTrashTest extends TestCase
 
     public function test_trash_preserves_index_columns_without_deletion_date(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->travelTo('2026-10-02 12:00:00');
         $entity = Entity::factory()->create();
         $project = Project::factory()->for($entity)->create();
@@ -57,7 +57,7 @@ class EpicTrashTest extends TestCase
 
     public function test_trash_can_be_searched_by_project_and_entity_names(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->create(['name' => 'Archived epic entity']);
         $project = Project::factory()->for($entity)->create(['name' => 'Archived epic project']);
         $matchingEpic = Epic::factory()->for($project)->trashed()->create(['name' => 'First archived epic']);

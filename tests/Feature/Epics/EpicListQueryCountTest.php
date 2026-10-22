@@ -21,8 +21,11 @@ class EpicListQueryCountTest extends TestCase
 
     public function test_the_epic_list_queries_do_not_grow_with_the_number_of_projects(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $this->epicsInNewProjects(2);
+        // The acting user keeps its permission slugs once loaded, so a first request loads them and
+        // the two measured ones both start from the same state.
+        $this->get(route('epics.index'))->assertOk();
 
         $few = $this->countQueries(fn () => $this->get(route('epics.index'))->assertOk());
 

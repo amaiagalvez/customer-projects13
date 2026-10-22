@@ -26,7 +26,7 @@ class ListSearchFragmentTest extends TestCase
 
     public function test_all_list_routes_return_only_the_results_fragment_for_fragment_requests(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         foreach (self::ROUTES as $route => $prefix) {
             $response = $this->get(route($route), ['X-List-Fragment' => 'true']);
@@ -45,7 +45,7 @@ class ListSearchFragmentTest extends TestCase
      */
     public function test_page_header_stays_outside_the_results_fragment(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         foreach (['entity', 'project', 'epic'] as $prefix) {
             $routePrefix = $prefix === 'entity' ? 'entities' : $prefix.'s';
@@ -60,7 +60,7 @@ class ListSearchFragmentTest extends TestCase
 
     public function test_page_header_carries_the_create_action_on_full_page_responses(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         foreach (['entity', 'project', 'epic'] as $prefix) {
             $routePrefix = $prefix === 'entity' ? 'entities' : $prefix.'s';
@@ -79,7 +79,7 @@ class ListSearchFragmentTest extends TestCase
 
     public function test_current_list_breadcrumb_links_to_the_full_list_url(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         foreach (array_keys(self::ROUTES) as $route) {
             $url = route($route, ['search' => 'reload-check']);

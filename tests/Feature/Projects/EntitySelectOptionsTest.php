@@ -16,7 +16,7 @@ class EntitySelectOptionsTest extends TestCase
 
     public function test_project_form_does_not_preload_every_entity(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $total = ListQueryBase::PER_PAGE + 1;
 
@@ -45,7 +45,7 @@ class EntitySelectOptionsTest extends TestCase
 
     public function test_project_list_offers_form_action_when_no_active_entities_exist(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
 
         $this->get(route('projects.index'))
             ->assertOk()

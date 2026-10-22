@@ -14,7 +14,7 @@ class EntityFeatureTest extends TestCase
 
     public function test_trashed_entities_cannot_be_assigned_to_projects(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->trashed()->create();
 
         $this->from(route('projects.index'))
@@ -30,7 +30,7 @@ class EntityFeatureTest extends TestCase
 
     public function test_a_project_can_keep_its_archived_entity_while_being_edited(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $entity = Entity::factory()->archived()->create();
         $project = Project::factory()->for($entity)->create();
 
@@ -53,7 +53,7 @@ class EntityFeatureTest extends TestCase
 
     public function test_a_project_cannot_be_moved_to_an_archived_entity(): void
     {
-        $this->actingAs(User::factory()->create());
+        $this->actingAs(User::factory()->admin()->create());
         $project = Project::factory()->for($this->entity())->create();
         $archived = Entity::factory()->archived()->create();
 

@@ -3,6 +3,7 @@
 namespace EntityProjects13\Tests;
 
 use App\Models\User;
+use Basics13\Models\Role;
 use Basics13\Support\Testing\ValidatesFormRequests;
 use Basics13\Tests\TestCase as Basics13TestCase;
 use Carbon\CarbonImmutable;
@@ -43,6 +44,7 @@ abstract class TestCase extends Basics13TestCase
             'password' => 'password',
             'email_verified_at' => now(),
         ]);
+        $user->assignRole(Role::query()->where('slug', 'admin')->firstOrFail());
 
         $this->actingAs($user);
 

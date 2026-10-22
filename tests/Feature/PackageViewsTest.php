@@ -55,7 +55,7 @@ class PackageViewsTest extends TestCase
 
     public function test_project_submit_guard_converts_empty_integration_state_to_a_boolean(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route('projects.index'))
             ->assertOk()
             ->assertSee(
@@ -101,7 +101,7 @@ class PackageViewsTest extends TestCase
     #[DataProvider('packagePageProvider')]
     public function test_application_pages_render_package_components(string $route): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs(User::factory()->admin()->create())
             ->get(route($route))
             ->assertOk();
     }
