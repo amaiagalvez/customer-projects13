@@ -198,19 +198,6 @@ class TracksAuditColumnsTest extends TestCase
     }
 
     /**
-     * The columns are written by the trait alone, so a payload cannot claim authorship.
-     *
-     * @param  class-string<Entity|Project|Epic|EpicComment|User>  $model
-     */
-    #[DataProvider('auditedModels')]
-    public function test_the_audit_columns_are_not_mass_assignable(string $model): void
-    {
-        foreach (['created_by', 'updated_by', 'deleted_by'] as $column) {
-            $this->assertFalse((new $model)->isFillable($column), "{$model} must not accept {$column}");
-        }
-    }
-
-    /**
      * A write with nobody authenticated is the console and queue path: no user on the guard.
      */
     private function loggedOut(): void

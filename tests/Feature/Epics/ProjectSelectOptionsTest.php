@@ -6,10 +6,13 @@ use App\Models\User;
 use Basics13\Queries\ListQueryBase;
 use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Project;
 
 class ProjectSelectOptionsTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_project_options_search_by_project_or_entity_and_are_limited_to_the_shared_page_size(): void
     {
         $this->actingAs(User::factory()->create());

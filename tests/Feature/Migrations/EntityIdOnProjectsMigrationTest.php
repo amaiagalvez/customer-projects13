@@ -4,11 +4,14 @@ namespace EntityProjects13\Tests\Feature\Migrations;
 
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class EntityIdOnProjectsMigrationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_entity_id_migration_can_be_rolled_back(): void
     {
         $connectionName = 'entity_projects13_entity_id_migration_test';

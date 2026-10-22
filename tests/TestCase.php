@@ -10,7 +10,6 @@ use Entities13\Models\Entity;
 use Entities13\ServiceProvider as entities13ServiceProvider;
 use EntityProjects13\ServiceProvider as EntityProjects13ServiceProvider;
 use Flux\FluxServiceProvider;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Date;
 use Projects13\ServiceProvider as Projects13ServiceProvider;
@@ -26,7 +25,7 @@ use Projects13\ServiceProvider as Projects13ServiceProvider;
  */
 abstract class TestCase extends Basics13TestCase
 {
-    use RefreshDatabase, ValidatesFormRequests;
+    use ValidatesFormRequests;
 
     /**
      * Create a test entity for integration tests.

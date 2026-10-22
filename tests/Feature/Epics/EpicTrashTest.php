@@ -5,11 +5,14 @@ namespace EntityProjects13\Tests\Feature\Epics;
 use App\Models\User;
 use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
 
 class EpicTrashTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

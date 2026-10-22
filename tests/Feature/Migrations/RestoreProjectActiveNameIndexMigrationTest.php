@@ -6,12 +6,15 @@ use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Projects13\Models\Project;
 
 class RestoreProjectActiveNameIndexMigrationTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_integrated_schema_preserves_name_reuse_and_uniqueness_across_entities(): void
     {
         $entity = Entity::factory()->create();

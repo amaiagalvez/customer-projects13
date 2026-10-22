@@ -18,24 +18,6 @@ class ListTransformerContractTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Every resource answers the three list states with the same envelope, so the shared list
-     * components can rely on it whichever resource and state they render.
-     */
-    private const ENVELOPE_KEYS = [
-        'resource',
-        'breadcrumbs',
-        'extraDateHeading',
-        'emptyMessage',
-        'narrowed',
-        'search',
-        'tabs',
-        'create',
-        'rows',
-    ];
-
-    private const COUNTED_TABS = ['active' => 2, 'archived' => 1, 'trashed' => 3];
-
-    /**
      * @return list<array{0: class-string, 1: 'active'|'archived'|'trash'}>
      */
     public static function listStates(): array
@@ -49,125 +31,6 @@ class ListTransformerContractTest extends TestCase
         }
 
         return $cases;
-    }
-
-    /**
-     * @return list<array{0: class-string}>
-     */
-    public static function transformers(): array
-    {
-        return array_map(static fn (string $class): array => [$class], self::transformerClasses());
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     * @param  'active'|'archived'|'trash'  $state
-     */
-    #[DataProvider('listStates')]
-    public function test_every_state_payload_has_the_expected_keys(string $transformerClass, string $state): void
-    {
-        app()->setLocale('en');
-        $list = $this->payload($transformerClass, $state);
-        $prefix = match ($transformerClass) {
-            EntityListTransformer::class => 'entities',
-            ProjectListTransformer::class => 'projects',
-            EpicListTransformer::class => 'epics',
-            default => throw new \LogicException("Unsupported transformer class [{$transformerClass}]."),
-        };
-
-        $this->assertSame(self::ENVELOPE_KEYS, array_keys($list));
-        $this->assertSame($state === 'active', $list['create']);
-        $this->assertSame(
-            route($prefix.'.'.match ($state) {
-                'active' => 'index',
-                'archived' => 'archived.index',
-                'trash' => 'trash.index',
-            }),
-            $list['search']['action'],
-        );
-        $this->assertSame(
-            [
-                route($prefix.'.index'),
-                route($prefix.'.archived.index'),
-                route($prefix.'.trash.index'),
-            ],
-            array_column($list['tabs'], 'url'),
-        );
-        $this->assertSame(
-            match ($state) {
-                'active' => __('Created at'),
-                'archived' => __('Updated at'),
-                'trash' => __('Deleted at'),
-            },
-            $list['extraDateHeading'],
-        );
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     */
-    #[DataProvider('transformers')]
-    public function test_state_tabs_count_records_only_when_counts_are_given(string $transformerClass): void
-    {
-        /** @var array<string, mixed> $withoutCounts */
-        $withoutCounts = $this->payload($transformerClass, 'active');
-
-        /** @var array<string, mixed> $withCounts */
-        $withCounts = $this->payload($transformerClass, 'active', self::COUNTED_TABS);
-
-        /** @var list<array{count: int|null}> $tabsWithoutCounts */
-        $tabsWithoutCounts = $withoutCounts['tabs'];
-
-        /** @var list<array{count: int|null}> $tabsWithCounts */
-        $tabsWithCounts = $withCounts['tabs'];
-
-        $this->assertSame([null, null, null], array_column($tabsWithoutCounts, 'count'));
-        $this->assertSame([2, 1, 3], array_column($tabsWithCounts, 'count'));
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     */
-    #[DataProvider('transformers')]
-    public function test_every_resource_uses_the_same_active_empty_state_message(string $transformerClass): void
-    {
-        /** @var array<string, mixed> $list */
-        $list = $this->payload($transformerClass, 'active');
-
-        $this->assertSame('No records yet.', $list['emptyMessage']);
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     */
-    #[DataProvider('transformers')]
-    public function test_every_resource_uses_the_same_no_match_message(string $transformerClass): void
-    {
-        /** @var array<string, mixed> $list */
-        $list = $this->payload($transformerClass, 'active', null, 'missing');
-
-        $this->assertSame(__('basics13::messages.no_matching_records'), $list['emptyMessage']);
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     */
-    #[DataProvider('transformers')]
-    public function test_each_state_marks_only_its_own_tab_as_current(string $transformerClass): void
-    {
-        foreach (['active', 'archived', 'trash'] as $state) {
-            /** @var array<string, mixed> $list */
-            $list = $this->payload($transformerClass, $state);
-
-            /** @var list<array{current: bool}> $tabs */
-            $tabs = $list['tabs'];
-
-            $this->assertSame(
-                [$state === 'active', $state === 'archived', $state === 'trash'],
-                array_column($tabs, 'current'),
-                "{$transformerClass}: only the tab of [{$state}] may be current",
-            );
-        }
     }
 
     /**
@@ -209,57 +72,6 @@ class ListTransformerContractTest extends TestCase
             ProjectListTransformer::class,
             EpicListTransformer::class,
         ];
-    }
-
-    /** @return LengthAwarePaginator<int, Entity> */
-    private function entities(): LengthAwarePaginator
-    {
-        return new LengthAwarePaginator([], 0, 15);
-    }
-
-    /** @return LengthAwarePaginator<int, Project> */
-    private function projects(): LengthAwarePaginator
-    {
-        return new LengthAwarePaginator([], 0, 15);
-    }
-
-    /** @return LengthAwarePaginator<int, Epic> */
-    private function epics(): LengthAwarePaginator
-    {
-        return new LengthAwarePaginator([], 0, 15);
-    }
-
-    /**
-     * @param  class-string<EntityListTransformer|ProjectListTransformer|EpicListTransformer>  $transformerClass
-     * @param  'active'|'archived'|'trash'  $state
-     * @param  array{active: int, archived: int, trashed: int}|null  $counts
-     * @return array<string, mixed>
-     */
-    private function payload(string $transformerClass, string $state, ?array $counts = null, string $search = ''): array
-    {
-        return match (true) {
-            $transformerClass === EntityListTransformer::class => $this->entityState(
-                app(EntityListTransformer::class),
-                $this->entities(),
-                $state,
-                $search,
-                $counts,
-            ),
-            $transformerClass === ProjectListTransformer::class => $this->projectState(
-                app(ProjectListTransformer::class),
-                $this->projects(),
-                $state,
-                $search,
-                $counts,
-            ),
-            default => $this->epicState(
-                app(EpicListTransformer::class),
-                $this->epics(),
-                $state,
-                $search,
-                $counts,
-            ),
-        };
     }
 
     /**

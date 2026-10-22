@@ -6,6 +6,7 @@ use App\Models\User;
 use Basics13\Queries\ListQueryBase;
 use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -13,6 +14,8 @@ use Projects13\Transformers\EpicListTransformer;
 
 class EpicCrudTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

@@ -5,6 +5,7 @@ namespace EntityProjects13\Tests\Feature\Epics;
 use App\Models\User;
 use Entities13\Models\Entity;
 use EntityProjects13\Tests\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Projects13\Models\Epic;
 use Projects13\Models\Project;
@@ -16,6 +17,8 @@ use Projects13\Models\Project;
  */
 class EpicListQueryCountTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_the_epic_list_queries_do_not_grow_with_the_number_of_projects(): void
     {
         $this->actingAs(User::factory()->create());
