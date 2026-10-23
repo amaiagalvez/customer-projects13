@@ -218,7 +218,9 @@ class ListQuerySharedBehaviourTest extends TestCase
     {
         return [
             'entities' => [EntityListQuery::class, 5],
-            'projects' => [ProjectListQuery::class, 4],
+            // One more than before: the active list loads the members, so each row tells whether the
+            // user may manage them without a query of its own.
+            'projects' => [ProjectListQuery::class, 5],
             'epics' => [EpicListQuery::class, 6],
         ];
     }

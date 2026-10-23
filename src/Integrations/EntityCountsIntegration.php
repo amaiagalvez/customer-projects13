@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Projects13\Models\EpicComment;
+use Projects13\Models\Project;
+use Projects13\Queries\ProjectVisibility;
 
 /**
  * What a entity's projects put back on the entity lists: how many there are, how many epics
@@ -19,6 +21,11 @@ use Projects13\Models\EpicComment;
 final class EntityCountsIntegration extends EntityIntegration
 {
     use ChecksPermissions;
+
+    /**
+     * The context the project form's entity selector sends while a project is being edited.
+     */
+    public const PROJECT_EDIT_CONTEXT = 'project-edit';
 
     /**
      * The alias the join and the search column share. A feature test searches the entity list by
@@ -113,5 +120,31 @@ final class EntityCountsIntegration extends EntityIntegration
     public function allowsSelectOptions(Authenticatable $user): bool
     {
         return $this->permits($user, 'projects.create') || $this->permits($user, 'projects.edit');
+    }
+
+    /**
+     * While a project is edited, a user who may not list entities is offered only the entities of
+     * the projects they reach, which include the one the project already has. Creating a project
+     * offers every active entity, so that user can start their first one.
+     */
+    public function scopeSelectOptions(Builder $query, Authenticatable $user, string $context): void
+    {
+        if ($context !== self::PROJECT_EDIT_CONTEXT || $this->permits($user, 'entities.view')) {
+            return;
+        }
+
+        $query->whereIn('ENT_entities.id', self::entitiesOfVisibleProjects());
+    }
+
+    /**
+     * The ids of the entities the projects the signed-in user reaches belong to.
+     *
+     * @return Builder<Project>
+     */
+    public static function entitiesOfVisibleProjects(): Builder
+    {
+        return (new ProjectVisibility)->restrict(Project::withTrashed(), 'id')
+            ->whereNotNull('entity_id')
+            ->select('entity_id');
     }
 }

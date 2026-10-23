@@ -182,6 +182,7 @@ class ResourceUniformityTest extends TestCase
             'notes',
             'start_date',
             'end_date',
+            'members',
             'entity',
             'entity_id',
             'entity_name',

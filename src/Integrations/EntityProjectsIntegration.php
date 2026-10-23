@@ -2,9 +2,11 @@
 
 namespace EntityProjects13\Integrations;
 
+use Basics13\Concerns\ChecksPermissions;
 use Entities13\Models\Entity;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Exists;
@@ -28,6 +30,7 @@ use Projects13\Models\Project;
  */
 final class EntityProjectsIntegration implements ProjectDisplayIntegration, ProjectQueryIntegration, ProjectValidationIntegration
 {
+    use ChecksPermissions;
     use ProjectDisplayIntegrationDefaults;
     use ProjectQueryIntegrationDefaults;
     use ProjectValidationIntegrationDefaults;
@@ -242,9 +245,19 @@ final class EntityProjectsIntegration implements ProjectDisplayIntegration, Proj
             return Rule::exists(Entity::class, 'id')->whereNull('deleted_at');
         }
 
-        return Rule::exists(Entity::class, 'id')
+        $rule = Rule::exists(Entity::class, 'id')
             ->whereNull('deleted_at')
             ->where('active', true);
+
+        // Moving a project to another entity without being allowed to list entities is limited to
+        // the entities of the user's projects, the same ones the selector offered.
+        $user = $request->user();
+
+        if ($current instanceof Project && $user !== null && ! $this->permits($user, 'entities.view')) {
+            $rule->where(static fn (QueryBuilder $query) => $query->whereIn('id', EntityCountsIntegration::entitiesOfVisibleProjects()));
+        }
+
+        return $rule;
     }
 
     private function aliasFor(string $scope): string

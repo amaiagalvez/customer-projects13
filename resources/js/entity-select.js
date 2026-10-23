@@ -99,7 +99,11 @@ function initializeEntitySelect(element) {
             dataType: 'json',
             delay: 250,
             headers: { Accept: 'application/json' },
-            data: (params) => ({ q: params.term ?? '' }),
+            // While a project is edited the bridge may narrow the entities it offers.
+            data: (params) => ({
+                q: params.term ?? '',
+                context: window.Alpine.$data(form).form.method === 'PUT' ? 'project-edit' : '',
+            }),
             processResults: (data) => {
                 const projectForm = window.Alpine.$data(form).form;
                 const selectedArchivedEntity = projectForm.method === 'PUT'
