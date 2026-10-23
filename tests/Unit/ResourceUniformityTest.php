@@ -86,20 +86,30 @@ class ResourceUniformityTest extends TestCase
 
     public function test_policy_abilities_are_uniform_and_have_http_call_sites(): void
     {
+        // Every policy carries the entity abilities; only these are specific to one resource.
         $entityAbilities = $this->policyAbilities(EntityPolicy::class);
-        $projectAbilities = $this->policyAbilities(ProjectPolicy::class);
-        $epicAbilities = $this->policyAbilities(EpicPolicy::class);
-        $expectedEpicAbilities = [...$entityAbilities, 'comment'];
-        sort($expectedEpicAbilities);
+        $abilitiesByResource = [
+            'Entity' => $entityAbilities,
+            'Project' => $this->policyAbilities(ProjectPolicy::class),
+            'Epic' => $this->policyAbilities(EpicPolicy::class),
+        ];
+        $extraAbilities = [
+            'Entity' => [],
+            'Project' => ['manageMembers'],
+            'Epic' => ['comment', 'viewComments'],
+        ];
 
-        $this->assertSame($entityAbilities, $projectAbilities);
-        $this->assertSame($expectedEpicAbilities, $epicAbilities);
+        foreach ($extraAbilities as $model => $extras) {
+            $expected = [...$entityAbilities, ...$extras];
+            sort($expected);
+            $this->assertSame($expected, $abilitiesByResource[$model], "{$model} policy abilities drifted");
+        }
 
         // Read the authorization call sites per resource, so dropping the check on one controller
         // is caught even while the other two still call it. The shared base classes
         // (InactiveController, RestoreRequest, TrashDestroyRequest...) hold call sites that apply to
         // every resource, so they count towards all three.
-        $models = ['Entity', 'Project', 'Epic'];
+        $models = array_keys($abilitiesByResource);
         $byResource = array_fill_keys($models, '');
         $shared = '';
 
@@ -148,23 +158,20 @@ class ResourceUniformityTest extends TestCase
             $byResource[$model] = $source.$shared;
         }
 
-        foreach ([...$entityAbilities, 'comment'] as $ability) {
-            $pattern = '/->(?:authorize|can)\(\s*[\'\"]'.preg_quote($ability, '/').'[\'\"]/';
-            $missing = [];
+        $missing = [];
 
-            foreach ($byResource as $model => $source) {
-                // `comment` only exists on the epic policy, so the other two are exempt.
-                if ($ability === 'comment' && $model !== 'Epic') {
-                    continue;
-                }
+        foreach ($abilitiesByResource as $model => $abilities) {
+            foreach ($abilities as $ability) {
+                // `inspect()` may pick the ability with a ternary, so the literal can follow other arguments.
+                $pattern = '/->(?:authorize|can|inspect)\([^;]*?[\'\"]'.preg_quote($ability, '/').'[\'\"]/';
 
-                if (preg_match($pattern, $source) === 0) {
-                    $missing[] = $model;
+                if (preg_match($pattern, $byResource[$model]) === 0) {
+                    $missing[] = "{$model}::{$ability}";
                 }
             }
-
-            $this->assertSame([], $missing, "No HTTP call site for [{$ability}] in: ".implode(', ', $missing));
         }
+
+        $this->assertSame([], $missing, 'No HTTP call site for: '.implode(', ', $missing));
     }
 
     /**
