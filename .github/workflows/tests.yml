@@ -117,6 +117,9 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      - name: Audit dependencies
+        run: composer audit --no-interaction --abort-on-unfixable
+
       # Same three checks testing13 runs locally: reformat.sh, review.sh, phpunit.sh.
       - name: Check formatting
         run: vendor/bin/pint --test
