@@ -69,7 +69,7 @@ class EntityFeatureTest extends TestCase
 
         $this->assertDatabaseHas('PRO_projects', [
             'id' => $project->id,
-            'entity_id' => $project->entity_id,
+            'entity_id' => $project->getAttribute('entity_id'),
         ]);
     }
 }

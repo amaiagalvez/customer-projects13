@@ -96,10 +96,10 @@ class ProjectEntityOptionsAuthorizationTest extends TestCase
         ]);
 
         $edit($foreign)->assertSessionHasErrors('entity_id');
-        $this->assertSame($own->id, $project->refresh()->entity_id);
+        $this->assertSame($own->id, $project->refresh()->getAttribute('entity_id'));
 
         $edit($other)->assertSessionHasNoErrors();
-        $this->assertSame($other->id, $project->refresh()->entity_id);
+        $this->assertSame($other->id, $project->refresh()->getAttribute('entity_id'));
     }
 
     /**

@@ -30,10 +30,10 @@ class EntityCountsIntegrationTest extends TestCase
 
         $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
         // Set the counts as if they came from the query
-        $entity->projects_count = 5;
-        $entity->epics_count = 3;
-        $entity->comments_count = 2;
-        $entity->projects_exists = true;
+        $entity->setAttribute('projects_count', 5);
+        $entity->setAttribute('epics_count', 3);
+        $entity->setAttribute('comments_count', 2);
+        $entity->setAttribute('projects_exists', true);
 
         $result = $integration->row($entity);
 
@@ -51,10 +51,10 @@ class EntityCountsIntegrationTest extends TestCase
         $integration = new EntityCountsIntegration;
 
         $entity = Entity::factory()->make(['id' => 1, 'name' => 'Test Entity']);
-        $entity->projects_count = 0;
-        $entity->epics_count = 0;
-        $entity->comments_count = 0;
-        $entity->projects_exists = false;
+        $entity->setAttribute('projects_count', 0);
+        $entity->setAttribute('epics_count', 0);
+        $entity->setAttribute('comments_count', 0);
+        $entity->setAttribute('projects_exists', false);
 
         $result = $integration->row($entity);
 

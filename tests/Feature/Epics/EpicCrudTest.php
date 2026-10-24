@@ -32,7 +32,7 @@ class EpicCrudTest extends TestCase
             ->assertOk()
             ->assertSee($epic->name)
             ->assertSee($project->name)
-            ->assertSee($project->entity->name);
+            ->assertSee($project->getRelationValue('entity')->name);
     }
 
     public function test_epic_list_transformer_renders_the_parents_it_is_bound_to(): void

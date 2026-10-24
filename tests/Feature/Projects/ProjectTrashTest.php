@@ -27,7 +27,7 @@ class ProjectTrashTest extends TestCase
             'start_date' => '2026-01-03',
             'end_date' => '2026-08-04',
         ]);
-        $entity = $project->entity;
+        $entity = $project->getRelationValue('entity');
 
         $activeResponse = $this->get(route('projects.index'));
         $project->delete();

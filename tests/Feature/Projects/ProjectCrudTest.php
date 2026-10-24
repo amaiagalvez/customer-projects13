@@ -117,7 +117,7 @@ class ProjectCrudTest extends TestCase
 
         $projects = Project::factory()->for($this->entity())->count(2)->for($entity)->create();
 
-        $this->assertCount(2, $entity->projects);
+        $this->assertCount(2, $entity->getRelationValue('projects'));
         $this->assertTrue($projects->every(function (Project $project) use ($entity): bool {
             return $project->getRelationValue('entity')->is($entity);
         }));
