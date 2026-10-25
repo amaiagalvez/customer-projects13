@@ -98,12 +98,12 @@ class FieldHintsTest extends TestCase
         ], $hints);
     }
 
-    public function test_the_end_date_of_an_epic_must_be_later_than_its_start_date(): void
+    public function test_the_end_date_of_an_epic_must_be_on_or_after_its_start_date(): void
     {
         $hints = (new FieldHints(EpicRequest::class, ['start_date' => 'Hasiera-data']))->for('end_date');
 
         $this->assertSame([
-            __('Must be later than :field.', ['field' => 'hasiera-data']),
+            __('Must be on or after :field.', ['field' => 'hasiera-data']),
         ], $hints);
     }
 
