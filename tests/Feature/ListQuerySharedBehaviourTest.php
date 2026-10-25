@@ -217,7 +217,9 @@ class ListQuerySharedBehaviourTest extends TestCase
     public static function queryBudgets(): array
     {
         return [
-            'entities' => [EntityListQuery::class, 5],
+            // One more than before: the active list loads the persons with their types, which the edit
+            // drawer lists without a query of its own.
+            'entities' => [EntityListQuery::class, 6],
             // One more than before: the active list loads the members, so each row tells whether the
             // user may manage them without a query of its own.
             'projects' => [ProjectListQuery::class, 5],

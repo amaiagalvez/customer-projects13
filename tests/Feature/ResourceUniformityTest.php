@@ -174,7 +174,8 @@ class ResourceUniformityTest extends TestCase
         $epicRows = $epicList['rows'];
 
         // The types travel as string ids, the values the multiselect binds to.
-        $this->assertRowActionContract($entityRows[0], 'entity', ['id', 'name', 'notes', 'entity_type_ids']);
+        // The persons the edit drawer lists come last, loaded with the row so the panel needs no request.
+        $this->assertRowActionContract($entityRows[0], 'entity', ['id', 'name', 'notes', 'entity_type_ids', 'persons']);
         // The last two are the integration's, merged into the drawer payload after the base keys.
         $this->assertRowActionContract($projectRows[0], 'project', [
             'id',
