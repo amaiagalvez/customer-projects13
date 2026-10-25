@@ -28,6 +28,9 @@ abstract class TestCase extends Basics13TestCase
 {
     use ValidatesFormRequests;
 
+    /** @var class-string */
+    protected string $seeder = AccessSeeder::class;
+
     /**
      * Create a test entity for integration tests.
      */
