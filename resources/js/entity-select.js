@@ -11,9 +11,84 @@
  *
  *     import { initializeEntitySelects } from '../../vendor/entity-projects13/entity-select.js';
  *
- * and then calls `initializeEntitySelects()` once the page is ready. `jquery` and `select2` are
- * read off the window, so the host decides which copy it bundles; nothing is imported here.
+ * and then calls `watchEntitySelects(load)`. `load` is the host's loader: it imports jQuery and
+ * select2 (the host decides which copy it bundles), registers select2 and resolves with jQuery. It
+ * runs only on a page that has an entity select, and the selects wait for it.
+ *
+ *     watchEntitySelects(async () => {
+ *         const [{ default: $ }, { default: select2 }] = await Promise.all([import('jquery'), import('select2')]);
+ *         window.$ = window.jQuery = $;
+ *         select2(window, $);
+ *         return $;
+ *     });
+ *
+ * The project form sets the picked value through `window.entitySelects.setValue`, which this module
+ * installs, so the value is applied as soon as jQuery is loaded, whatever the load order.
  */
+
+const ENTITY_SELECT = '[data-project-entity-select]';
+
+// jQuery once the host's loader has resolved; the loading itself is memoised.
+let jquery = null;
+let loading = null;
+
+/**
+ * Loads jQuery and select2 once, then initialises the selects on the page and watches the ones that
+ * appear later.
+ */
+export function loadEntitySelects(load) {
+    loading ??= Promise.resolve()
+        .then(load)
+        .then((loaded) => {
+            jquery = loaded;
+            initializeEntitySelects();
+            observeEntitySelects();
+
+            return loaded;
+        });
+
+    return loading;
+}
+
+/**
+ * Starts loading when the page has an entity select. A page without one keeps watching until one
+ * appears, because a navigation can bring it in without reloading this script.
+ */
+export function watchEntitySelects(load) {
+    if (document.querySelector(ENTITY_SELECT) !== null) {
+        return loadEntitySelects(load);
+    }
+
+    const watcher = new MutationObserver(() => {
+        if (document.querySelector(ENTITY_SELECT) !== null) {
+            watcher.disconnect();
+            loadEntitySelects(load);
+        }
+    });
+
+    watcher.observe(document.documentElement, { childList: true, subtree: true });
+
+    return null;
+}
+
+/**
+ * Sets the value of a select, now if jQuery is loaded or as soon as it is. The form calls it on
+ * every state change, so a call made before the load is not lost.
+ */
+export function setEntitySelectValue(element, value) {
+    const apply = ($) => $(element).val(value || null).trigger('change.select2');
+
+    if (jquery !== null) {
+        return apply(jquery);
+    }
+
+    loading?.then(apply);
+
+    return null;
+}
+
+window.entitySelects = { setValue: setEntitySelectValue };
+
 export function initializeEntitySelects(root = document) {
     if (root instanceof Element && root.matches('[data-project-entity-select]')) {
         initializeEntitySelect(root);
@@ -49,7 +124,7 @@ function renderArchivedEntity(text, element) {
     badge.textContent = element.dataset.archivedLabel;
     selection.append(badge);
 
-    return window.jQuery(selection);
+    return jquery(selection);
 }
 
 /**
@@ -73,7 +148,7 @@ export function observeEntitySelects(root = document.documentElement) {
 }
 
 function initializeEntitySelect(element) {
-    const $ = window.jQuery;
+    const $ = jquery;
 
     if (!$) {
         return;

@@ -35,7 +35,7 @@
                 option.dataset.active = String(form.entity_active !== false);
                 option.selected = true;
             }
-            window.jQuery($el).val(entityId || null).trigger('change.select2')
+            window.entitySelects?.setValue($el, entityId)
         "
         required data-test="project-entity" data-project-entity-select
         data-entity-store-url="{{ route('entities.store', [], false) }}"
