@@ -13,7 +13,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/basics13",
-                "reference": "daf62e50d2dd649dc72a589526cc5f6493e8f66e"
+                "reference": "377b24bcfa10869a382f7836b3a873373488c0a6"
             },
             "require": {
                 "laravel/fortify": "^1.37.2",
@@ -71,7 +71,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/entities13",
-                "reference": "b968455d5e30546451a44f05c1425875185d70b0"
+                "reference": "9fe496e32cb51f4541dc1c61e9b486a312962c0b"
             },
             "require": {
                 "php": "^8.5"
@@ -121,7 +121,7 @@
             "dist": {
                 "type": "path",
                 "url": "../packages/projects13",
-                "reference": "f26a777c8a555f30adcc18df13107101d9d3c9be"
+                "reference": "e87c44fbaa78e8f3df2aac84a9c0e5cce5264068"
             },
             "require": {
                 "php": "^8.5"
@@ -129,6 +129,7 @@
             "require-dev": {
                 "amaia/basics13": "^1.0",
                 "larastan/larastan": "^3.9",
+                "laravel/dusk": "^8.7",
                 "laravel/pint": "^1.27",
                 "mockery/mockery": "^1.6",
                 "orchestra/testbench": "^11.3",
@@ -5565,11 +5566,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.3.1",
+            "version": "2.3.2",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/6155239b488e95d26d1ebd95c6b4bb294d7f09db",
-                "reference": "6155239b488e95d26d1ebd95c6b4bb294d7f09db",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/18bc23a0682f08591529377d271b5c4dfe9ed1dd",
+                "reference": "18bc23a0682f08591529377d271b5c4dfe9ed1dd",
                 "shasum": ""
             },
             "require": {
@@ -5625,7 +5626,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-10-08T21:09:11+00:00"
+            "time": "2026-10-24T11:36:00+00:00"
         },
         {
             "name": "phpunit/php-code-coverage",
