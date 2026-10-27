@@ -30,7 +30,7 @@ use Projects13\Policies\ProjectPolicy;
 use ReflectionClass;
 use ReflectionMethod;
 
-class ResourceUniformityTest extends TestCase
+class ResourceContractUniformityTest extends TestCase
 {
     public function test_list_requests_share_search_rules_and_normalization(): void
     {
